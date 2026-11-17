@@ -1,0 +1,3 @@
+<resources>
+    <style name="Theme.NextSet" parent="android:Theme.Material.NoActionBar" />
+</resources>
