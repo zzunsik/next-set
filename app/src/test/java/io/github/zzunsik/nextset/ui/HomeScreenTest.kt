@@ -23,6 +23,6 @@ class HomeScreenTest {
         compose.setContent { NextSetTheme { HomeScreen() } }
 
         compose.onNodeWithText(app.getString(R.string.app_name)).assertIsDisplayed()
-        compose.onNodeWithText(app.getString(R.string.home_placeholder)).assertIsDisplayed()
+        compose.onNodeWithText("CI 실패 확인용: 화면에 없는 문구").assertIsDisplayed()
     }
 }
