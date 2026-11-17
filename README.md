@@ -43,6 +43,10 @@ JDK 17 이상과 Android SDK(platform 37)가 필요합니다. Android Studio는 
 
 AGP, Gradle, Kotlin, Compose는 작업 시점의 최신 안정 버전을 쓰고, 의존성 버전은 `gradle/libs.versions.toml`에서만 관리합니다.
 
+## 문서
+
+- [종목 데이터 조사](docs/exercise-data.md): 내장할 종목 데이터의 후보와 라이선스, 한국어 이름
+
 ## 작업 흐름
 
 평소 작업은 `develop`에 모으고 릴리스할 때만 `main`으로 올립니다. 이슈, 브랜치, PR 규칙은 [AGENTS.md](AGENTS.md)에 있습니다.
