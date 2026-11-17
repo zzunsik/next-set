@@ -18,6 +18,20 @@
   - `feat/<이슈번호>-<요약>`: 기능
   - `fix/<이슈번호>-<요약>`: 버그
   - `chore/<이슈번호>-<요약>`: 빌드·설정·문서
+- 작업은 이슈마다 worktree를 따로 만들어 한다. 원본 클론에서는 브랜치를 바꾸지 않는다. 여러 세션이 클론 하나를 같이 쓰면 한쪽이 브랜치를 바꿀 때 다른 쪽의 작업 파일이 바뀐다.
+
+  ```bash
+  git fetch origin
+  git worktree add --no-track -b chore/14-design ../next-set-worktrees/14-design origin/develop
+  cd ../next-set-worktrees/14-design
+  cp ../../next-set/local.properties .    # ANDROID_HOME을 쓰면 건너뛴다
+  git push -u origin chore/14-design      # 첫 push
+  ```
+
+  - 위치는 저장소 폴더 옆의 `next-set-worktrees/<이슈번호>-<요약>`이다. 저장소 폴더 안에는 만들지 않는다.
+  - `--no-track`을 붙인다. 빼면 새 브랜치의 upstream이 `origin/develop`이 되어 `git push`가 작업 브랜치를 올리지 않는다.
+  - 새 worktree에는 `local.properties`가 없어서 빌드가 "SDK location not found"로 실패한다. `ANDROID_HOME` 환경 변수를 쓰거나 원본 클론에서 복사한다.
+  - PR이 머지되면 원본 클론에서 `git worktree remove <경로>`로 지운다. 지우기 전에 push하지 않은 커밋과 커밋하지 않은 변경이 없는지 확인한다.
 - 작업 브랜치에도 force push하지 않는다(`--force`, `-f`, `--force-with-lease` 모두). 훅을 건너뛰는 `--no-verify`도 쓰지 않는다. `develop`과 `main`은 GitHub이 막지만(아래 "저장소 설정") 작업 브랜치는 막지 않는다.
 - 저장소의 현재 상태를 말할 때는 로컬 체크아웃이 아니라 `git fetch` 뒤의 `origin/develop`을 기준으로 본다.
 
