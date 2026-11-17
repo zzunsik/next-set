@@ -51,6 +51,21 @@
 - 외부 코드·데이터·글꼴·이미지를 넣을 때는 라이선스를 확인하고 출처를 적는다.
 - 워크플로는 필요한 권한만 선언하고(`permissions`), 외부 액션은 커밋 SHA로 고정한다. 포크에서 온 PR에 시크릿이 노출되는 `pull_request_target`은 쓰지 않는다.
 
+## 저장소 설정
+
+GitHub 설정으로 강제하는 것들입니다. 설정을 바꾸면 이 절도 함께 고칩니다.
+
+- `develop`과 `main`은 ruleset(`protect-develop`, `protect-main`)으로 보호한다.
+  - PR로만 올릴 수 있다. 직접 push, force push, 브랜치 삭제는 거부된다.
+  - `ci-passed`가 PR의 현재 커밋에서 성공해야 머지된다.
+  - `develop` 대상 PR은 `develop`의 최신 커밋을 포함해야 하고 squash로만 합쳐진다.
+  - `main` 대상 PR은 머지 커밋으로만 합쳐진다. 릴리스 머지 커밋은 `develop`에 없으므로 최신 반영 조건은 두지 않는다.
+  - 우회 목록이 비어 있어 저장소 소유자도 같은 규칙을 따른다.
+- 머지된 작업 브랜치는 자동으로 지워진다.
+- 시크릿 스캐닝과 푸시 차단이 켜져 있다.
+- Dependabot이 보안 알림과 보안 업데이트 PR을 보내고, 주 1회 의존성 업데이트 PR을 보낸다(`.github/dependabot.yml`). Dependabot PR은 이슈 없이 받고 다른 PR과 같은 검사를 거친다.
+- 워크플로의 기본 토큰 권한은 읽기 전용이다.
+
 ## 빌드 환경
 
 - `./gradlew`는 JDK 17 이상에서 실행한다. 빌드 자체는 JDK 25로 돌고(`gradle/gradle-daemon-jvm.properties`), 없으면 Gradle이 내려받는다.
