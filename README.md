@@ -47,12 +47,17 @@ AGP, Gradle, Kotlin, Compose는 작업 시점의 최신 안정 버전을 쓰고,
 
 - [요구사항](docs/requirements.md): 첫 버전에 넣을 것과 뺄 것, 확인이 남은 항목
 - [종목 데이터 조사](docs/exercise-data.md): 내장할 종목 데이터의 후보와 라이선스, 한국어 이름
+- [내장 종목 목록](docs/exercise-list.md): 앱에 내장할 종목의 이름, 부위, 장비, 기록 방식. 검수 전 초안
 - [디자인 레퍼런스](docs/design-references.md): 참고 앱의 세트 입력·직전 기록·휴식 타이머 화면과 정리한 원칙
 - [휴식 타이머 조사](docs/rest-timer.md): 화면 밖에서 타이머와 신호를 돌리는 방법, 필요한 권한, Live Updates, Android 버전별 차이
 
 ## 작업 흐름
 
 평소 작업은 `develop`에 모으고 릴리스할 때만 `main`으로 올립니다. 이슈, 브랜치, PR 규칙은 [AGENTS.md](AGENTS.md)에 있습니다.
+
+## 참고한 자료
+
+- [free-exercise-db](https://github.com/yuhonas/free-exercise-db): 내장 종목을 고르고 부위와 장비 분류를 대조하는 데 참고했습니다. 이름, 설명, 이미지는 가져오지 않았습니다.
 
 ## 라이선스
 
