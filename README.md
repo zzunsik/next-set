@@ -46,6 +46,7 @@ AGP, Gradle, Kotlin, Compose는 작업 시점의 최신 안정 버전을 쓰고,
 ## 문서
 
 - [요구사항](docs/requirements.md): 첫 버전에 넣을 것과 뺄 것, 확인이 남은 항목
+- [데이터 모델과 코드 구조](docs/architecture.md): 패키지 구조, 라이브러리 선택, 저장 스키마, 백업 파일 형식, 테스트 전략
 - [종목 데이터 조사](docs/exercise-data.md): 내장할 종목 데이터의 후보와 라이선스, 한국어 이름
 - [내장 종목 목록](docs/exercise-list.md): 앱에 내장할 종목의 이름, 부위, 장비, 기록 방식. 검수 전 초안
 - [디자인 레퍼런스](docs/design-references.md): 참고 앱의 세트 입력·직전 기록·휴식 타이머 화면과 정리한 원칙
