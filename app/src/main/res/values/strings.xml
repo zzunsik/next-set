@@ -68,4 +68,26 @@
     <string name="exercise_form_name_conflict">이미 있는 종목 이름이에요. 다른 이름을 적어 주세요.</string>
     <string name="exercise_form_record_type_notice">기록 방식을 바꾸면 최고 기록과 지난번 기록은 새 방식으로 적은 세트만 봐요. 지난 기록은 그대로 남아요.</string>
     <string name="exercise_delete_confirm">이 종목을 지울까요? 운동 기록은 남아요.</string>
+
+    <!-- 자체 숫자판(docs/DESIGN.md NumberPad). 증감 키는 값을 적고 화면 읽기 프로그램에는 "1 더하기"처럼 읽힌다. -->
+    <string name="number_pad_step_plus">+%1$s</string>
+    <string name="number_pad_step_minus">−%1$s</string>
+    <string name="number_pad_step_plus_seconds">+%1$d초</string>
+    <string name="number_pad_step_minus_seconds">−%1$d초</string>
+    <string name="number_pad_step_add_description">%1$s 더하기</string>
+    <string name="number_pad_step_subtract_description">%1$s 빼기</string>
+    <string name="number_pad_step_add_seconds_description">%1$d초 더하기</string>
+    <string name="number_pad_step_subtract_seconds_description">%1$d초 빼기</string>
+    <string name="number_pad_decimal_point_description">소수점</string>
+    <string name="number_pad_backspace">지우기</string>
+    <string name="number_pad_clear_all">전부 지우기</string>
+    <string name="number_pad_next">다음</string>
+    <string name="number_pad_done">완료</string>
+    <string name="number_pad_close">숫자판 닫기</string>
+    <!-- 입력 칸. 화면 읽기 프로그램이 "무게, 60"처럼 칸 이름과 값을 함께 읽는다. -->
+    <string name="number_field_description">%1$s, %2$s</string>
+    <string name="number_field_empty">비어 있음</string>
+    <string name="number_field_weight">무게</string>
+    <string name="number_field_reps">횟수</string>
+    <string name="number_field_duration">시간</string>
 </resources>
