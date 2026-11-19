@@ -62,4 +62,9 @@ class WeightTest {
         assertEquals("-2.5", Weight(-2_500).toKgText())
         assertEquals(Weight(80_000), Weight.kg(80))
     }
+
+    @Test
+    fun parsesWholeKg() {
+        assertEquals(Weight(70_000), Weight.parseKg("70"))
+    }
 }
