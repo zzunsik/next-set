@@ -2,16 +2,39 @@ package io.github.zzunsik.nextset
 
 import android.content.Context
 import io.github.zzunsik.nextset.data.db.NextSetDatabase
+import io.github.zzunsik.nextset.data.repository.RoomExerciseRepository
+import io.github.zzunsik.nextset.data.repository.RoomRoutineRepository
+import io.github.zzunsik.nextset.data.repository.RoomSettingsRepository
+import io.github.zzunsik.nextset.data.repository.RoomWorkoutRepository
+import io.github.zzunsik.nextset.data.seed.BuiltinExerciseSeeder
+import io.github.zzunsik.nextset.domain.repository.ExerciseRepository
+import io.github.zzunsik.nextset.domain.repository.RoutineRepository
+import io.github.zzunsik.nextset.domain.repository.SettingsRepository
+import io.github.zzunsik.nextset.domain.repository.WorkoutRepository
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 /**
  * 앱이 쓰는 객체를 만드는 곳. 의존성 주입 라이브러리 없이 여기서 직접 만들어 넘긴다
- * (docs/architecture.md "의존성 주입").
- *
- * 저장소 구현은 #20에서 더한다. 화면 상태는 저장소 인터페이스만 받는다.
+ * (docs/architecture.md "의존성 주입"). 화면 상태는 저장소 인터페이스만 받는다.
  */
 class AppContainer(context: Context) {
+    private val appContext = context.applicationContext
+
     /** 처음 쓸 때 연다. 앱 시작 때 디스크를 건드리지 않는다. */
-    val database: NextSetDatabase by lazy {
-        NextSetDatabase.build(context.applicationContext)
+    private val database: NextSetDatabase by lazy { NextSetDatabase.build(appContext) }
+
+    /** 내장 종목은 종목을 처음 읽을 때 반영한다. */
+    private val seeder: BuiltinExerciseSeeder by lazy {
+        BuiltinExerciseSeeder(database) {
+            withContext(Dispatchers.IO) {
+                appContext.assets.open(BuiltinExerciseSeeder.ASSET_NAME).bufferedReader().use { it.readText() }
+            }
+        }
     }
+
+    val exerciseRepository: ExerciseRepository by lazy { RoomExerciseRepository(database, seeder) }
+    val routineRepository: RoutineRepository by lazy { RoomRoutineRepository(database) }
+    val workoutRepository: WorkoutRepository by lazy { RoomWorkoutRepository(database) }
+    val settingsRepository: SettingsRepository by lazy { RoomSettingsRepository(database) }
 }

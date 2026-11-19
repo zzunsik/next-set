@@ -41,6 +41,13 @@ android {
     buildFeatures {
         compose = true
     }
+
+    sourceSets {
+        // MigrationTestHelper는 스키마 JSON을 앱의 assets에서 읽는다. 단위 테스트는 디버그 빌드의 병합된
+        // assets를 읽으므로 디버그 소스 세트에만 스키마 폴더를 더한다. 릴리스 APK에는 들어가지 않는다
+        // (docs/architecture.md "마이그레이션 테스트").
+        getByName("debug").assets.directories.add("$projectDir/schemas")
+    }
 }
 
 room3 {
