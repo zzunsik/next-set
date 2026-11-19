@@ -1,6 +1,9 @@
 package io.github.zzunsik.nextset.ui.exercise
 
 import io.github.zzunsik.nextset.domain.model.BodyPart
+import io.github.zzunsik.nextset.domain.model.Equipment
+import io.github.zzunsik.nextset.domain.model.ExerciseDraft
+import io.github.zzunsik.nextset.domain.model.RecordType
 import io.github.zzunsik.nextset.domain.model.SubPart
 import io.github.zzunsik.nextset.ui.exercise.TestExercises.backSquat
 import io.github.zzunsik.nextset.ui.exercise.TestExercises.benchPress
@@ -144,6 +147,30 @@ class ExercisePickerViewModelTest {
         picker.onExerciseCreated("custom-new")
         picker.onExerciseCreated("custom-new")
         assertEquals(listOf(pushUp.id, "custom-new"), picker.uiState.value.selectedIds)
+    }
+
+    @Test
+    fun createdExerciseIsShownEvenWhenFiltersWouldHideIt() = runTest {
+        val picker = picker()
+        picker.onBodyPartSelect(BodyPart.LEGS)
+        picker.onSubPartToggle(SubPart.GLUTES)
+        picker.onQueryChange("sled push")
+        val id = repository.addCustomExercise(
+            ExerciseDraft(
+                nameKo = "Sled Push",
+                bodyPart = BodyPart.LEGS,
+                equipment = Equipment.OTHER,
+                recordType = RecordType.DURATION,
+            ),
+        )
+        picker.onExerciseCreated(id)
+
+        val state = picker.uiState.value
+        assertEquals(null, state.bodyPart)
+        assertEquals(null, state.subPart)
+        assertEquals("Sled Push", state.query)
+        assertEquals(listOf(id), state.exercises.map { it.id })
+        assertEquals(listOf(id), state.selectedIds)
     }
 
     @Test

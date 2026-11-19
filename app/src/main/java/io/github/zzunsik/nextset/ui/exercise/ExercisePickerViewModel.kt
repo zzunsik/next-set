@@ -15,6 +15,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 
 /** 종목 고르기 화면이 그리는 상태. */
 data class ExercisePickerUiState(
@@ -37,7 +38,7 @@ data class ExercisePickerUiState(
  * 저장소에서 숨기지 않은 종목 전체를 한 번 받아 두고, 검색어나 필터가 바뀔 때마다 다시 거른다.
  */
 class ExercisePickerViewModel(
-    repository: ExerciseRepository,
+    private val repository: ExerciseRepository,
     val mode: ExercisePickerMode,
 ) : ViewModel() {
     private val filter = MutableStateFlow(ExerciseFilter())
@@ -85,10 +86,16 @@ class ExercisePickerViewModel(
         selected.update { if (exerciseId in it) it - exerciseId else it + exerciseId }
     }
 
-    /** 이 화면에서 새로 만든 종목은 고른 상태로 넣는다(docs/DESIGN.md "종목 추가·수정"). */
+    /**
+     * 이 화면에서 새로 만든 종목은 고른 상태로 넣는다(docs/DESIGN.md "종목 추가·수정").
+     * 걸어 둔 부위 필터나 검색어에 새 종목이 가려지지 않게 필터를 풀고 검색어를 새 종목의 이름으로 바꾼다.
+     */
     fun onExerciseCreated(exerciseId: String) {
-        if (mode != ExercisePickerMode.Pick) return
-        selected.update { if (exerciseId in it) it else it + exerciseId }
+        if (mode == ExercisePickerMode.Pick) selected.update { if (exerciseId in it) it else it + exerciseId }
+        viewModelScope.launch {
+            val created = repository.getExercise(exerciseId) ?: return@launch
+            filter.value = ExerciseFilter(query = created.nameKo)
+        }
     }
 
     private companion object {

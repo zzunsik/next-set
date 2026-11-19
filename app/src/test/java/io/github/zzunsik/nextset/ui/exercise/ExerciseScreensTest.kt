@@ -13,6 +13,7 @@ import androidx.compose.ui.test.performScrollTo
 import io.github.zzunsik.nextset.R
 import io.github.zzunsik.nextset.domain.model.BodyPart
 import io.github.zzunsik.nextset.domain.model.Equipment
+import io.github.zzunsik.nextset.domain.model.Exercise
 import io.github.zzunsik.nextset.domain.model.RecordType
 import io.github.zzunsik.nextset.ui.exercise.TestExercises.benchPress
 import io.github.zzunsik.nextset.ui.exercise.TestExercises.customSledPush
@@ -40,7 +41,7 @@ class ExerciseScreensTest {
         mode: ExercisePickerMode = ExercisePickerMode.Pick,
         query: String = "",
         selected: List<String> = emptyList(),
-        exercises: List<io.github.zzunsik.nextset.domain.model.Exercise> = listOf(benchPress, pushUp, customSledPush),
+        exercises: List<Exercise> = listOf(benchPress, pushUp, customSledPush),
     ) = ExercisePickerUiState(mode = mode, query = query, exercises = exercises, selectedIds = selected, loading = false)
 
     private fun setPicker(
