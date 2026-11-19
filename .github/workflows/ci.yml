@@ -48,8 +48,19 @@ jobs:
       - name: Lint
         run: ./gradlew lint --console=plain
 
-      - name: Unit tests
+      # 스크린샷 비교도 여기서 돈다. gradle.properties의 roborazzi.test.verify=true로
+      # testDebugUnitTest가 app/src/test/screenshots/의 기준 이미지와 비교하고 다르면 실패한다.
+      - name: Unit tests and screenshot comparison
         run: ./gradlew testDebugUnitTest --console=plain
+
+      # 기준과 다른 화면의 실제 이미지(_actual)와 차이 이미지(_compare)를 올린다.
+      - name: Upload screenshot diffs
+        if: failure()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: screenshot-diffs
+          path: app/build/outputs/roborazzi/
+          if-no-files-found: ignore
 
       - name: Upload reports
         if: always()

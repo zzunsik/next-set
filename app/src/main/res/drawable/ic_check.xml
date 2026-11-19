@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 완료 체크 모양(NF-06). 이 저장소에서 직접 그린 선이다. 색은 그리는 쪽에서 입힌다. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <path
+        android:pathData="M5,12.5L10,17.5L19,7"
+        android:strokeWidth="2.5"
+        android:strokeColor="#FF000000"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
+</vector>
