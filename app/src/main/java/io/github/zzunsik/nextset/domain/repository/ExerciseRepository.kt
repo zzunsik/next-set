@@ -28,6 +28,9 @@ interface ExerciseRepository {
      */
     suspend fun deleteCustomExercise(id: String): ExerciseDeleteResult
 
+    /** 운동 기록에 쓰인 적이 있는지. 종목 수정에서 기록 방식을 바꿀 때 안내 문구를 보일지 정한다. */
+    suspend fun isUsedInWorkouts(id: String): Boolean
+
     /** 종목별 휴식 시간(REST-03). null이면 설정의 기본값을 쓴다. 내장 종목에도 쓸 수 있다. */
     suspend fun setRestSeconds(id: String, seconds: Int?)
 }

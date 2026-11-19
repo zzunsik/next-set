@@ -36,6 +36,8 @@ class SettingsScreenScreenshotTest {
                     onThemeModeChange = {},
                     onOpenLicenses = {},
                     onOpenSourceCode = {},
+                    // 종목 관리는 앱에서 종목 고르기로 이어진다(#21). 백업(#29)은 아직 "준비 중이에요."다.
+                    onManageExercises = {},
                 )
             }
         }

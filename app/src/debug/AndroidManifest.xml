@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    디버그 빌드에만 들어가는 매니페스트. 릴리스 APK에는 없다.
+    종목 고르기를 부를 화면(루틴 편집 #22, 운동 중 #24)이 생기기 전에 기기에서 써 보기 위한 시험 화면이다(#21).
+    런처에 아이콘을 두지 않는다. adb로 연다:
+    adb shell am start -n io.github.zzunsik.nextset/.debug.ExerciseTryOutActivity
+-->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <application>
+        <activity
+            android:name=".debug.ExerciseTryOutActivity"
+            android:exported="true"
+            android:label="@string/debug_exercise_try_out_title" />
+    </application>
+</manifest>

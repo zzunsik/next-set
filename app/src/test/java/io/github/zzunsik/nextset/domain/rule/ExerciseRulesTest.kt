@@ -81,4 +81,16 @@ class ExerciseRulesTest {
         assertThrows(IllegalArgumentException::class.java) { draft.copy(nameKo = " ").validate() }
         assertThrows(IllegalArgumentException::class.java) { draft.copy(subPart = SubPart.BICEPS).validate() }
     }
+
+    @Test
+    fun nameConflictIgnoresSpacesCaseHiddenAndSelf() {
+        assertTrue(all.hasNameConflict("바벨 벤치 프레스"))
+        assertTrue("띄어쓰기만 다르면 겹친다", all.hasNameConflict("바벨벤치프레스"))
+        assertTrue("영어 이름도 견준다", all.hasNameConflict(" barbell bench press "))
+        assertFalse("별칭은 견주지 않는다", all.hasNameConflict("벤치"))
+        assertFalse("숨긴 종목은 견주지 않는다", all.hasNameConflict("숨긴 벤치"))
+        assertFalse("고치는 종목 자신은 빼고 본다", all.hasNameConflict("내 하체 운동", exceptId = "custom-1"))
+        assertTrue(all.hasNameConflict("내 하체 운동"))
+        assertFalse("빈 이름은 겹침이 아니라 빈 이름으로 막는다", all.hasNameConflict("  "))
+    }
 }

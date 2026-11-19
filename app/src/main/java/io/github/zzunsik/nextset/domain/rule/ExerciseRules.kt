@@ -54,3 +54,17 @@ fun List<Exercise>.filterBy(filter: ExerciseFilter): List<Exercise> = filter { e
         exercise.matchesPart(filter.bodyPart, filter.subPart) &&
         exercise.matchesQuery(filter.query)
 }
+
+/**
+ * [name]이 숨기지 않은 다른 종목의 이름과 겹치는지(EX-04). 검색과 같이 공백과 대소문자를 빼고
+ * 한국어 이름과 영어 이름에 견준다. "벤치프레스"는 "벤치 프레스"와 겹친다.
+ * 숨긴 종목은 목록에 나오지 않으므로 견주지 않는다. 고치는 종목 자신([exceptId])도 뺀다.
+ */
+fun List<Exercise>.hasNameConflict(name: String, exceptId: String? = null): Boolean {
+    val needle = normalizeForSearch(name)
+    if (needle.isEmpty()) return false
+    return any { exercise ->
+        !exercise.isArchived && exercise.id != exceptId &&
+            (normalizeForSearch(exercise.nameKo) == needle || normalizeForSearch(exercise.nameEn.orEmpty()) == needle)
+    }
+}

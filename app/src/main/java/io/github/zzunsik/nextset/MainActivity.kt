@@ -42,6 +42,7 @@ class MainActivity : ComponentActivity() {
                 NextSetNavDisplay(
                     settingsRepository = container.settingsRepository,
                     licenseRepository = container.licenseRepository,
+                    exerciseRepository = container.exerciseRepository,
                 )
             }
         }

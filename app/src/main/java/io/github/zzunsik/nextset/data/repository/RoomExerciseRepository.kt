@@ -96,6 +96,8 @@ internal class RoomExerciseRepository(
         result
     }
 
+    override suspend fun isUsedInWorkouts(id: String): Boolean = exerciseDao.isUsedInWorkouts(id)
+
     override suspend fun setRestSeconds(id: String, seconds: Int?) {
         require(seconds == null || seconds > 0) { "휴식 시간은 0보다 커야 한다" }
         require(exerciseDao.setRestSeconds(id, seconds) == 1) { "종목 $id 가 없다" }

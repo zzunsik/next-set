@@ -19,6 +19,7 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertThrows
 import org.junit.Assert.assertTrue
@@ -82,7 +83,9 @@ class ExerciseAndRoutineRepositoryTest {
         db.routines.addRoutineExercise(routineId, BENCH, setCount = 3)
         db.routines.addRoutineExercise(routineId, id, setCount = 3)
         db.routines.addRoutineExercise(routineId, SQUAT, setCount = 3)
+        assertFalse(db.exercises.isUsedInWorkouts(id))
         val workoutId = db.finishedWorkout(at(0), mapOf(id to listOf(wr(20_000, 12))))
+        assertTrue(db.exercises.isUsedInWorkouts(id))
 
         assertEquals(ExerciseDeleteResult.ARCHIVED, db.exercises.deleteCustomExercise(id))
         assertTrue(db.exercises.getExercise(id)!!.isArchived)

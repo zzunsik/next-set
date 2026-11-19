@@ -11,6 +11,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import io.github.zzunsik.nextset.R
+import io.github.zzunsik.nextset.ui.exercise.FakeExerciseRepository
 import io.github.zzunsik.nextset.ui.settings.FakeLicenseRepository
 import io.github.zzunsik.nextset.ui.settings.FakeSettingsRepository
 import io.github.zzunsik.nextset.ui.theme.NextSetTheme
@@ -45,6 +46,7 @@ class NextSetNavDisplayTest {
                     NextSetNavDisplay(
                         settingsRepository = FakeSettingsRepository(),
                         licenseRepository = FakeLicenseRepository(),
+                        exerciseRepository = FakeExerciseRepository(),
                     )
                 }
             }
@@ -76,6 +78,19 @@ class NextSetNavDisplayTest {
 
         compose.onNodeWithContentDescription(app.getString(R.string.navigate_back)).performClick()
         compose.onNodeWithText("Test Font").assertIsDisplayed()
+        compose.onNodeWithContentDescription(app.getString(R.string.navigate_back)).performClick()
+        compose.onNodeWithText(app.getString(R.string.settings_default_rest)).assertIsDisplayed()
+    }
+
+    /** 설정의 "종목 관리"가 종목 고르기를 관리로 연다(#21). */
+    @Test
+    fun manageExercisesOpensPickerInManageMode() {
+        show()
+        openSettings()
+        compose.onNodeWithText(app.getString(R.string.settings_manage_exercises)).performScrollTo().performClick()
+        compose.onNodeWithText(app.getString(R.string.exercise_manage_title)).assertIsDisplayed()
+        compose.onNodeWithText(app.getString(R.string.exercise_add_selected, 0)).assertDoesNotExist()
+
         compose.onNodeWithContentDescription(app.getString(R.string.navigate_back)).performClick()
         compose.onNodeWithText(app.getString(R.string.settings_default_rest)).assertIsDisplayed()
     }
