@@ -54,7 +54,7 @@ AGP, Gradle, Kotlin, Compose는 작업 시점의 최신 안정 버전을 쓰고,
 | 직렬화 | kotlinx.serialization(JSON) |
 | 비동기 | kotlinx.coroutines |
 | 의존성 주입 | 쓰지 않는다. `AppContainer`에서 직접 만든다 |
-| 테스트 | JUnit 4, Robolectric, Compose UI 테스트, `room3-testing`, `kotlinx-coroutines-test` |
+| 테스트 | JUnit 4, Robolectric, Compose UI 테스트, `room3-testing`, `kotlinx-coroutines-test`, Roborazzi(스크린샷 테스트와 접근성 검사) |
 
 인터넷 권한을 요청하지 않습니다. 단위 테스트와 CI가 병합된 매니페스트를 검사합니다.
 
@@ -79,3 +79,22 @@ AGP, Gradle, Kotlin, Compose는 작업 시점의 최신 안정 버전을 쓰고,
 ## 라이선스
 
 [MIT](LICENSE)
+
+## 글꼴
+
+화면 글꼴은 [Pretendard](https://github.com/orioncactus/pretendard)입니다. SIL Open Font License 1.1로 배포됩니다.
+
+| 파일 | 출처 |
+|---|---|
+| `app/src/main/res/font/pretendard_regular.otf`, `pretendard_semibold.otf`, `pretendard_bold.otf` | [v1.3.9 릴리스](https://github.com/orioncactus/pretendard/releases/tag/v1.3.9)의 `Pretendard-1.3.9.zip` 안 `public/static/`의 `Pretendard-Regular.otf`, `Pretendard-SemiBold.otf`, `Pretendard-Bold.otf`. 이름만 바꿨고 내용은 그대로입니다 |
+| `app/src/main/assets/licenses/pretendard.txt` | 저장소 커밋 [`0189074`](https://github.com/orioncactus/pretendard/blob/0189074fdad117a5e360aad00a59b47225429c31/LICENSE)의 `LICENSE`. 바탕 글꼴(Source, Inter, M PLUS 1)의 저작권 표시까지 담긴 판입니다. 고치지 않았습니다 |
+
+앱의 설정 화면에서 이 라이선스 전문을 보여 줄 예정입니다.
+
+## 아이콘
+
+아이콘은 [Material Symbols](https://github.com/google/material-design-icons)(Apache License 2.0)의 Rounded 모양을 벡터 XML로 넣습니다. 받은 파일에서 AppCompat 속성을 쓰는 `android:tint` 한 줄만 지웁니다. 색은 화면 코드에서 입힙니다.
+
+| 파일 | 출처 |
+|---|---|
+| `app/src/main/res/drawable/ic_check.xml` | 커밋 [`10ecc14`](https://github.com/google/material-design-icons/blob/10ecc14790612ca8fd164e3f4ffe9c16fc50d5b7/symbols/android/check/materialsymbolsrounded/check_24px.xml)의 `symbols/android/check/materialsymbolsrounded/check_24px.xml` |

@@ -59,6 +59,15 @@
 - 꺼 둔 테스트(`@Ignore`), 내용이 빈 테스트, `TODO`는 완료 근거가 아니다. 구현하거나 막힌 것으로 보고한다.
 - CI에 job을 추가하면 `ci-passed`의 `needs`에 넣는다. 머지 판단은 이 검사 하나로 한다.
 - 화면 테스트는 Robolectric으로 JVM에서 돌린다. 테스트 SDK는 `app/src/test/resources/robolectric.properties`에서 정한다.
+- 스크린샷 테스트는 Roborazzi로 찍는다. 기준 이미지는 `app/src/test/screenshots/`에 커밋한다.
+  - 비교: 검사 명령의 `testDebugUnitTest`가 늘 기준 이미지와 비교한다(`gradle.properties`의 `roborazzi.test.verify=true`). 다르면 실패하고 `app/build/outputs/roborazzi/`에 실제 이미지(`_actual`)와 차이 이미지(`_compare`)가 생긴다. CI는 이 폴더를 `screenshot-diffs` 아티팩트로 올린다.
+  - 다시 만들기: `./gradlew recordRoborazziDebug`. 화면을 일부러 바꾼 PR에서만 돌리고, 바뀐 이미지를 같은 커밋에 넣는다. 이미지를 열어 의도한 변화인지 본 뒤에 커밋한다.
+  - 새 화면과 컴포넌트는 밝은 화면과 어두운 화면, 글자 크기 기본과 200%의 네 조합을 찍는다(`@Config(qualifiers = "+night", fontScale = 2.0f)`). `@GraphicsMode(NATIVE)`를 붙인다.
+  - 지어낸 문구와 값만 찍는다. 실제 기록이나 다른 앱의 화면을 넣지 않는다.
+- 접근성 검사는 화면 테스트에서 `assertAccessible()`(`ui/a11y/AccessibilityChecks.kt`)로 돌린다. 스크린샷 테스트는 찍기 전에 이 검사를 먼저 돌린다.
+  - ATF 검사(빠진 라벨, 글자 대비 등)는 경고까지 실패로 본다. 누르는 요소는 배치 크기가 48dp 이상이어야 한다(NF-10).
+  - Compose UI 테스트의 `enableAccessibilityChecks()`는 Robolectric에서 아무것도 검사하지 않는다. 이것으로 접근성을 확인했다고 보지 않는다.
+  - 검사가 실패하면 화면을 고친다. 검사를 빼거나 억제 목록(suppressions)을 더하려면 PR 본문에 이유를 적고 승인을 받는다.
 
 ## 작업 범위
 
