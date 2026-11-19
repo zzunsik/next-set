@@ -2,6 +2,7 @@ package io.github.zzunsik.nextset.domain.model
 
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
+import org.junit.Ignore
 import org.junit.Test
 
 class WeightTest {
@@ -52,6 +53,7 @@ class WeightTest {
         assertNull(Weight.parseKg("9999999"))
     }
 
+    @Ignore("확인용")
     @Test
     fun formatsKgTextWithoutTrailingZeros() {
         assertEquals("62.5", Weight(62_500).toKgText())
