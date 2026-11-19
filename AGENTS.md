@@ -58,6 +58,7 @@
 - 실패한 검사를 끄거나 기준을 낮춰 통과시키지 않는다. lint 예외를 늘리거나 테스트를 지워서 맞추지 않는다. 기준을 바꿔야 하면 PR 본문에 이유를 적고 승인을 받는다.
 - 꺼 둔 테스트(`@Ignore`), 내용이 빈 테스트, `TODO`는 완료 근거가 아니다. 구현하거나 막힌 것으로 보고한다.
 - CI에 job을 추가하면 `ci-passed`의 `needs`에 넣는다. 머지 판단은 이 검사 하나로 한다.
+- CI는 `testDebugUnitTest`를 빌드 캐시 없이 매번 돌린다(`--rerun`). 입력이 같다고 판정돼 테스트가 `FROM-CACHE`나 `UP-TO-DATE`로 건너뛰어지면 `ci-passed`가 실제 검사 없이 통과하기 때문이다. 빌드와 lint는 캐시를 쓴다. 실행한 테스트 수는 CI 단계 요약의 "Test count"에 나오고, 0개면 실패한다. 로컬 검사 명령은 캐시를 그대로 쓴다.
 - 화면 테스트는 Robolectric으로 JVM에서 돌린다. 테스트 SDK는 `app/src/test/resources/robolectric.properties`에서 정한다.
 - 스크린샷 테스트는 Roborazzi로 찍는다. 기준 이미지는 `app/src/test/screenshots/`에 커밋한다.
   - 비교: 검사 명령의 `testDebugUnitTest`가 늘 기준 이미지와 비교한다(`gradle.properties`의 `roborazzi.test.verify=true`). 다르면 실패하고 `app/build/outputs/roborazzi/`에 실제 이미지(`_actual`)와 차이 이미지(`_compare`)가 생긴다. CI는 이 폴더를 `screenshot-diffs` 아티팩트로 올린다.
