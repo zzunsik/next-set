@@ -63,8 +63,26 @@ jobs:
 
       # 스크린샷 비교도 여기서 돈다. gradle.properties의 roborazzi.test.verify=true로
       # testDebugUnitTest가 app/src/test/screenshots/의 기준 이미지와 비교하고 다르면 실패한다.
+      # 머지는 ci-passed 하나로 판단하므로 테스트는 빌드 캐시 결과(FROM-CACHE, UP-TO-DATE)로
+      # 건너뛰지 않고 매번 돌린다. --rerun은 바로 앞의 작업에만 걸린다. 빌드와 lint는 캐시를 쓴다.
       - name: Unit tests and screenshot comparison
-        run: ./gradlew testDebugUnitTest --console=plain
+        run: ./gradlew testDebugUnitTest --rerun --console=plain
+
+      # 실제로 돈 테스트 수를 단계 요약에 남긴다. 결과 파일이 없거나 0개면 실패한다.
+      - name: Test count
+        if: success() || failure()
+        run: |
+          dir=app/build/test-results/testDebugUnitTest
+          sum() { cat "$dir"/TEST-*.xml 2>/dev/null | grep -o "<testsuite [^>]*" | grep -o " $1=\"[0-9]*\"" | grep -o '[0-9]*' | awk '{s+=$1} END {print s+0}'; }
+          tests=$(sum tests); failures=$(sum failures); errors=$(sum errors); skipped=$(sum skipped)
+          files=$(ls "$dir"/TEST-*.xml 2>/dev/null | wc -l)
+          {
+            echo "### testDebugUnitTest"
+            echo "| 테스트 클래스 | 테스트 | 실패 | 오류 | 건너뜀 |"
+            echo "|---|---|---|---|---|"
+            echo "| $files | $tests | $failures | $errors | $skipped |"
+          } | tee -a "$GITHUB_STEP_SUMMARY"
+          [ "$tests" -gt 0 ] || { echo "실행된 테스트가 없습니다."; exit 1; }
 
       # 기준과 다른 화면의 실제 이미지(_actual)와 차이 이미지(_compare)를 올린다.
       - name: Upload screenshot diffs
