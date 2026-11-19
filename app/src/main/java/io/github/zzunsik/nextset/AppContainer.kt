@@ -2,12 +2,14 @@ package io.github.zzunsik.nextset
 
 import android.content.Context
 import io.github.zzunsik.nextset.data.db.NextSetDatabase
+import io.github.zzunsik.nextset.data.repository.AssetLicenseRepository
 import io.github.zzunsik.nextset.data.repository.RoomExerciseRepository
 import io.github.zzunsik.nextset.data.repository.RoomRoutineRepository
 import io.github.zzunsik.nextset.data.repository.RoomSettingsRepository
 import io.github.zzunsik.nextset.data.repository.RoomWorkoutRepository
 import io.github.zzunsik.nextset.data.seed.BuiltinExerciseSeeder
 import io.github.zzunsik.nextset.domain.repository.ExerciseRepository
+import io.github.zzunsik.nextset.domain.repository.LicenseRepository
 import io.github.zzunsik.nextset.domain.repository.RoutineRepository
 import io.github.zzunsik.nextset.domain.repository.SettingsRepository
 import io.github.zzunsik.nextset.domain.repository.WorkoutRepository
@@ -37,4 +39,13 @@ class AppContainer(context: Context) {
     val routineRepository: RoutineRepository by lazy { RoomRoutineRepository(database) }
     val workoutRepository: WorkoutRepository by lazy { RoomWorkoutRepository(database) }
     val settingsRepository: SettingsRepository by lazy { RoomSettingsRepository(database) }
+
+    /** 오픈소스 라이선스(SET-03). `assets/licenses/`의 파일만 읽는다. */
+    val licenseRepository: LicenseRepository by lazy {
+        AssetLicenseRepository { fileName ->
+            withContext(Dispatchers.IO) {
+                appContext.assets.open("licenses/$fileName").bufferedReader().use { it.readText() }
+            }
+        }
+    }
 }
