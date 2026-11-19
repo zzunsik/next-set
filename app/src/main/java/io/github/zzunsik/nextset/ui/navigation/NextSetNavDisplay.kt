@@ -11,8 +11,11 @@ import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import io.github.zzunsik.nextset.domain.repository.ExerciseRepository
+import io.github.zzunsik.nextset.domain.repository.LicenseRepository
+import io.github.zzunsik.nextset.domain.repository.SettingsRepository
 import io.github.zzunsik.nextset.ui.exercise.exerciseEntries
 import io.github.zzunsik.nextset.ui.home.HomeScreen
+import io.github.zzunsik.nextset.ui.settings.settingsEntries
 
 /**
  * 앱의 화면 이동. 뒤로 가기 스택은 화면 키의 목록이다.
@@ -20,6 +23,8 @@ import io.github.zzunsik.nextset.ui.home.HomeScreen
  */
 @Composable
 fun NextSetNavDisplay(
+    settingsRepository: SettingsRepository,
+    licenseRepository: LicenseRepository,
     exerciseRepository: ExerciseRepository,
     modifier: Modifier = Modifier,
 ) {
@@ -31,7 +36,13 @@ fun NextSetNavDisplay(
         exerciseRepository = exerciseRepository,
         modifier = modifier,
     ) {
-        entry<HomeKey> { HomeScreen() }
+        entry<HomeKey> { HomeScreen(onOpenSettings = { backStack.add(SettingsKey) }) }
+        settingsEntries(
+            backStack = backStack,
+            settingsRepository = settingsRepository,
+            licenseRepository = licenseRepository,
+            onManageExercises = { backStack.add(ExercisePickerKey(mode = ExercisePickerMode.Manage)) },
+        )
     }
 }
 

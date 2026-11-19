@@ -253,7 +253,11 @@ class AppContainer(context: Context) {
   - v1.3.9 릴리스 묶음의 `LICENSE.txt`(4,419바이트)에는 Pretendard의 저작권 줄만 있다. 바탕 글꼴(Source, Inter, M PLUS 1)의 저작권 줄은 그 뒤 저장소 커밋 `0189074`("Add missing copyright notices to license", 2024-04-21)에서 더해졌다. 그래서 글꼴 파일은 v1.3.9 릴리스에서, 라이선스는 이 커밋의 `LICENSE`(4,816바이트)에서 받아 고치지 않고 넣었다(#19).
 - 설정 화면에 "오픈소스 라이선스" 항목을 둔다(협의). 누르면 `assets/licenses/`의 파일을 읽어 전문을 보여 준다. 네트워크를 쓰지 않는다.
 - 라이브러리 고지도 같은 화면에서 다룬다. 고른 라이브러리는 모두 Apache License 2.0으로 배포된다(공식, 각 POM). 이 라이선스는 받는 사람에게 라이선스 사본을 주라고 요구한다(공식, 4조). Apache 2.0 전문 하나와 라이브러리 이름 목록을 같은 폴더에 둔다.
-- 라이브러리 목록을 손으로 적을지 Gradle 플러그인으로 만들지는 구현할 때 정한다. 플러그인을 쓴다면 인터넷 권한과 Google Play 서비스 의존성을 끌어오지 않는 것만 고른다.
+- 라이브러리 목록은 손으로 적는다(#28). `assets/licenses/index.json`에 항목마다 이름, 만든 곳, 라이선스 이름, 전문 파일, 고지하는 Maven 모듈을 적는다. Apache 2.0 전문은 `assets/licenses/apache-2.0.txt` 하나를 함께 쓴다.
+  - Gradle 플러그인(AboutLibraries 등)은 쓰지 않는다. 직접 넣은 라이브러리가 열 개 남짓이고 모두 Apache 2.0이라 손으로 적는 쪽이 의존성과 빌드 설정을 늘리지 않는다.
+  - 손으로 적으면 라이브러리를 더할 때 목록을 빠뜨릴 수 있다. `AssetLicenseRepositoryTest`가 `app/build.gradle.kts`의 `implementation` 라이브러리를 버전 목록에서 찾아 모두 목록에 있는지, 목록에 앱이 쓰지 않는 모듈이 없는지 본다.
+  - 함께 딸려 오는 의존성(전이 의존성)은 목록에 따로 적지 않는다. 아래 "확인하지 못한 것"의 "라이브러리 고지의 범위"와 같다.
+  - 화면은 `domain`의 `LicenseRepository`로 읽는다. 구현(`data/repository/AssetLicenseRepository`)이 assets를 읽는다.
 
 ### 화면 검증
 
@@ -1023,6 +1027,7 @@ CI에서 빌드한 뒤 `git status --porcelain app/schemas`가 비어 있는지 
 | 디자인 토큰 | `docs/DESIGN.md`의 색, 타입, 간격, 모서리 표와 테마 코드가 같은지. 대비 표를 테마 색으로 다시 계산 | 문서를 읽는 순수 JVM 단위 테스트 |
 | 글꼴 | Pretendard로 그려지는지, 모든 스타일의 숫자 폭이 같은지, 글꼴을 못 읽으면 시스템 글꼴로 그리는지 | Robolectric NATIVE 그래픽에서 글자 폭을 잰다 |
 | 권한 | 요청 권한에 `INTERNET`이 없는지(DATA-02) | Robolectric 단위 테스트 |
+| 라이선스 고지 | 앱에 넣는 라이브러리가 모두 `assets/licenses/index.json`에 있는지, 전문 파일이 있는지(SET-03) | 빌드 파일과 assets를 읽는 JVM 단위 테스트 |
 | 의존 방향 | `domain`이 Android, `ui`, `data`를 import하지 않는지 | 소스 파일을 읽는 단위 테스트 |
 
 - 버그 수정은 실패하는 재현 테스트부터 넣는다(`AGENTS.md`). 저장과 계산 버그는 위 표의 `domain`과 `data` 테스트로 재현한다.
@@ -1072,7 +1077,8 @@ CI에서 빌드한 뒤 `git status --porcelain app/schemas`가 비어 있는지 
 | HIST-05 | `workout`, `workout_exercise`, `workout_set` | 저장소 | 따로 맞출 값이 없다 |
 | HIST-06 | `workout.started_at` | 저장소 | 끝난 기록으로 바로 만든다 |
 | SET-01 | `app_settings.default_rest_seconds` | 저장소 | |
-| SET-02 | `app_settings.theme_mode` | 저장소, 화면 | |
+| SET-02 | `app_settings.theme_mode` | 저장소, 화면 | `MainActivity`가 저장한 값으로 테마와 시스템 바를 정한다 |
+| SET-03 | 없음 | `assets/licenses/`, 화면 | 위 "글꼴과 라이선스 고지" |
 | DATA-01 | 전체 | `data` | 앱 내부 저장소의 데이터베이스 파일 하나 |
 | DATA-02 | 없음 | 빌드, 테스트 | 권한 테스트 |
 | DATA-03 | 전체 | `data/backup` | |
