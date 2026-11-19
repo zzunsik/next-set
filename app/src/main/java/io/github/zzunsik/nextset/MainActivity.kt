@@ -4,7 +4,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import io.github.zzunsik.nextset.ui.HomeScreen
+import io.github.zzunsik.nextset.ui.navigation.NextSetNavDisplay
 import io.github.zzunsik.nextset.ui.theme.NextSetTheme
 
 class MainActivity : ComponentActivity() {
@@ -13,7 +13,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             NextSetTheme {
-                HomeScreen()
+                NextSetNavDisplay()
             }
         }
     }

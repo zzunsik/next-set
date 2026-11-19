@@ -1,4 +1,4 @@
-package io.github.zzunsik.nextset.ui
+package io.github.zzunsik.nextset.ui.home
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column

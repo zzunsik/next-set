@@ -43,6 +43,21 @@ JDK 17 이상과 Android SDK(platform 37)가 필요합니다. Android Studio는 
 
 AGP, Gradle, Kotlin, Compose는 작업 시점의 최신 안정 버전을 쓰고, 의존성 버전은 `gradle/libs.versions.toml`에서만 관리합니다.
 
+쓰는 라이브러리는 다음과 같습니다. 고른 이유와 견준 후보는 [데이터 모델과 코드 구조](docs/architecture.md)에 있습니다.
+
+| 용도 | 라이브러리 |
+|---|---|
+| 화면 | Jetpack Compose, Material 3 |
+| 화면 이동 | Navigation 3 |
+| 화면 상태 | Lifecycle(ViewModel) |
+| 데이터베이스 | Room 3, `BundledSQLiteDriver`(`androidx.sqlite`). 주석 처리기는 KSP |
+| 직렬화 | kotlinx.serialization(JSON) |
+| 비동기 | kotlinx.coroutines |
+| 의존성 주입 | 쓰지 않는다. `AppContainer`에서 직접 만든다 |
+| 테스트 | JUnit 4, Robolectric, Compose UI 테스트, `room3-testing`, `kotlinx-coroutines-test` |
+
+인터넷 권한을 요청하지 않습니다. 단위 테스트와 CI가 병합된 매니페스트를 검사합니다.
+
 ## 문서
 
 - [요구사항](docs/requirements.md): 첫 버전에 넣을 것과 뺄 것, 확인이 남은 항목

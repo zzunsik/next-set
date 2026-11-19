@@ -33,6 +33,18 @@ jobs:
       - name: Build
         run: ./gradlew assembleDebug --console=plain
 
+      # 단위 테스트(ManifestPermissionTest)는 디버그 매니페스트를 본다. 릴리스는 여기서 본다(DATA-02).
+      - name: Release manifest has no INTERNET permission
+        run: |
+          ./gradlew processReleaseMainManifest --console=plain
+          manifest=app/build/intermediates/merged_manifest/release/processReleaseMainManifest/AndroidManifest.xml
+          test -f "$manifest" || { echo "병합된 릴리스 매니페스트를 찾지 못했습니다: $manifest"; exit 1; }
+          grep 'uses-permission' "$manifest" || true
+          if grep -q '"android.permission.INTERNET"' "$manifest"; then
+            echo "릴리스 매니페스트에 INTERNET 권한이 있습니다."
+            exit 1
+          fi
+
       - name: Lint
         run: ./gradlew lint --console=plain
 

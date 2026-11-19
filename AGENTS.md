@@ -102,3 +102,10 @@ GitHub 설정으로 강제하는 것들입니다. 설정을 바꾸면 이 절도
 - `./gradlew`는 JDK 17 이상에서 실행한다. 빌드 자체는 JDK 25로 돌고(`gradle/gradle-daemon-jvm.properties`), 없으면 Gradle이 내려받는다.
 - Android SDK platform 37이 필요하다. Android Studio 없이 명령줄로 빌드한다.
 - 의존성 버전은 `gradle/libs.versions.toml`에서만 관리하고, 작업 시점의 최신 안정 버전을 쓴다.
+- 라이브러리와 패키지 구조는 `docs/architecture.md`가 정한다. 그 문서에 없는 라이브러리를 더하려면 문서를 먼저 고친다.
+  - 주석 처리기는 KSP만 쓴다. AGP 9의 내장 Kotlin에서는 `kotlin-kapt`를 쓸 수 없다.
+  - 의존성 주입 라이브러리를 쓰지 않는다. 객체는 `AppContainer`에서 만들어 넘긴다.
+  - 인터넷 권한을 끌어오는 라이브러리를 넣지 않는다(DATA-02). `ManifestPermissionTest`가 디버그 매니페스트를, CI의 "Release manifest has no INTERNET permission" 단계가 릴리스 매니페스트를 본다.
+- 계층 사이 의존 방향(`ui → domain ← data`)은 `LayerDependencyTest`가 import를 읽어 검사한다. `domain`은 `android.`, `androidx.`, `ui`, `data`를, `ui`는 `data`를 import하지 않는다.
+- Room 스키마 JSON은 빌드할 때 `app/schemas/`에 나온다. 엔티티를 바꿨으면 바뀐 JSON을 같은 커밋에 넣는다.
+- 데이터베이스 드라이버는 `BundledSQLiteDriver`다. JVM 테스트에는 `sqlite-bundled-jvm`이 들어 있어야 한다. 없으면 `UnsatisfiedLinkError: no sqliteJni`로 실패한다.
