@@ -26,7 +26,7 @@ class HomeScreenScreenshotTest {
     val compose = createComposeRule()
 
     private fun capture() {
-        compose.setContent { NextSetTheme { HomeScreen() } }
+        compose.setContent { NextSetTheme { HomeScreen(onOpenSettings = {}) } }
         // 접근성 검사를 먼저 돌려 접근성 문제를 스크린샷 차이보다 먼저 알린다.
         compose.assertAccessible()
         compose.onRoot().captureRoboImage()

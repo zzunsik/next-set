@@ -1,0 +1,112 @@
+{
+  "notices": [
+    {
+      "id": "pretendard",
+      "name": "Pretendard",
+      "author": "Kil Hyung-jin",
+      "license": "SIL Open Font License 1.1",
+      "file": "pretendard.txt",
+      "modules": []
+    },
+    {
+      "id": "material-symbols",
+      "name": "Material Symbols",
+      "author": "Google",
+      "license": "Apache License 2.0",
+      "file": "apache-2.0.txt",
+      "modules": []
+    },
+    {
+      "id": "androidx-core",
+      "name": "AndroidX Core",
+      "author": "The Android Open Source Project",
+      "license": "Apache License 2.0",
+      "file": "apache-2.0.txt",
+      "modules": ["androidx.core:core-ktx"]
+    },
+    {
+      "id": "androidx-activity",
+      "name": "AndroidX Activity",
+      "author": "The Android Open Source Project",
+      "license": "Apache License 2.0",
+      "file": "apache-2.0.txt",
+      "modules": ["androidx.activity:activity-compose"]
+    },
+    {
+      "id": "compose-ui",
+      "name": "Jetpack Compose UI",
+      "author": "The Android Open Source Project",
+      "license": "Apache License 2.0",
+      "file": "apache-2.0.txt",
+      "modules": ["androidx.compose.ui:ui", "androidx.compose.ui:ui-tooling-preview"]
+    },
+    {
+      "id": "compose-material3",
+      "name": "Compose Material 3",
+      "author": "The Android Open Source Project",
+      "license": "Apache License 2.0",
+      "file": "apache-2.0.txt",
+      "modules": ["androidx.compose.material3:material3"]
+    },
+    {
+      "id": "navigation3",
+      "name": "Navigation 3",
+      "author": "The Android Open Source Project",
+      "license": "Apache License 2.0",
+      "file": "apache-2.0.txt",
+      "modules": ["androidx.navigation3:navigation3-runtime", "androidx.navigation3:navigation3-ui"]
+    },
+    {
+      "id": "androidx-lifecycle",
+      "name": "AndroidX Lifecycle",
+      "author": "The Android Open Source Project",
+      "license": "Apache License 2.0",
+      "file": "apache-2.0.txt",
+      "modules": [
+        "androidx.lifecycle:lifecycle-viewmodel-compose",
+        "androidx.lifecycle:lifecycle-runtime-compose",
+        "androidx.lifecycle:lifecycle-viewmodel-navigation3"
+      ]
+    },
+    {
+      "id": "room3",
+      "name": "Room 3",
+      "author": "The Android Open Source Project",
+      "license": "Apache License 2.0",
+      "file": "apache-2.0.txt",
+      "modules": ["androidx.room3:room3-runtime"]
+    },
+    {
+      "id": "androidx-sqlite",
+      "name": "AndroidX SQLite",
+      "author": "The Android Open Source Project",
+      "license": "Apache License 2.0",
+      "file": "apache-2.0.txt",
+      "modules": ["androidx.sqlite:sqlite-bundled"]
+    },
+    {
+      "id": "kotlin-stdlib",
+      "name": "Kotlin Standard Library",
+      "author": "JetBrains",
+      "license": "Apache License 2.0",
+      "file": "apache-2.0.txt",
+      "modules": ["org.jetbrains.kotlin:kotlin-stdlib"]
+    },
+    {
+      "id": "kotlinx-coroutines",
+      "name": "kotlinx.coroutines",
+      "author": "JetBrains",
+      "license": "Apache License 2.0",
+      "file": "apache-2.0.txt",
+      "modules": ["org.jetbrains.kotlinx:kotlinx-coroutines-android"]
+    },
+    {
+      "id": "kotlinx-serialization",
+      "name": "kotlinx.serialization",
+      "author": "JetBrains",
+      "license": "Apache License 2.0",
+      "file": "apache-2.0.txt",
+      "modules": ["org.jetbrains.kotlinx:kotlinx-serialization-json"]
+    }
+  ]
+}

@@ -9,12 +9,21 @@ import androidx.compose.runtime.staticCompositionLocalOf
 
 /**
  * 화면 모드(SET-02). 값은 바깥(설정)에서 받는다. 기본은 시스템 설정을 따른다.
- * 고르는 화면과 저장은 설정 화면 이슈(#28)에서 만든다.
+ * 고르는 화면과 저장은 `ui/settings`에 있다. 저장하는 값은 `domain.model.ThemeMode`이고 `toUiThemeMode()`로 옮긴다.
  */
 enum class ThemeMode {
     System,
     Light,
     Dark,
+}
+
+/** 이 모드에서 어두운 화면을 쓰는지. [ThemeMode.System]은 기기의 설정을 따른다. */
+@Composable
+@ReadOnlyComposable
+fun ThemeMode.isDark(): Boolean = when (this) {
+    ThemeMode.System -> isSystemInDarkTheme()
+    ThemeMode.Light -> false
+    ThemeMode.Dark -> true
 }
 
 // 토큰은 바뀌지 않으므로 한 번만 만든다.
@@ -40,11 +49,7 @@ fun NextSetTheme(
     themeMode: ThemeMode = ThemeMode.System,
     content: @Composable () -> Unit,
 ) {
-    val dark = when (themeMode) {
-        ThemeMode.System -> isSystemInDarkTheme()
-        ThemeMode.Light -> false
-        ThemeMode.Dark -> true
-    }
+    val dark = themeMode.isDark()
     CompositionLocalProvider(LocalNextSetColors provides if (dark) DarkColors else LightColors) {
         MaterialTheme(
             colorScheme = if (dark) DarkColorScheme else LightColorScheme,
