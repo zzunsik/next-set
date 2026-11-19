@@ -89,6 +89,36 @@ class AccessibilityChecksTest {
         Box(Modifier.size(48.dp).clickable {})
     }
 
+    /** 비활성 요소의 글자 대비만 예외다(DESIGN.md, WCAG 1.4.3). 승인됨(소유자, 2026-11-20). */
+    @Test
+    fun passesLowContrastOnDisabledButton() {
+        compose.setContent {
+            Box(Modifier.size(200.dp).background(Color.White), contentAlignment = Alignment.Center) {
+                Box(
+                    Modifier
+                        .size(96.dp, 48.dp)
+                        .clickable(enabled = false) {},
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Text("흐린 글자", color = Color(0xFFBBBBBB))
+                }
+            }
+        }
+        compose.assertAccessible()
+    }
+
+    @Test
+    fun failsOnLowContrastEnabledButton() = assertFailsWith("TextContrastCheck") {
+        Box(Modifier.size(96.dp, 48.dp).clickable {}, contentAlignment = Alignment.Center) {
+            Text("흐린 글자", color = Color(0xFFBBBBBB))
+        }
+    }
+
+    @Test
+    fun failsOnMissingLabelEvenWhenDisabled() = assertFailsWith("SpeakableTextPresentCheck") {
+        Box(Modifier.size(48.dp).clickable(enabled = false) {})
+    }
+
     @Test
     fun failsOnLowTextContrast() = assertFailsWith("TextContrastCheck") {
         Text("흐린 글자", color = Color(0xFFBBBBBB), modifier = Modifier.padding(8.dp))

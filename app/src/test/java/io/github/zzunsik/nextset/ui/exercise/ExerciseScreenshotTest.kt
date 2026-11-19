@@ -139,4 +139,14 @@ class ExerciseFormScreenshotTest {
     @Test
     @Config(qualifiers = "+night", fontScale = LARGE_FONT_SCALE)
     fun darkLargeFont() = capture()
+
+    /** 검색 결과 없이 "새 종목"으로 연 첫 화면. 이름이 비어 "저장"이 비활성이다. */
+    @Test
+    fun newEmpty() = capture(ExerciseFormUiState())
+
+    /** 새 종목에서 이름이 겹친 상태. 오류 문구가 보이고 "저장"이 비활성이다. */
+    @Test
+    fun nameConflict() = capture(
+        ExerciseFormUiState(name = "바벨 벤치 프레스", bodyPart = BodyPart.CHEST, equipment = Equipment.BARBELL, nameConflict = true),
+    )
 }

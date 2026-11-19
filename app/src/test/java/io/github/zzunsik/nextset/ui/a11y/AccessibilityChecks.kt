@@ -13,6 +13,11 @@ import com.github.takahirom.roborazzi.RoborazziATFAccessibilityCheckOptions
 import com.github.takahirom.roborazzi.RoborazziATFAccessibilityChecker
 import com.github.takahirom.roborazzi.checkRoboAccessibility
 import com.google.android.apps.common.testing.accessibility.framework.AccessibilityCheckPreset
+import com.google.android.apps.common.testing.accessibility.framework.AccessibilityViewCheckResult
+import com.google.android.apps.common.testing.accessibility.framework.checks.TextContrastCheck
+import com.google.android.apps.common.testing.accessibility.framework.uielement.ViewHierarchyElement
+import org.hamcrest.Description
+import org.hamcrest.TypeSafeMatcher
 import org.junit.Assert.fail
 
 /**
@@ -24,6 +29,10 @@ import org.junit.Assert.fail
  *    아무것도 잡지 못한다(#19에서 확인). 그래서 Robolectric을 지원하는 Roborazzi 쪽을 쓴다.
  * 2. 누르는 요소의 배치 크기가 48dp 이상인지(NF-10). [assertTouchTargets]를 본다.
  *
+ * 예외는 하나다. 비활성 요소의 글자 대비(TextContrastCheck)만 빼고 본다([disabledTextContrast]).
+ * docs/DESIGN.md("비활성 요소는 … 대비 기준의 대상이 아니다")와 WCAG 1.4.3(비활성 UI 요소는 예외)를 따른다.
+ * 승인됨(소유자, 2026-11-20, #21). 비활성 요소라도 다른 검사(빠진 라벨 등)와 활성 요소의 대비는 그대로 실패로 본다.
+ *
  * 그래픽 모드가 NATIVE여야 대비 검사가 화면을 읽을 수 있다(`@GraphicsMode(NATIVE)`).
  *
  * Roborazzi의 접근성 검사 API는 실험 표시가 붙어 있어 옵트인한다. 테스트 코드에만 쓰고 앱 코드에는 들어가지 않는다.
@@ -32,12 +41,33 @@ import org.junit.Assert.fail
 fun ComposeContentTestRule.assertAccessible() {
     onRoot().checkRoboAccessibility(
         roborazziATFAccessibilityCheckOptions = RoborazziATFAccessibilityCheckOptions(
-            checker = RoborazziATFAccessibilityChecker(preset = AccessibilityCheckPreset.LATEST),
+            checker = RoborazziATFAccessibilityChecker(
+                preset = AccessibilityCheckPreset.LATEST,
+                suppressions = disabledTextContrast,
+            ),
             failureLevel = RoborazziATFAccessibilityChecker.CheckLevel.Warning,
         ),
     )
     assertTouchTargets()
 }
+
+/**
+ * 비활성 요소의 글자 대비 결과만 고른다. 검사 종류가 TextContrastCheck이고, 결과가 붙은 요소나 그 조상 가운데
+ * 비활성(Compose의 `Disabled` 의미가 옮겨진 `isEnabled == false`)인 것이 있을 때만 뺀다.
+ * 비활성 버튼의 글자는 ATF에 버튼(비활성)의 자식 글자 요소(활성)로 나오므로 조상까지 본다.
+ */
+private val disabledTextContrast = object : TypeSafeMatcher<AccessibilityViewCheckResult>() {
+    override fun matchesSafely(item: AccessibilityViewCheckResult): Boolean =
+        item.accessibilityHierarchyCheck == TextContrastCheck::class.java &&
+            item.element.isInsideDisabled()
+
+    override fun describeTo(description: Description) {
+        description.appendText("비활성 요소의 TextContrastCheck 결과")
+    }
+}
+
+private fun ViewHierarchyElement?.isInsideDisabled(): Boolean =
+    generateSequence(this) { it.parentView }.any { !it.isEnabled }
 
 /** 누르는 요소의 최소 크기(docs/DESIGN.md "크기"). */
 val MinTouchTarget = 48.dp

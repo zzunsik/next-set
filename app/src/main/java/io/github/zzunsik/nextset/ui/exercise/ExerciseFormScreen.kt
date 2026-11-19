@@ -122,7 +122,7 @@ fun ExerciseFormScreen(
                 TextInputField(
                     value = state.name,
                     onValueChange = onNameChange,
-                    placeholder = stringResource(R.string.exercise_form_name),
+                    placeholder = stringResource(R.string.exercise_form_name_hint),
                 )
                 if (state.nameConflict) {
                     Text(
