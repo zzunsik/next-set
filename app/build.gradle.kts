@@ -6,6 +6,7 @@ plugins {
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.ksp)
     alias(libs.plugins.room3)
+    alias(libs.plugins.roborazzi)
 }
 
 android {
@@ -55,6 +56,11 @@ room3 {
     schemaDirectory("$projectDir/schemas")
 }
 
+roborazzi {
+    // 기준 이미지는 저장소에 커밋한다. build/ 아래는 .gitignore 대상이라 따로 둔다.
+    outputDir.set(file("src/test/screenshots"))
+}
+
 kotlin {
     compilerOptions {
         jvmTarget.set(JvmTarget.JVM_25)
@@ -89,5 +95,7 @@ dependencies {
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(platform(libs.androidx.compose.bom))
     testImplementation(libs.androidx.compose.ui.test.junit4)
+    testImplementation(libs.roborazzi)
+    testImplementation(libs.roborazzi.accessibility.check)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
 }

@@ -113,6 +113,8 @@ flowchart LR
 | 화면 상태 | `lifecycle-viewmodel-compose`, `lifecycle-runtime-compose` | | 화면 회전과 화면 이동을 거쳐도 상태를 유지한다 |
 | 날짜와 시간 | `java.time` | kotlinx-datetime | minSdk 26부터 플랫폼에 들어 있어 의존성이 필요 없다 |
 | 글꼴 | Pretendard 파일을 앱에 넣는다(협의) | 기기 기본 글꼴, 내려받는 글꼴 | 아래 "글꼴과 라이선스 고지" |
+| 스크린샷 테스트(테스트 전용) | Roborazzi | Paparazzi | 아래 "화면 검증" |
+| 접근성 검사(테스트 전용) | Roborazzi 접근성 검사 모듈(ATF)과 누르는 영역 크기 검사 | Compose UI 테스트의 `enableAccessibilityChecks()` | 아래 "화면 검증" |
 
 ### 빌드 전제와 인터넷 권한 확인
 
@@ -247,9 +249,28 @@ class AppContainer(context: Context) {
 
 - 글꼴을 소프트웨어에 묶어 배포해도 된다. 조건은 사본마다 저작권 표시와 라이선스를 담는 것이다. 독립된 텍스트 파일로 담아도 된다(공식, OFL 2항).
 - Pretendard 저장소의 `LICENSE` 파일에 저작권 표시와 OFL 전문이 함께 있다. 약 4.8KB다. 이 파일을 고치지 않고 `app/src/main/assets/licenses/pretendard.txt`로 싣는다.
+  - v1.3.9 릴리스 묶음의 `LICENSE.txt`(4,419바이트)에는 Pretendard의 저작권 줄만 있다. 바탕 글꼴(Source, Inter, M PLUS 1)의 저작권 줄은 그 뒤 저장소 커밋 `0189074`("Add missing copyright notices to license", 2024-04-21)에서 더해졌다. 그래서 글꼴 파일은 v1.3.9 릴리스에서, 라이선스는 이 커밋의 `LICENSE`(4,816바이트)에서 받아 고치지 않고 넣었다(#19).
 - 설정 화면에 "오픈소스 라이선스" 항목을 둔다(협의). 누르면 `assets/licenses/`의 파일을 읽어 전문을 보여 준다. 네트워크를 쓰지 않는다.
 - 라이브러리 고지도 같은 화면에서 다룬다. 고른 라이브러리는 모두 Apache License 2.0으로 배포된다(공식, 각 POM). 이 라이선스는 받는 사람에게 라이선스 사본을 주라고 요구한다(공식, 4조). Apache 2.0 전문 하나와 라이브러리 이름 목록을 같은 폴더에 둔다.
 - 라이브러리 목록을 손으로 적을지 Gradle 플러그인으로 만들지는 구현할 때 정한다. 플러그인을 쓴다면 인터넷 권한과 Google Play 서비스 의존성을 끌어오지 않는 것만 고른다.
+
+### 화면 검증
+
+#19에서 정했다. 스크린샷 테스트와 접근성 검사는 테스트에만 쓰고 APK에는 들어가지 않는다.
+
+| 용도 | 후보 | 도는 곳 | 고른 것과 이유 |
+|---|---|---|---|
+| 스크린샷 테스트 | **Roborazzi** | Robolectric 위 JVM | 고름. 지금 화면 테스트와 같은 Robolectric 러너와 Compose 테스트 규칙을 그대로 쓴다. 접근성 검사 모듈이 함께 있다 |
+| | Paparazzi | layoutlib 위 JVM | Robolectric을 쓰지 않아 이슈의 조건과 맞지 않는다. Compose 테스트 규칙의 조작과 검사를 같은 테스트에서 쓰지 못한다 |
+| 접근성 검사 | Compose UI 테스트의 `enableAccessibilityChecks()`(`ui-test-junit4-accessibility`) | 기기 | Robolectric에서는 ATF의 모든 검사가 `NOT_RUN`으로 끝나 라벨 없는 버튼과 흐린 글자를 하나도 잡지 못했다(탐침) |
+| | **Roborazzi 접근성 검사 모듈**(`roborazzi-accessibility-check`, ATF) | Robolectric 위 JVM | 고름. 같은 예시에서 라벨 없음(`SpeakableTextPresentCheck`)과 대비 부족(`TextContrastCheck`)을 잡았다(탐침) |
+| | 누르는 영역 크기 검사(직접 작성) | Robolectric 위 JVM | 고름. 아래 이유로 ATF와 함께 쓴다 |
+
+- ATF의 누르는 영역 검사(`TouchTargetSizeCheck`)는 Compose에서 32dp 버튼도 통과시켰다. Compose가 48dp보다 작은 누르는 요소의 접근성 영역(`touchBoundsInRoot`)을 48dp로 늘려 알리기 때문이다(탐침: 배치 32dp, 알린 영역 48dp). 늘린 영역은 옆 요소와 겹치면 줄어들 수 있다. 그래서 누르는 요소의 배치 크기(`boundsInRoot`)가 48dp 이상인지 따로 검사한다(NF-10).
+- 접근성 검사의 실패 기준은 ATF의 경고(WARNING) 이상이다. 대비 부족이 경고로 나오기 때문이다.
+- 검사 자체가 조용히 꺼지는 일을 막으려고, 잘못 만든 예시(40dp 버튼, 라벨 없는 버튼, 흐린 글자)에서 검사가 실패하는지 보는 테스트를 둔다(`AccessibilityChecksTest`).
+- 기준 이미지는 `app/src/test/screenshots/`에 커밋한다. `gradle.properties`의 `roborazzi.test.verify=true`로 `testDebugUnitTest`가 늘 기준 이미지와 비교한다. 검사 명령과 CI가 따로 비교 단계를 부르지 않아도 화면이 바뀌면 실패한다.
+- 기기 조건은 폭 360dp, xhdpi다. 밝은 화면과 어두운 화면, 글자 크기 기본(100%)과 크게(200%)의 네 조합을 찍는다. Robolectric의 `@Config(qualifiers = "+night", fontScale = 2.0f)`로 시스템 설정을 바꿔 찍으므로 화면 모드의 "시스템 설정 따름"과 Android 14의 비선형 글자 크기 조절을 함께 거친다.
 
 ## 저장 스키마
 
@@ -996,6 +1017,10 @@ CI에서 빌드한 뒤 `git status --porcelain app/schemas`가 비어 있는지 
 | 앱 재시작 | 파일 데이터베이스에 진행 중인 운동을 쓰고 닫았다 다시 열어 그대로인지(LOG-13) | Robolectric, 파일 데이터베이스 |
 | 화면 상태 | 저장소의 값이 화면용 상태로 바뀌는지, 입력이 저장소 호출로 이어지는지 | JVM 단위 테스트, 가짜 저장소, `kotlinx-coroutines-test` |
 | 화면 | 상태에 따라 요소가 보이는지, 누르면 콜백이 불리는지 | Robolectric, Compose 테스트 규칙. 지금 `HomeScreenTest`와 같은 방식 |
+| 화면의 모양 | 밝은 화면과 어두운 화면, 글자 크기 기본과 200%에서 기준 이미지와 같은지 | Robolectric NATIVE 그래픽, Roborazzi. 위 "화면 검증" |
+| 접근성 | 누르는 영역 48dp, 빠진 라벨, 글자 대비 | Roborazzi 접근성 검사(ATF)와 누르는 영역 크기 검사. 스크린샷 테스트에서 함께 돈다 |
+| 디자인 토큰 | `docs/DESIGN.md`의 색, 타입, 간격, 모서리 표와 테마 코드가 같은지. 대비 표를 테마 색으로 다시 계산 | 문서를 읽는 순수 JVM 단위 테스트 |
+| 글꼴 | Pretendard로 그려지는지, 모든 스타일의 숫자 폭이 같은지, 글꼴을 못 읽으면 시스템 글꼴로 그리는지 | Robolectric NATIVE 그래픽에서 글자 폭을 잰다 |
 | 권한 | 요청 권한에 `INTERNET`이 없는지(DATA-02) | Robolectric 단위 테스트 |
 | 의존 방향 | `domain`이 Android, `ui`, `data`를 import하지 않는지 | 소스 파일을 읽는 단위 테스트 |
 
@@ -1145,6 +1170,8 @@ CI에서 빌드한 뒤 `git status --porcelain app/schemas`가 비어 있는지 
 | `androidx.test:core`(마이그레이션 테스트용) | 1.7.0 | 탐침 테스트 |
 | DataStore(`datastore-preferences`). 고르지 않았다 | 1.3.0 | 탐침 테스트 |
 | Pretendard | 1.3.9(2023-11-05 릴리스) | 저장소의 파일 크기와 `LICENSE`, 탐침 빌드 |
+| Roborazzi(`roborazzi`, `roborazzi-accessibility-check`, Gradle 플러그인) | 1.79.0(2026-11-12 릴리스). #19에서 2026-11-19에 확인 | Maven Central 메타데이터, 빌드와 테스트, 릴리스 노트 |
+| Accessibility Test Framework | 4.1.1. `roborazzi-accessibility-check`가 끌어온다. 같은 날 Google Maven의 최신 안정판 | POM, 테스트 |
 
 탐침에서 한 일은 다음과 같다.
 
@@ -1177,7 +1204,7 @@ CI에서 빌드한 뒤 `git status --porcelain app/schemas`가 비어 있는지 
 - **마이그레이션 테스트의 스키마 위치.** `debug` 소스 세트의 assets에 넣는 방법만 통했다. 디버그 APK에 스키마가 들어가지 않는 방법은 찾지 못했다. #20에서 이 방법을 받아들였다("마이그레이션 테스트").
 - **백업 파일 크기.** 계산한 값이다.
 - **바꾼 스키마의 나머지.** 탐침은 스키마와 질의, 삭제 전파까지 봤다. 내장 종목 반영과 방식을 바꿀 때 루틴 목표를 비우는 트랜잭션은 #20에서 코드와 테스트로 확인했다. 백업 내보내기와 가져오기는 #29에서 다룬다.
-- **글꼴.** Pretendard가 Compose 화면에 그려지는지, 정적 OTF 파일의 굵기가 `FontWeight`와 맞게 골라지는지 확인하지 않았다. APK 증가는 서명하지 않은 릴리스 APK로 잰 값이다. 글자를 덜어 낸 파일이 OFL의 고친 판에 드는지도 확인하지 못했다.
+- **글꼴.** 실제 기기에서 Pretendard가 그려지는지 확인하지 않았다. Robolectric 스크린샷과 글자 폭 테스트에서는 Pretendard로 그려지고 굵기별 파일이 골라지는 것을 확인했다(#19). APK 증가는 서명하지 않은 릴리스 APK로 잰 값이다. 글자를 덜어 낸 파일이 OFL의 고친 판에 드는지도 확인하지 못했다.
 - **라이브러리 고지의 범위.** 직접 고른 라이브러리의 라이선스만 POM에서 확인했다. 함께 딸려 오는 의존성과 `sqlite-bundled`에 든 SQLite 자체의 고지 조건은 확인하지 않았다.
 - **알림 권한 창을 선택 없이 닫은 경우.** 이때 `notification_prompt_declined`를 어떻게 둘지는 #16 문서가 정한다. 이 문서는 열만 정의했다.
 - **JDK의 네이티브 접근 경고.** JDK 25에서 Robolectric이 네이티브 라이브러리를 올릴 때 "앞으로 막힌다"는 경고가 나온다. 지금 테스트에도 있는 경고다. `sqlite-bundled-jvm`도 네이티브 라이브러리를 올리므로 같은 영향을 받는다. 다음 JDK에서 설정이 필요한지 확인하지 않았다.
@@ -1196,6 +1223,11 @@ CI에서 빌드한 뒤 `git status --porcelain app/schemas`가 비어 있는지 
 - [Dagger 릴리스](https://github.com/google/dagger/releases)
 - [Google Maven의 `androidx.room3` 버전 목록](https://dl.google.com/android/maven2/androidx/room3/group-index.xml)
 - [Maven Central의 KSP 버전 목록](https://repo1.maven.org/maven2/com/google/devtools/ksp/symbol-processing-api/maven-metadata.xml)
+
+- [Roborazzi 1.79.0 릴리스](https://github.com/takahirom/roborazzi/releases/tag/1.79.0), [Roborazzi 접근성 검사 모듈](https://github.com/takahirom/roborazzi/tree/1.79.0/roborazzi-accessibility-check)
+- [Accessibility Test Framework for Android](https://github.com/google/Accessibility-Test-Framework-for-Android)
+- [Google Maven의 ATF 버전 목록](https://dl.google.com/android/maven2/com/google/android/apps/common/testing/accessibility/framework/accessibility-test-framework/maven-metadata.xml)
+- [Pretendard v1.3.9 릴리스](https://github.com/orioncactus/pretendard/releases/tag/v1.3.9), [라이선스 커밋 0189074](https://github.com/orioncactus/pretendard/commit/0189074fdad117a5e360aad00a59b47225429c31)
 
 빌드
 
