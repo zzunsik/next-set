@@ -1,4 +1,4 @@
-package io.github.zzunsik.nextset.ui
+package io.github.zzunsik.nextset.ui.navigation
 
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.v2.createComposeRule
@@ -12,17 +12,16 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.RuntimeEnvironment
 
 @RunWith(RobolectricTestRunner::class)
-class HomeScreenTest {
+class NextSetNavDisplayTest {
     @get:Rule
     val compose = createComposeRule()
 
     @Test
-    fun showsAppNameAndPlaceholder() {
+    fun startsAtHome() {
         val app = RuntimeEnvironment.getApplication()
 
-        compose.setContent { NextSetTheme { HomeScreen() } }
+        compose.setContent { NextSetTheme { NextSetNavDisplay() } }
 
-        compose.onNodeWithText(app.getString(R.string.app_name)).assertIsDisplayed()
         compose.onNodeWithText(app.getString(R.string.home_placeholder)).assertIsDisplayed()
     }
 }
