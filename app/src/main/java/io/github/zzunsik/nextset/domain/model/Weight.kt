@@ -1,5 +1,7 @@
 package io.github.zzunsik.nextset.domain.model
 
+// test-guard 확인용 주석(#43). 머지하지 않는다.
+
 /**
  * 무게. 정수 그램으로 들고 다녀 더하고 빼도 오차가 생기지 않는다(docs/architecture.md "무게 저장 형식").
  * 62.5kg은 `Weight(62500)`이다.
