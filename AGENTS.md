@@ -57,6 +57,15 @@
 - 기능 PR은 영향받는 기존 테스트가 통과해야 한다. 동작을 일부러 바꿨으면 테스트도 같은 PR에서 고친다.
 - 실패한 검사를 끄거나 기준을 낮춰 통과시키지 않는다. lint 예외를 늘리거나 테스트를 지워서 맞추지 않는다. 기준을 바꿔야 하면 PR 본문에 이유를 적고 승인을 받는다.
 - 꺼 둔 테스트(`@Ignore`), 내용이 빈 테스트, `TODO`는 완료 근거가 아니다. 구현하거나 막힌 것으로 보고한다.
+- CI의 `test-guard` job이 PR에서 기존 테스트를 지우거나 약하게 바꾼 곳을 찾는다(`scripts/test-guard.mjs`). base 브랜치와의 merge-base에 있던 테스트 소스(`app/src/test*`, `app/src/androidTest*`)를 기준으로 다음이 있으면 실패한다.
+  - `@Test` 함수를 지우거나 이름을 바꿈, `@Test` 함수 안의 줄을 지우거나 바꿈(공백만 바뀐 줄은 빼고). 기존 테스트 안에 `return`, `try`/`catch`, `runCatching`을 끼워 넣음
+  - 테스트 함수 밖(도우미 등)의 검증 줄을 지우거나 바꿈: `assert…`, `fail(`, `check(`, `require(`, `verify`, `should…`, Truth 체인(`.isEqualTo(` 등), Compose `onNode…`, `assertAccessible()`, `captureRoboImage`
+  - 테스트 리소스(`app/src/test/resources/` 등, 소스가 아닌 파일)를 바꾸거나 지움
+  - `@Ignore`, `@Disabled`, `assume…(`을 새로 더함(새 파일 포함)
+  - 기준 스크린샷(`app/src/test/screenshots/`)은 보지 않는다. CI 비교와 리뷰로 다룬다. 새 테스트·새 파일·새 리소스를 더하거나 기존 테스트에 검증을 더하는 것은 통과한다.
+  - 테스트를 다른 파일로 옮겨도 실패한다. 같은 이름의 테스트나 같은 검증 줄이 다른 곳에 생겼으면 로그에 근거로 보여 준다.
+- 동작을 일부러 바꿔 기존 테스트를 고쳐야 하면 PR 본문에 한 줄을 적는다: `테스트 기대값 변경: <왜 바꿨는지>`. 줄 맨 앞(목록 기호 `- `는 허용)에 쓰고 사유를 비우지 않는다. 승인한 사람이 라벨 `test-change-approved`를 붙여도 통과한다. 사유는 `test-guard` 로그와 단계 요약에 남는다.
+  - 본문 수정과 라벨 변경에도 CI가 다시 돈다. 이때 같은 커밋에서 끝난 `build` 결과가 있으면 그것을 다시 쓰고 `build`를 건너뛴다(`build-plan` job). 진행 중이던 run은 취소되므로 그때는 `build`를 다시 돌린다.
 - CI에 job을 추가하면 `ci-passed`의 `needs`에 넣는다. 머지 판단은 이 검사 하나로 한다.
 - CI는 `testDebugUnitTest`를 빌드 캐시 없이 매번 돌린다(`--rerun`). 입력이 같다고 판정돼 테스트가 `FROM-CACHE`나 `UP-TO-DATE`로 건너뛰어지면 `ci-passed`가 실제 검사 없이 통과하기 때문이다. 빌드와 lint는 캐시를 쓴다. 실행한 테스트 수는 CI 단계 요약의 "Test count"에 나오고, 0개면 실패한다. 로컬 검사 명령은 캐시를 그대로 쓴다.
 - 화면 테스트는 Robolectric으로 JVM에서 돌린다. 테스트 SDK는 `app/src/test/resources/robolectric.properties`에서 정한다.

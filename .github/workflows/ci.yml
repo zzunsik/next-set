@@ -2,6 +2,9 @@ name: CI
 
 on:
   pull_request:
+    # 기본(opened, synchronize, reopened)에 더해 본문·라벨이 바뀌어도 test-guard를 다시 돌린다.
+    # 이때는 같은 커밋의 빌드 결과를 다시 쓰고 build를 건너뛴다(build-plan).
+    types: [opened, synchronize, reopened, edited, labeled, unlabeled]
   push:
     branches: [develop, main]
 
@@ -14,7 +17,51 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  # build를 돌릴지 정한다. 본문 수정과 라벨 변경(edited, labeled, unlabeled)은 커밋이 그대로이므로
+  # 같은 head 커밋에서 끝난 build 결과(성공이나 실패)가 있으면 그것을 다시 쓰고 build를 건너뛴다.
+  # 그런 결과가 없거나(진행 중이던 run은 위 concurrency로 취소된다) base 브랜치를 바꿨으면 build를 돌린다.
+  build-plan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      actions: read
+    outputs:
+      run-build: ${{ steps.plan.outputs.run-build }}
+      reused-result: ${{ steps.plan.outputs.reused-result }}
+    steps:
+      - name: build를 돌릴지 정하기
+        id: plan
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          EVENT: ${{ github.event_name }}
+          ACTION: ${{ github.event.action }}
+          BASE_CHANGED: ${{ github.event.changes.base != null }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          RUN_ID: ${{ github.run_id }}
+        run: |
+          build() { echo "build를 돌립니다: $1"; echo "run-build=true" >> "$GITHUB_OUTPUT"; exit 0; }
+          case "$EVENT:$ACTION" in
+            pull_request:edited|pull_request:labeled|pull_request:unlabeled) ;;
+            *) build "$EVENT $ACTION 이벤트" ;;
+          esac
+          [ "$BASE_CHANGED" != "true" ] || build "base 브랜치가 바뀌었습니다"
+          runs=$(gh api "repos/$REPO/actions/workflows/ci.yml/runs?head_sha=$HEAD_SHA&event=pull_request&status=completed&per_page=50" \
+            --jq ".workflow_runs[] | select(.id != $RUN_ID) | .id") || build "이전 run을 조회하지 못했습니다"
+          for id in $runs; do
+            result=$(gh api "repos/$REPO/actions/runs/$id/jobs?per_page=100" --jq '[.jobs[] | select(.name == "build") | .conclusion] | first // ""') || continue
+            case "$result" in
+              success|failure)
+                echo "같은 커밋 $HEAD_SHA 의 build 결과($result)를 다시 씁니다: https://github.com/$REPO/actions/runs/$id"
+                { echo "run-build=false"; echo "reused-result=$result"; } >> "$GITHUB_OUTPUT"
+                exit 0 ;;
+            esac
+          done
+          build "같은 커밋에서 끝난 build가 없습니다"
+
   build:
+    needs: build-plan
+    if: needs.build-plan.outputs.run-build == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
@@ -103,17 +150,66 @@ jobs:
             app/build/test-results/
           if-no-files-found: ignore
 
+  # 기존 테스트를 지우거나 약하게 바꾸지 않았는지 본다(#43). PR에서만 판정하고 push에서는 자체 테스트만 돈다.
+  # 판정 규칙과 예외 표기는 scripts/test-guard.mjs와 AGENTS.md "테스트와 CI"에 있다.
+  test-guard:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      pull-requests: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: 판정 스크립트 자체 테스트
+        run: |
+          node --version
+          node --test scripts/test-guard.test.mjs
+
+      # PR 본문과 라벨은 이 단계에서 API로 현재 값을 읽는다. 이전 run을 다시 돌려도 지금 본문을 본다.
+      # 읽지 못하면 이벤트 페이로드(PR_BODY, PR_LABELS)를 쓴다. 본문은 env로만 넘기고 스크립트에 끼워 넣지 않는다.
+      - name: 기존 테스트 삭제·약화 검사
+        if: github.event_name == 'pull_request'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          PR_BODY: ${{ github.event.pull_request.body }}
+          PR_LABELS: ${{ toJSON(github.event.pull_request.labels.*.name) }}
+        run: |
+          pr_json="$RUNNER_TEMP/pr.json"
+          gh api "repos/$REPO/pulls/$PR_NUMBER" > "$pr_json" || { echo "PR을 API로 읽지 못해 이벤트 값을 씁니다."; rm -f "$pr_json"; }
+          node scripts/test-guard.mjs --base "$BASE_SHA" --head "$HEAD_SHA" --pr-json "$pr_json"
+
   # 머지 판단용 단일 검사. 저장소 설정에서 이 검사 하나를 필수로 건다.
   # job을 추가하면 needs에 함께 넣는다.
   ci-passed:
     if: always()
-    needs: [build]
+    needs: [build-plan, build, test-guard]
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
       - name: 모든 CI job 성공 확인
+        # build는 build-plan이 같은 커밋의 성공한 build를 다시 쓰기로 했을 때만 건너뛰어도 된다.
         env:
-          RESULTS: ${{ join(needs.*.result, ' ') }}
+          NEEDS: ${{ toJSON(needs) }}
+          RUN_BUILD: ${{ needs.build-plan.outputs.run-build }}
+          REUSED: ${{ needs.build-plan.outputs.reused-result }}
         run: |
-          echo "job 결과: $RESULTS"
-          for r in $RESULTS; do [ "$r" = "success" ] || { echo "성공하지 않은 job이 있습니다."; exit 1; }; done
+          fail=0
+          for job in $(echo "$NEEDS" | jq -r 'keys[]'); do
+            result=$(echo "$NEEDS" | jq -r --arg j "$job" '.[$j].result')
+            if [ "$job" = build ] && [ "$result" = skipped ] && [ "$RUN_BUILD" = false ]; then
+              result="$REUSED"
+              echo "$job: 같은 커밋의 이전 결과 $result"
+            else
+              echo "$job: $result"
+            fi
+            [ "$result" = success ] || fail=1
+          done
+          [ "$fail" = 0 ] || { echo "성공하지 않은 job이 있습니다."; exit 1; }
