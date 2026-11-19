@@ -4,6 +4,7 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import io.github.zzunsik.nextset.R
+import io.github.zzunsik.nextset.ui.exercise.FakeExerciseRepository
 import io.github.zzunsik.nextset.ui.theme.NextSetTheme
 import org.junit.Rule
 import org.junit.Test
@@ -20,7 +21,7 @@ class NextSetNavDisplayTest {
     fun startsAtHome() {
         val app = RuntimeEnvironment.getApplication()
 
-        compose.setContent { NextSetTheme { NextSetNavDisplay() } }
+        compose.setContent { NextSetTheme { NextSetNavDisplay(exerciseRepository = FakeExerciseRepository()) } }
 
         compose.onNodeWithText(app.getString(R.string.home_placeholder)).assertIsDisplayed()
     }

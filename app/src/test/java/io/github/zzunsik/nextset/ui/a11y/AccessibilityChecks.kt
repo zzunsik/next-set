@@ -48,18 +48,22 @@ private val isActionable = SemanticsMatcher("누를 수 있는 요소") { node -
 }
 
 /**
- * 누르는 요소마다 배치된 크기(boundsInRoot)가 가로세로 48dp 이상인지 본다.
+ * 누르는 요소마다 배치된 크기([SemanticsNode.size])가 가로세로 48dp 이상인지 본다.
+ *
+ * 화면에 보이는 영역(boundsInRoot)이 아니라 요소의 배치 크기를 잰다. 보이는 영역은 스크롤 목록의 끝에 걸쳐
+ * 잘린 요소나 화면 밖의 요소에서 작게(0까지) 나와, 48dp로 배치한 요소도 실패로 잡는다(#21).
  *
  * ATF의 TouchTargetSizeCheck만으로는 못 잡는다. Compose는 48dp보다 작은 누르는 요소의
  * 접근성 영역(touchBoundsInRoot)을 48dp로 늘려서 알리기 때문이다. 이 늘린 영역은
  * 옆 요소와 겹치면 줄어들 수 있으므로 기대지 않고, 요소 자체를 48dp 이상으로 배치하게 한다
- * (예: M3의 `minimumInteractiveComponentSize`, 또는 `size(48.dp)` 상자 안에 보이는 모양을 둔다).
+ * (예: `size(48.dp)` 상자 안에 보이는 모양을 둔다). M3의 `minimumInteractiveComponentSize`는 바깥 배치만 키우고
+ * 누르는 요소 자체는 보이는 크기로 남겨 이 검사를 통과하지 못한다(#21에서 IconButton, 글자 버튼, 칩으로 확인).
  */
 fun ComposeContentTestRule.assertTouchTargets() {
     val minPx = with(density) { MinTouchTarget.toPx() }
     val small = onAllNodes(isActionable, useUnmergedTree = true)
         .fetchSemanticsNodes()
-        .filter { it.boundsInRoot.width < minPx - 0.5f || it.boundsInRoot.height < minPx - 0.5f }
+        .filter { it.size.width < minPx - 0.5f || it.size.height < minPx - 0.5f }
     if (small.isNotEmpty()) {
         fail(
             "누르는 영역이 ${MinTouchTarget.value.toInt()}dp보다 작은 요소가 있다(NF-10):\n" +
@@ -69,8 +73,8 @@ fun ComposeContentTestRule.assertTouchTargets() {
 }
 
 private fun SemanticsNode.describe(density: Float): String {
-    val w = boundsInRoot.width / density
-    val h = boundsInRoot.height / density
+    val w = size.width / density
+    val h = size.height / density
     val role = config.getOrNull(SemanticsProperties.Role)
     val label = config.getOrNull(SemanticsProperties.ContentDescription)
         ?: config.getOrNull(SemanticsProperties.Text)?.map { it.text }

@@ -2,7 +2,10 @@ package io.github.zzunsik.nextset.ui.a11y
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Text
@@ -55,6 +58,30 @@ class AccessibilityChecksTest {
     @Test
     fun failsOnTouchTargetSmallerThan48dp() = assertFailsWith("48dp보다 작은") {
         Box(Modifier.size(40.dp).semantics { contentDescription = "닫기" }.clickable {})
+    }
+
+    /** 스크롤 목록에서 보이는 영역이 잘린 요소도 배치 크기로 잰다. 작게 배치한 요소는 화면 밖에 있어도 잡는다. */
+    @Test
+    fun measuresLaidOutSizeInsideScrolledContainers() {
+        compose.setContent {
+            Box(Modifier.size(200.dp).background(Color.White)) {
+                Column(Modifier.size(200.dp, 100.dp).verticalScroll(rememberScrollState())) {
+                    Box(Modifier.size(200.dp, 80.dp))
+                    // 위 20dp만 보이고 나머지는 잘린다.
+                    Box(Modifier.size(48.dp).semantics { contentDescription = "걸친 요소" }.clickable {})
+                    Box(Modifier.size(48.dp).semantics { contentDescription = "화면 밖 요소" }.clickable {})
+                }
+            }
+        }
+        compose.assertTouchTargets()
+    }
+
+    @Test
+    fun failsOnSmallTargetOutsideTheVisibleArea() = assertFailsWith("48dp보다 작은") {
+        Column(Modifier.size(200.dp, 100.dp).verticalScroll(rememberScrollState())) {
+            Box(Modifier.size(200.dp, 150.dp))
+            Box(Modifier.size(40.dp).semantics { contentDescription = "닫기" }.clickable {})
+        }
     }
 
     @Test

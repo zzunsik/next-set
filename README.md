@@ -97,4 +97,7 @@ AGP, Gradle, Kotlin, Compose는 작업 시점의 최신 안정 버전을 쓰고,
 
 | 파일 | 출처 |
 |---|---|
+| `app/src/main/res/drawable/ic_arrow_back.xml` | 커밋 [`10ecc14`](https://github.com/google/material-design-icons/blob/10ecc14790612ca8fd164e3f4ffe9c16fc50d5b7/symbols/android/arrow_back/materialsymbolsrounded/arrow_back_24px.xml)의 `symbols/android/arrow_back/materialsymbolsrounded/arrow_back_24px.xml` |
 | `app/src/main/res/drawable/ic_check.xml` | 커밋 [`10ecc14`](https://github.com/google/material-design-icons/blob/10ecc14790612ca8fd164e3f4ffe9c16fc50d5b7/symbols/android/check/materialsymbolsrounded/check_24px.xml)의 `symbols/android/check/materialsymbolsrounded/check_24px.xml` |
+| `app/src/main/res/drawable/ic_close.xml` | 커밋 [`10ecc14`](https://github.com/google/material-design-icons/blob/10ecc14790612ca8fd164e3f4ffe9c16fc50d5b7/symbols/android/close/materialsymbolsrounded/close_24px.xml)의 `symbols/android/close/materialsymbolsrounded/close_24px.xml` |
+| `app/src/main/res/drawable/ic_search.xml` | 커밋 [`10ecc14`](https://github.com/google/material-design-icons/blob/10ecc14790612ca8fd164e3f4ffe9c16fc50d5b7/symbols/android/search/materialsymbolsrounded/search_24px.xml)의 `symbols/android/search/materialsymbolsrounded/search_24px.xml` |

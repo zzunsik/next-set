@@ -195,6 +195,7 @@ Room 3은 Room 2와 다음이 다르다(공식).
 - 화면 키는 `@Serializable`을 붙인 `NavKey` 구현으로 만든다. 프로세스가 죽었다 살아나도 스택이 복원된다(공식). 직렬화 플러그인은 백업에도 쓰므로 따로 드는 비용이 없다.
 - 화면별 ViewModel 범위는 `lifecycle-viewmodel-navigation3`으로 잡는다. 이 아티팩트는 의존성이 풀리는 것까지만 확인했다(탐침).
 - `NavDisplay`, `entryProvider`, `rememberNavBackStack`을 쓰는 코드가 컴파일되는 것을 확인했다(탐침). 화면 테스트에서 그려지는지는 확인하지 않았다.
+- 뒤 화면이 앞 화면에 값을 돌려주는 API는 Navigation 3에 없다. 스택을 쥔 곳에서 `ui/navigation/NavResults`를 하나 만들어 화면들에 넘긴다. 뒤 화면은 값을 놓고 스택에서 빠지고, 앞 화면은 다시 그려질 때 `ResultEffect`로 한 번 꺼낸다. 값은 메모리에만 두므로 그 사이에 프로세스가 죽으면 잃는다. 종목 고르기가 고른 종목을 루틴 편집과 운동 중 화면에 돌려줄 때 쓴다(#21).
 
 ### 의존성 주입
 
