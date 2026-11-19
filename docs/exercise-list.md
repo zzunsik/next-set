@@ -2,7 +2,7 @@
 
 작성일: 2026-11-18. 이슈 [#17](https://github.com/zzunsik/next-set/issues/17).
 
-앱에 내장할 근력 종목 130개의 목록이다(EX-01). 이 표가 앱 데이터 파일의 원본이다. 표를 데이터 파일로 바꾸는 일은 [#20](https://github.com/zzunsik/next-set/issues/20)에서 한다.
+앱에 내장할 근력 종목 130개의 목록이다(EX-01). 이 표가 앱 데이터 파일의 원본이다. 앱 데이터 파일은 `app/src/main/assets/exercises.json`이다([#20](https://github.com/zzunsik/next-set/issues/20)). 표를 고치면 데이터 파일의 같은 줄을 고치고 파일의 판 번호(`version`)를 올린다. 둘이 어긋나면 `BuiltinExerciseFileTest`가 실패한다. 보조 부위는 데이터 파일에 넣지 않는다.
 
 저장소 소유자가 2026-11-18에 종목 표를 검수했다. 고친 종목과 빠진 종목은 없었다. 그 뒤에 같은 날 협의에서 정한 중량 종목 3개와 세부 부위 열을 넣었다. 정한 내용은 "정한 것" 절에 있다.
 

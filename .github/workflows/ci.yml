@@ -33,6 +33,19 @@ jobs:
       - name: Build
         run: ./gradlew assembleDebug --console=plain
 
+      # 빌드가 Room 스키마 JSON을 app/schemas에 다시 쓴다. 엔티티를 바꾸고 JSON을 커밋하지 않았거나
+      # 버전을 올리고 새 JSON을 더하지 않았으면 여기서 걸린다. 추적하지 않은 파일도 보려고 git status를 쓴다
+      # (docs/architecture.md "스키마 버전 관리").
+      - name: Room schema JSON is committed
+        run: |
+          changes=$(git status --porcelain -- app/schemas)
+          if [ -n "$changes" ]; then
+            echo "$changes"
+            git diff -- app/schemas
+            echo "app/schemas가 커밋한 것과 다릅니다. 빌드가 만든 스키마 JSON을 함께 커밋하세요."
+            exit 1
+          fi
+
       # 단위 테스트(ManifestPermissionTest)는 디버그 매니페스트를 본다. 릴리스는 여기서 본다(DATA-02).
       - name: Release manifest has no INTERNET permission
         run: |
