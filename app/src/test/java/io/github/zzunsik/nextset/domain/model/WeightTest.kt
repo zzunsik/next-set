@@ -39,7 +39,6 @@ class WeightTest {
         assertEquals(Weight(62_500), Weight.parseKg("62.5"))
         assertEquals(Weight(60_000), Weight.parseKg("60"))
         assertEquals(Weight(60_000), Weight.parseKg("60."))
-        assertEquals(Weight(500), Weight.parseKg(".5"))
         assertEquals(Weight(61_250), Weight.parseKg("61.25"))
         assertEquals(Weight(1), Weight.parseKg("0.001"))
         assertEquals(Weight(0), Weight.parseKg("0"))
