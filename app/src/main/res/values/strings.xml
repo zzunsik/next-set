@@ -95,6 +95,45 @@
     <string name="settings_open_link_failed">주소를 열 브라우저를 찾지 못했어요. 브라우저 앱을 켠 뒤 다시 눌러 주세요.</string>
     <string name="settings_version">버전 %1$s</string>
 
+    <!-- 백업(docs/DESIGN.md "백업", DATA-03, DATA-04) -->
+    <string name="backup_title">백업</string>
+    <string name="backup_description">기록은 이 기기에만 저장돼요. 파일로 내보내 두면 다른 기기로 옮길 수 있어요.</string>
+    <string name="backup_unencrypted_notice">백업 파일에는 운동 기록이 암호화되지 않은 채 들어가요. 믿을 수 있는 곳에 저장해 주세요.</string>
+    <string name="backup_export">백업 파일 내보내기</string>
+    <string name="backup_last_exported">마지막으로 내보낸 날 %1$s</string>
+    <string name="backup_import">백업 파일에서 가져오기</string>
+    <string name="backup_exported">백업 파일을 저장했어요.</string>
+    <string name="backup_imported">백업 파일의 기록으로 바꿨어요.</string>
+    <!-- 가져오기 확인. 기록 양은 "운동 기록 42건, 루틴 4개"로 적는다. -->
+    <string name="backup_confirm_title">백업 파일에서 가져오기</string>
+    <string name="backup_confirm_file">백업 파일: 운동 기록 %1$d건, 루틴 %2$d개</string>
+    <string name="backup_confirm_device">이 기기: 운동 기록 %1$d건, 루틴 %2$d개</string>
+    <string name="backup_confirm_in_progress">이 기기에서 진행 중인 운동도 지워져요.</string>
+    <string name="backup_confirm_question">지금 기록을 모두 지우고 백업 파일의 기록으로 바꿀까요? 되돌릴 수 없어요.</string>
+    <string name="backup_confirm_replace">바꾸기</string>
+    <!-- 오류. 무슨 일이 있었는지와 할 일을 적는다(docs/DESIGN.md "문구"). -->
+    <string name="backup_error_not_backup">이 앱의 백업 파일이 아니에요. 다른 파일을 골라 주세요.</string>
+    <string name="backup_error_newer_version">이 앱보다 새 버전에서 만든 백업 파일이에요. 앱을 업데이트한 뒤 다시 가져와 주세요.</string>
+    <string name="backup_error_broken">백업 파일이 손상돼 읽을 수 없어요. 다른 백업 파일을 골라 주세요.</string>
+    <string name="backup_error_read_failed">파일을 읽지 못했어요. 다시 골라 주세요.</string>
+    <string name="backup_error_write_failed">백업 파일을 저장하지 못했어요. 다른 곳을 골라 다시 내보내 주세요.</string>
+    <string name="backup_error_import_failed">기록을 바꾸지 못했어요. 지금 기록은 그대로 남아 있어요.</string>
+    <string name="backup_error_picker_unavailable">파일을 고를 화면을 열지 못했어요. 기기의 파일 앱을 켠 뒤 다시 눌러 주세요.</string>
+
+    <!-- 날짜. "11월 14일 (토)", 올해가 아니면 연도를 붙인다(docs/DESIGN.md "숫자와 단위"). -->
+    <string name="date_month_day">%1$d월 %2$d일 (%3$s)</string>
+    <string name="date_year_month_day">%1$d년 %2$d월 %3$d일 (%4$s)</string>
+    <!-- 월요일부터 일요일까지(java.time.DayOfWeek 순서) -->
+    <string-array name="weekdays_short">
+        <item>월</item>
+        <item>화</item>
+        <item>수</item>
+        <item>목</item>
+        <item>금</item>
+        <item>토</item>
+        <item>일</item>
+    </string-array>
+
     <!-- 휴식 시간 값. 설정의 "2분"(docs/DESIGN.md "설정") -->
     <string name="rest_minutes">%1$d분</string>
     <string name="rest_seconds">%1$d초</string>

@@ -43,6 +43,7 @@ class MainActivity : ComponentActivity() {
                     settingsRepository = container.settingsRepository,
                     licenseRepository = container.licenseRepository,
                     exerciseRepository = container.exerciseRepository,
+                    backupRepository = container.backupRepository,
                 )
             }
         }
