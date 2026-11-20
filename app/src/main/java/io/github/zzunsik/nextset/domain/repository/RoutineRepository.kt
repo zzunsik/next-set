@@ -3,6 +3,7 @@ package io.github.zzunsik.nextset.domain.repository
 import io.github.zzunsik.nextset.domain.model.Routine
 import io.github.zzunsik.nextset.domain.model.RoutineDetail
 import io.github.zzunsik.nextset.domain.model.Target
+import io.github.zzunsik.nextset.domain.rule.RoutineUpdatePlan
 import kotlinx.coroutines.flow.Flow
 
 interface RoutineRepository {
@@ -37,4 +38,11 @@ interface RoutineRepository {
 
     /** 세트 수와 목표를 저장한다(RTN-03, RTN-04). */
     suspend fun updateRoutineExercise(routineExerciseId: Long, setCount: Int, target: Target)
+
+    /**
+     * 운동을 끝낼 때 [plan]을 루틴에 반영한다(LOG-10). 한 트랜잭션이라 도중에 실패하면 루틴은 반영 전 그대로다.
+     * 남는 종목은 세트 수만 바꾸고 목표는 그대로 둔다. 세트 수가 0인 종목(운동에서 세트를 모두 지운 종목)은 뺀다.
+     * 더하는 종목의 목표는 비운다(RTN-04). 순서는 [RoutineUpdatePlan.order]대로 0부터 다시 매긴다.
+     */
+    suspend fun applyRoutineUpdate(plan: RoutineUpdatePlan)
 }

@@ -10,7 +10,6 @@ import io.github.zzunsik.nextset.domain.model.RoutineDetail
 import io.github.zzunsik.nextset.domain.model.Target
 import io.github.zzunsik.nextset.domain.model.Weight
 import io.github.zzunsik.nextset.domain.rule.RoutineUpdatePlan
-import io.github.zzunsik.nextset.domain.rule.applyRoutineUpdate
 import io.github.zzunsik.nextset.domain.rule.planRoutineUpdate
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest

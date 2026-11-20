@@ -10,6 +10,7 @@ import io.github.zzunsik.nextset.domain.model.RoutineDetail
 import io.github.zzunsik.nextset.domain.model.RoutineExercise
 import io.github.zzunsik.nextset.domain.model.Target
 import io.github.zzunsik.nextset.domain.repository.RoutineRepository
+import io.github.zzunsik.nextset.domain.rule.RoutineUpdatePlan
 import io.github.zzunsik.nextset.domain.rule.fitTo
 import io.github.zzunsik.nextset.domain.rule.requireSameItems
 import io.github.zzunsik.nextset.domain.rule.topRoutine
@@ -109,6 +110,54 @@ internal class RoomRoutineRepository(private val database: NextSetDatabase) : Ro
             val item = requireNotNull(routineDao.getItem(routineExerciseId)) { "루틴 종목 $routineExerciseId 가 없다" }
             val exercise = checkNotNull(exerciseDao.getById(item.exerciseId))
             routineDao.updateItem(item.copy(setCount = setCount).withTarget(target.fitTo(exercise.recordType)))
+        }
+    }
+
+    override suspend fun applyRoutineUpdate(plan: RoutineUpdatePlan) {
+        // 빼기, 세트 수 바꾸기, 더하기, 순서 매기기를 한 트랜잭션에서 한다(#72). 어느 단계가 실패해도 모두 되돌아간다.
+        database.withWriteTransaction {
+            val routineId = plan.routineId
+            requireNotNull(routineDao.getById(routineId)) { "루틴 $routineId 가 없다" }
+            val current = routineDao.getItems(routineId).associateBy { it.id }
+            plan.remove.forEach { id -> if (id in current) routineDao.deleteItem(id) }
+            val keptIds = mutableSetOf<Long>()
+            plan.keep.forEach { (id, setCount) ->
+                val item = requireNotNull(current[id]) { "루틴 $routineId 에 루틴 종목 $id 가 없다" }
+                if (setCount < 1) {
+                    routineDao.deleteItem(id)
+                } else {
+                    val target = plan.targets[id] ?: Target.NONE
+                    validateRoutineExercise(setCount, target)
+                    val exercise = checkNotNull(exerciseDao.getById(item.exerciseId))
+                    routineDao.updateItem(item.copy(setCount = setCount).withTarget(target.fitTo(exercise.recordType)))
+                    keptIds += id
+                }
+            }
+            val addedIds = plan.add.map { (exerciseId, setCount) ->
+                if (setCount < 1) return@map null
+                validateRoutineExercise(setCount, Target.NONE)
+                requireNotNull(exerciseDao.getById(exerciseId)) { "종목 $exerciseId 가 없다" }
+                routineDao.insertItem(
+                    RoutineExerciseEntity(
+                        routineId = routineId,
+                        exerciseId = exerciseId,
+                        position = Int.MAX_VALUE, // 아래에서 순서를 다시 매긴다.
+                        setCount = setCount,
+                        targetWeightG = null,
+                        targetRepsMin = null,
+                        targetRepsMax = null,
+                        targetDurationS = null,
+                    ),
+                )
+            }
+            val ordered = plan.order.mapNotNull { slot ->
+                when (slot) {
+                    is RoutineUpdatePlan.Slot.Existing -> slot.routineExerciseId.takeIf { it in keptIds }
+                    is RoutineUpdatePlan.Slot.New -> addedIds[slot.addIndex]
+                }
+            }
+            requireSameItems(routineDao.getItems(routineId).map { it.id }, ordered)
+            ordered.forEachIndexed { index, id -> routineDao.setItemPosition(id, index) }
         }
     }
 
