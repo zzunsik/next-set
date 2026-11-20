@@ -103,6 +103,54 @@
 - 외부 코드·데이터·글꼴·이미지를 넣을 때는 라이선스를 확인하고 출처를 적는다.
 - 워크플로는 필요한 권한만 선언하고(`permissions`), 외부 액션은 커밋 SHA로 고정한다. 포크에서 온 PR에 시크릿이 노출되는 `pull_request_target`은 쓰지 않는다.
 
+## 릴리스
+
+v1은 GitHub Releases에 서명한 APK를 올려 배포한다(REL-01). 태그를 올리면 CI(`.github/workflows/release.yml`)가 빌드하고 서명하고 올린다. 손으로 빌드하거나 서명하지 않는다.
+
+### 절차
+
+1. `develop`에서 `app/build.gradle.kts`의 `appVersionName`을 이번 버전으로 올리는 PR을 보내 합친다(아래 "버전").
+2. `develop`에서 `main`으로 릴리스 PR을 보내 머지 커밋으로 합친다. `ci-passed`가 통과해야 한다.
+3. 그 머지 커밋에 태그를 달아 올린다. 태그는 `v` + `appVersionName`이다.
+
+   ```bash
+   git fetch origin
+   git tag -a v0.1.0 origin/main -m "v0.1.0"   # origin/main이 방금 합친 릴리스 머지 커밋인지 git log로 먼저 본다
+   git push origin v0.1.0
+   ```
+
+4. Actions의 Release 실행이 끝나면 Releases에 APK와 체크섬이 올라와 있는지 본다.
+
+### 워크플로가 하는 일
+
+- `v*` 태그 push에서만 돈다. PR에서는 돌지 않으므로 포크에서 온 PR은 서명 시크릿에 닿지 않는다. `contents: write` 권한은 이 워크플로에만 있다. 액션은 커밋 SHA로 고정한다.
+- 서명 시크릿이 없으면 무엇이 빠졌는지 적고 바로 실패한다. 태그가 `vMAJOR.MINOR.PATCH` 꼴이 아니거나 태그의 커밋이 `main`에 없어도 실패한다.
+- 키스토어를 시크릿에서 풀어 작업 폴더 밖(`RUNNER_TEMP`)에 두고, 환경 변수로 Gradle `signingConfigs`에 넘겨 `assembleRelease`로 서명한다. 비밀번호를 출력하지 않고, 설정 캐시와 Gradle 캐시를 쓰지 않으며, 마지막에 키스토어를 지운다(실패해도 지운다). 아티팩트는 올리지 않는다.
+- 릴리스 매니페스트와 APK에 `android.permission.INTERNET`이 없는지, APK의 `versionName`이 태그와 같은지 보고 `apksigner verify --print-certs`로 서명을 확인한다.
+- APK(`next-set-vX.Y.Z.apk`)와 SHA-256 체크섬(`next-set-vX.Y.Z.apk.sha256`)을 올려 Release를 만든다. 릴리스 노트는 GitHub이 앞 태그 뒤에 합친 PR 목록으로 만든다(`--generate-notes`). 고칠 것이 있으면 Release 화면에서 손으로 고친다.
+- 시크릿이 빠졌거나 일시적인 오류로 실패했으면 고친 뒤 그 실행을 다시 돌린다(Re-run jobs). 코드를 고쳐야 하면 태그를 옮기지 말고 고친 뒤 다음 버전으로 새 태그를 단다. 실패한 태그는 Release 없이 남는다.
+
+### 버전
+
+- `versionName`은 `app/build.gradle.kts`의 `appVersionName` 한 곳에서 정한다. `MAJOR.MINOR.PATCH` 꼴이고 태그는 `v`를 붙인 같은 값이다. 워크플로가 다르면 실패한다.
+- `versionCode`는 `versionName`에서 계산한다: `MAJOR * 1_000_000 + MINOR * 1_000 + PATCH`(0.1.0 → 1000, 1.2.3 → 1002003). 버전을 올리면 `versionCode`도 늘어나므로 따로 고치지 않는다. 그래서 MINOR와 PATCH는 0~999만 쓰고, 버전을 낮추지 않는다(Android는 `versionCode`가 작은 APK로 업데이트하지 않는다).
+- 미리보기 판(`-beta` 등)은 쓰지 않는다.
+
+### 서명 키와 시크릿
+
+- 릴리스 키스토어는 저장소 소유자가 만들고 보관한다. 저장소, 이슈, PR, 로그, 아티팩트에 키스토어와 비밀번호를 올리지 않는다(NF-11). 시크릿 등록은 소유자만 한다.
+- 워크플로가 읽는 시크릿은 셋이다.
+
+  | 시크릿 | 값 |
+  |---|---|
+  | `RELEASE_KEYSTORE_BASE64` | PKCS12 키스토어 파일을 base64 한 줄로 바꾼 값 |
+  | `RELEASE_KEYSTORE_PASSWORD` | 키스토어 비밀번호. PKCS12라 키 비밀번호도 같다 |
+  | `RELEASE_KEY_ALIAS` | 키 별칭 |
+
+- 로컬에서 서명한 릴리스 APK를 만들 때는 환경 변수 `NEXTSET_RELEASE_STORE_FILE`, `NEXTSET_RELEASE_STORE_PASSWORD`, `NEXTSET_RELEASE_KEY_ALIAS`(키 비밀번호가 다르면 `NEXTSET_RELEASE_KEY_PASSWORD`)를 주거나 같은 이름의 Gradle 속성을 `~/.gradle/gradle.properties`에 둔다. 저장소 안의 `gradle.properties`에는 넣지 않는다. 키스토어 경로가 없으면 서명하지 않은 APK가 나오고 디버그 빌드와 CI 검사는 영향을 받지 않는다.
+- **키를 잃으면 되돌릴 수 없다.** Android는 처음 설치한 APK와 같은 키로 서명한 APK만 업데이트로 받는다. 첫 APK를 배포한 뒤 키를 잃거나 바꾸면 기존 사용자는 앱을 지우고(기록도 함께 지워진다) 다시 설치해야 한다. 키가 새면 다른 사람이 업데이트로 위장한 APK를 만들 수 있다. 키스토어와 비밀번호는 저장소 밖 두 곳 이상(예: 비밀번호 관리자와 오프라인 저장 장치)에 나눠 보관한다. Android 개발자 인증(`docs/requirements.md` "Android 개발자 인증(11번)")에도 이 키의 인증서 지문을 등록하므로 키를 잃으면 등록도 할 수 없다.
+- 태그 보호(권장, 소유자 설정): `v*` 태그에 ruleset을 걸어 태그를 옮기거나 지우지 못하게 한다(Restrict updates, Restrict deletions). 지금은 걸려 있지 않다. 걸면 "저장소 설정" 절에 적는다.
+
 ## 저장소 설정
 
 GitHub 설정으로 강제하는 것들입니다. 설정을 바꾸면 이 절도 함께 고칩니다.
