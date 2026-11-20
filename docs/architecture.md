@@ -42,7 +42,8 @@
 ```
 io.github.zzunsik.nextset
 ├── MainActivity.kt
-├── NextSetApplication.kt      앱 컨테이너를 만든다
+├── NextSetApplication.kt      앱 컨테이너를 만들고 화면 모드를 시스템에 맞춰 둔다
+├── SystemNightModeSync.kt     저장한 화면 모드를 시스템 쪽 사본에 맞춘다(#54)
 ├── AppContainer.kt            저장소 구현을 만들어 화면 상태에 넘긴다
 ├── ui/                        화면과 화면 상태
 │   ├── theme/
@@ -186,6 +187,14 @@ Room 3은 Room 2와 다음이 다르다(공식).
 
 값이 적고 그 가운데 하나가 루틴을 가리키므로 데이터베이스에 둔다. 값이 늘어 마이그레이션이 번거로워지면 그때 DataStore로 옮긴다. DataStore(Preferences)도 탐침에 넣어 빌드와 Robolectric 테스트가 통과하는 것은 확인해 두었다(탐침).
 
+화면 모드는 시스템에도 사본을 둔다(#54). 시스템은 앱 코드가 돌기 전에 시작 화면(splash)을 그리므로 데이터베이스의 값을 읽지 못한다. Android 12(API 31)부터 `UiModeManager.setApplicationNightMode`로 알려 두면 시스템이 앱별로 기억했다가 시작 화면과 앱의 `Configuration`에 적용한다.
+
+- 기준은 `app_settings.theme_mode`다. 시스템 쪽은 사본이고 앱 안에서 읽지 않는다. 읽는 공개 API도 없다.
+- `NextSetApplication`이 시작할 때 `SystemNightModeSync`가 저장소의 Flow를 보기 시작한다. 첫 값(앱 시작)과 값이 바뀔 때마다 덮어쓰므로, 설정 화면이든 백업 가져오기든 데이터베이스를 바꾸는 경로와 상관없이 맞춰진다. 이 때문에 데이터베이스를 앱 시작 때 연다.
+- 값은 `SYSTEM` → `MODE_NIGHT_AUTO`(앱별 값을 지우고 기기 설정을 따름), `LIGHT` → `MODE_NIGHT_NO`, `DARK` → `MODE_NIGHT_YES`다.
+- 둘이 어긋나면 `SystemNightModeTest`(데이터베이스와 Robolectric의 `UiModeManager`)와 `SystemNightModeSyncTest`가 실패한다.
+- 사본이 늦는 때가 있다. 이 버전으로 처음 켤 때와 앱 데이터를 지운 뒤 처음 켤 때는 시작 화면이 옛 값(처음에는 시스템 설정)을 따르고, 켜진 뒤 맞춰진다. 이때 앱의 `Configuration`이 바뀌어 화면이 한 번 다시 만들어진다.
+- API 26~30에는 이 API가 없다. 시작 화면은 창 테마(`values-night`의 `Theme.NextSet`)를 따르므로 시스템 설정을 따른다. 데이터베이스 밖 저장소(SharedPreferences)에 사본을 두어도 창 테마는 프로세스가 뜨기 전에 정해지므로 시작 화면을 바꾸지 못한다. 시작 화면의 바탕을 모드와 무관한 색으로 두는 방법은 디자인 변경이라 범위 밖으로 두었다.
 ### 화면 이동
 
 | 후보 | 장점 | 단점 |
@@ -1079,7 +1088,7 @@ CI에서 빌드한 뒤 `git status --porcelain app/schemas`가 비어 있는지 
 | HIST-05 | `workout`, `workout_exercise`, `workout_set` | 저장소 | 따로 맞출 값이 없다 |
 | HIST-06 | `workout.started_at` | 저장소 | 끝난 기록으로 바로 만든다 |
 | SET-01 | `app_settings.default_rest_seconds` | 저장소 | |
-| SET-02 | `app_settings.theme_mode` | 저장소, 화면 | `MainActivity`가 저장한 값으로 테마와 시스템 바를 정한다 |
+| SET-02 | `app_settings.theme_mode` | 저장소, 화면 | `MainActivity`가 저장한 값으로 테마와 시스템 바를 정한다. API 31+에서는 `SystemNightModeSync`가 시스템 쪽 사본을 맞춰 시작 화면도 따른다 |
 | SET-03 | 없음 | `assets/licenses/`, 화면 | 위 "글꼴과 라이선스 고지" |
 | DATA-01 | 전체 | `data` | 앱 내부 저장소의 데이터베이스 파일 하나 |
 | DATA-02 | 없음 | 빌드, 테스트 | 권한 테스트 |
