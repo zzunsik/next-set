@@ -27,7 +27,9 @@ import kotlinx.coroutines.withContext
 class AppContainer(context: Context) {
     private val appContext = context.applicationContext
 
-    /** 처음 쓸 때 연다. 앱 시작 때 디스크를 건드리지 않는다. */
+    /**
+     * 처음 쓸 때 연다. 첫 화면이 화면 모드를 읽고, API 31 이상에서는 `SystemNightModeSync`도 앱 시작 때 읽는다(#54).
+     */
     private val database: NextSetDatabase by lazy { NextSetDatabase.build(appContext) }
 
     /** 내장 종목은 종목을 처음 읽을 때 반영한다. */
@@ -50,7 +52,6 @@ class AppContainer(context: Context) {
         RoomBackupRepository(
             database = database,
             seeder = seeder,
-            settingsRepository = settingsRepository,
             appVersion = BackupApp(
                 versionName = info.versionName.orEmpty(),
                 versionCode = PackageInfoCompat.getLongVersionCode(info),

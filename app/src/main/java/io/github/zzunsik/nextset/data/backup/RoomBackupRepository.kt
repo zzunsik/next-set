@@ -17,7 +17,6 @@ import io.github.zzunsik.nextset.data.seed.BuiltinExerciseSeeder
 import io.github.zzunsik.nextset.domain.model.BackupSummary
 import io.github.zzunsik.nextset.domain.model.CheckedBackup
 import io.github.zzunsik.nextset.domain.repository.BackupRepository
-import io.github.zzunsik.nextset.domain.repository.SettingsRepository
 import java.time.Instant
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -34,14 +33,12 @@ internal class DecodedBackup(val file: BackupFile) : CheckedBackup {
  * 가져오기는 한 트랜잭션에서 모든 테이블을 비우고 파일의 내용을 넣은 뒤 내장 종목을 다시 반영한다.
  * 도중에 실패하면 트랜잭션이 되돌아가 기존 기록이 그대로 남는다.
  *
- * @param settingsRepository 가져온 화면 모드를 설정 저장소의 쓰기 경로로 한 번 더 쓴다. 화면 모드를 바꿀 때
- *   함께 맞추는 값(예: 시스템에 알리는 화면 모드, #54)이 가져오기에서도 맞춰지게 한다.
+ * 가져온 화면 모드는 `SystemNightModeSync`(#54)가 설정의 Flow로 받아 시스템 쪽 사본에 맞춘다.
  * @param appVersion 파일의 `app`에 적을 앱 버전.
  */
 internal class RoomBackupRepository(
     private val database: NextSetDatabase,
     private val seeder: BuiltinExerciseSeeder,
-    private val settingsRepository: SettingsRepository,
     private val appVersion: BackupApp,
 ) : BackupRepository {
     private val backupDao = database.backupDao()
@@ -158,7 +155,6 @@ internal class RoomBackupRepository(
             // 옛 백업의 내장 종목 이름 같은 값을 이 앱의 내장 종목 파일로 다시 맞추고, 파일에 없던 내장 종목을 더한다.
             seeder.seed(builtins)
         }
-        settingsRepository.setThemeMode(file.settings.themeMode)
     }
 
     /** 데이터베이스 전체를 [BackupFile]로 옮긴다. 읽기 트랜잭션 안에서 부른다. */

@@ -18,14 +18,11 @@ import io.github.zzunsik.nextset.domain.model.ExerciseDeleteResult
 import io.github.zzunsik.nextset.domain.model.ExerciseDraft
 import io.github.zzunsik.nextset.domain.model.InvalidBackupException
 import io.github.zzunsik.nextset.domain.model.RecordType
-import io.github.zzunsik.nextset.domain.model.Settings
 import io.github.zzunsik.nextset.domain.model.SubPart
 import io.github.zzunsik.nextset.domain.model.Target
 import io.github.zzunsik.nextset.domain.model.ThemeMode
 import io.github.zzunsik.nextset.domain.model.Weight
-import io.github.zzunsik.nextset.domain.repository.SettingsRepository
 import java.time.Instant
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
@@ -191,15 +188,14 @@ class BackupImportTest {
             db.settings.setNotificationPromptDeclined(true)
             val exportedAt = Instant.parse("2026-11-10T09:30:00Z")
             db.backup().markExported(exportedAt)
-            val recorder = RecordingSettings(db.settings)
 
-            db.backup(recorder).replaceAll(db.backup().check(BackupSamples.read(1)))
+            db.backup().replaceAll(db.backup().check(BackupSamples.read(1)))
 
             // 알림 켜기 안내를 거절했는지와 마지막으로 내보낸 시각은 이 기기의 값을 그대로 둔다.
             assertTrue(db.settings.observeSettings().first().notificationPromptDeclined)
             assertEquals(exportedAt, db.backup().observeLastExportedAt().first())
-            // 가져온 화면 모드는 설정 저장소의 쓰기 경로로도 쓴다.
-            assertEquals(listOf(ThemeMode.DARK), recorder.themeModes)
+            // 가져온 화면 모드는 설정의 Flow로 나간다. 시스템 쪽 사본(#54)은 이 Flow를 보고 맞춘다.
+            assertEquals(ThemeMode.DARK, db.settings.observeSettings().first().themeMode)
         }
     }
 
@@ -217,8 +213,8 @@ class BackupImportTest {
     }
 }
 
-internal fun TestDb.backup(settings: SettingsRepository = this.settings) =
-    RoomBackupRepository(database, seeder, settings, BackupApp(versionName = "0.1.0", versionCode = 1))
+internal fun TestDb.backup() =
+    RoomBackupRepository(database, seeder, BackupApp(versionName = "0.1.0", versionCode = 1))
 
 /**
  * 지어낸 기록을 넣는다. 직접 만든 종목은 무게와 횟수로 한 번 기록한 뒤 횟수만으로 바꾸고 다시 기록하고 지워서(숨김) 둔다.
@@ -271,14 +267,3 @@ private fun normalized(text: String): BackupFile {
     )
 }
 
-/** 설정 저장소의 쓰기를 기록하고 그대로 넘긴다. */
-private class RecordingSettings(private val delegate: SettingsRepository) : SettingsRepository by delegate {
-    val themeModes = mutableListOf<ThemeMode>()
-
-    override fun observeSettings(): Flow<Settings> = delegate.observeSettings()
-
-    override suspend fun setThemeMode(mode: ThemeMode) {
-        themeModes += mode
-        delegate.setThemeMode(mode)
-    }
-}
