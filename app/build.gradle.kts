@@ -9,6 +9,31 @@ plugins {
     alias(libs.plugins.roborazzi)
 }
 
+// 앱 버전은 여기 한 곳에서 정한다. 릴리스 태그는 `v<versionName>`이고 릴리스 워크플로가 둘이 같은지 본다.
+// versionCode는 versionName에서 계산한다: major * 1_000_000 + minor * 1_000 + patch(예: 0.1.0 → 1000).
+// 그래서 minor와 patch는 0~999만 쓴다. 자세한 규칙은 AGENTS.md "릴리스".
+val appVersionName = "0.1.0"
+val appVersionCode = appVersionName.split(".").let { parts ->
+    require(parts.size == 3 && parts.all { it.matches(Regex("0|[1-9][0-9]*")) }) {
+        "versionName은 MAJOR.MINOR.PATCH 꼴이어야 합니다: $appVersionName"
+    }
+    val (major, minor, patch) = parts.map { it.toInt() }
+    require(minor <= 999 && patch <= 999 && major <= 2099) { "versionCode로 바꿀 수 없는 버전입니다: $appVersionName" }
+    major * 1_000_000 + minor * 1_000 + patch
+}
+
+// 릴리스 서명 정보는 저장소에 두지 않는다(NF-11). 환경 변수나 Gradle 속성(-P, ~/.gradle/gradle.properties)으로만 받는다.
+// 키스토어 경로가 없으면 서명 설정을 만들지 않는다. 그때 assembleRelease는 서명하지 않은 APK를 만들고
+// 디버그 빌드와 CI 검사는 그대로 돈다. PKCS12 키스토어는 키 비밀번호가 키스토어 비밀번호와 같아서
+// 키 비밀번호를 따로 주지 않으면 키스토어 비밀번호를 쓴다.
+fun releaseSigningValue(name: String): String? =
+    providers.environmentVariable(name).orElse(providers.gradleProperty(name)).orNull?.takeIf { it.isNotEmpty() }
+
+val releaseStoreFile = releaseSigningValue("NEXTSET_RELEASE_STORE_FILE")
+val releaseStorePassword = releaseSigningValue("NEXTSET_RELEASE_STORE_PASSWORD")
+val releaseKeyAlias = releaseSigningValue("NEXTSET_RELEASE_KEY_ALIAS")
+val releaseKeyPassword = releaseSigningValue("NEXTSET_RELEASE_KEY_PASSWORD") ?: releaseStorePassword
+
 android {
     namespace = "io.github.zzunsik.nextset"
     compileSdk = 37
@@ -17,13 +42,33 @@ android {
         applicationId = "io.github.zzunsik.nextset"
         minSdk = 26
         targetSdk = 37
-        versionCode = 1
-        versionName = "0.1.0"
+        versionCode = appVersionCode
+        versionName = appVersionName
+    }
+
+    signingConfigs {
+        if (releaseStoreFile != null) {
+            if (releaseStorePassword == null || releaseKeyAlias == null) {
+                throw GradleException(
+                    "NEXTSET_RELEASE_STORE_FILE이 있으면 NEXTSET_RELEASE_STORE_PASSWORD와 NEXTSET_RELEASE_KEY_ALIAS도 있어야 합니다.",
+                )
+            }
+            create("release") {
+                storeFile = file(releaseStoreFile)
+                storePassword = releaseStorePassword
+                keyAlias = releaseKeyAlias
+                keyPassword = releaseKeyPassword
+            }
+        }
     }
 
     buildTypes {
         release {
-            isMinifyEnabled = false
+            // 코드와 리소스를 줄인다(R8). 근거와 확인한 흐름은 docs/architecture.md "코드 축소(R8)".
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+            signingConfig = signingConfigs.findByName("release")
         }
     }
 
