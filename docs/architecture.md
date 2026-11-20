@@ -45,6 +45,7 @@ io.github.zzunsik.nextset
 ├── NextSetApplication.kt      앱 컨테이너를 만들고 화면 모드를 시스템에 맞춰 둔다
 ├── SystemNightModeSync.kt     저장한 화면 모드를 시스템 쪽 사본에 맞춘다(#54)
 ├── AppContainer.kt            저장소 구현을 만들어 화면 상태에 넘긴다
+├── rest/                      휴식 타이머의 안드로이드 쪽: 포그라운드 서비스, 알림, 소리와 진동, 끝나는 시각 저장(#26)
 ├── ui/                        화면과 화면 상태
 │   ├── theme/
 │   ├── navigation/            화면 키, 화면 이동
@@ -54,10 +55,12 @@ io.github.zzunsik.nextset
 │   ├── routine/
 │   ├── exercise/
 │   ├── history/
-│   └── settings/              설정, 오픈소스 라이선스
+│   ├── settings/              설정, 오픈소스 라이선스
+│   └── rest/                  알림 켜기 안내(휴식 바와 설정이 함께 쓴다)
 ├── domain/                    Android에 기대지 않는 순수 Kotlin
 │   ├── model/                 종목, 루틴, 운동 기록, 세트, 무게
 │   ├── rule/                  다음 차례, 최고 기록, 미리 채우기, 루틴 변경 비교
+│   ├── rest/                  휴식 타이머의 상태와 신호 시각, 신호 판정(#26)
 │   └── repository/            저장소 인터페이스
 └── data/
     ├── db/                    Room 엔티티, DAO, 마이그레이션
@@ -707,7 +710,7 @@ fun nextRoutine(routines: List<Routine>, lastRoutineId: Long?): Routine? {
 - 진행 중인 운동이 있는데 다른 루틴을 누르면 화면이 먼저 묻는다(협의, 디자인 문서 #14). "끝내고 새로 시작"을 고르면 운동 끝 트랜잭션 다음에 운동 시작 트랜잭션을 돈다.
 - 완료한 세트가 하나도 없이 끝내면 빈 기록을 남기지 않고 버린다(제안).
 - 운동을 끝낼 때 완료하지 않은 세트를 지우기 전에 확인을 받을지는 화면 설계에서 정한다.
-- 휴식 타이머의 남은 시간을 어디에 둘지는 이 문서의 범위가 아니다. 휴식 타이머 설계(#16)가 정한다.
+- 휴식 타이머의 남은 시간을 어디에 둘지는 이 문서의 범위가 아니다. 휴식 타이머 설계(#16)가 정한다. #26은 끝나는 시각을 데이터베이스가 아닌 기기의 `SharedPreferences`에 둔다(docs/rest-timer.md "구현(#26)에서 정한 것").
 
 ## 지난 기록이 바뀌지 않게 하는 방법
 

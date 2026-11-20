@@ -29,6 +29,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
@@ -71,6 +72,9 @@ class HistoryViewModelTest {
     @After
     fun tearDown() {
         screens.cancel()
+        // 화면 상태가 차례로 하던 쓰기(예: 더한 세트의 값 맞추기)가 끝나기를 잠깐 기다린다. 그 사이에 데이터베이스를 닫으면
+        // 남은 쓰기가 닫힌 데이터베이스를 읽어 뒤에 도는 다른 테스트 클래스가 UncaughtExceptionsBeforeTest로 실패한다.
+        runBlocking { withContext(Dispatchers.Default) { delay(WRITE_DRAIN_MILLIS) } }
         store.clear()
         db.close()
     }
@@ -281,5 +285,6 @@ class HistoryViewModelTest {
 
     private companion object {
         const val TIMEOUT = 5_000L
+        const val WRITE_DRAIN_MILLIS = 500L
     }
 }

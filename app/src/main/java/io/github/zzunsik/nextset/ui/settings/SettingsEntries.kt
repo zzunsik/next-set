@@ -17,6 +17,7 @@ import io.github.zzunsik.nextset.domain.repository.SettingsRepository
 import io.github.zzunsik.nextset.ui.navigation.LicenseDetailKey
 import io.github.zzunsik.nextset.ui.navigation.LicensesKey
 import io.github.zzunsik.nextset.ui.navigation.SettingsKey
+import io.github.zzunsik.nextset.ui.rest.rememberNotificationPermissionState
 import kotlinx.coroutines.launch
 
 /**
@@ -24,6 +25,7 @@ import kotlinx.coroutines.launch
  *
  * [onManageExercises]는 종목 고르기를 관리로 연다(#21, `NextSetNavDisplay`가 넘긴다). [onBackup]은 백업 화면(#29, [backupEntries])을 연다.
  * null이면 그 행은 "준비 중이에요."를 보이고 누르는 요소가 아니다.
+ * [onNotificationsAllowed]는 설정의 "알림 켜기"로 알림이 켜졌을 때 부른다. 휴식 중이면 알림을 다시 보낸다(#26).
  */
 fun EntryProviderScope<NavKey>.settingsEntries(
     backStack: MutableList<NavKey>,
@@ -31,9 +33,11 @@ fun EntryProviderScope<NavKey>.settingsEntries(
     licenseRepository: LicenseRepository,
     onManageExercises: (() -> Unit)? = null,
     onBackup: (() -> Unit)? = null,
+    onNotificationsAllowed: () -> Unit = {},
 ) {
     entry<SettingsKey> {
         val viewModel = viewModel { SettingsViewModel(settingsRepository) }
+        val notifications = rememberNotificationPermissionState(settingsRepository, onNotificationsAllowed)
         val state by viewModel.uiState.collectAsStateWithLifecycle()
         val context = LocalContext.current
         val versionName = remember(context) {
@@ -62,6 +66,8 @@ fun EntryProviderScope<NavKey>.settingsEntries(
             onManageExercises = onManageExercises,
             onBackup = onBackup,
             snackbarHostState = snackbarHostState,
+            notificationsOff = notifications.showSettingsRow,
+            onEnableNotifications = notifications::enableFromSettings,
         )
     }
     entry<LicensesKey> {
