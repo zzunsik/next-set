@@ -263,8 +263,6 @@
     <string name="remove_exercise_confirm">%1$s 종목을 뺄까요? 적은 세트도 함께 지워져요.</string>
     <string name="remove_exercise_action">빼기</string>
     <string name="note_hint">메모</string>
-    <string name="reorder_move_up">%1$s 위로 옮기기</string>
-    <string name="reorder_move_down">%1$s 아래로 옮기기</string>
     <!-- 빈 운동을 끝낸 뒤 운동 요약의 결론 문장 -->
     <string name="workout_done_title">운동을 끝냈어요.</string>
     <string name="workout_duration_minutes">%1$d분</string>

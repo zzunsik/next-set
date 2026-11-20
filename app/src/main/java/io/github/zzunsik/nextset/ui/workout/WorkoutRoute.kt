@@ -134,6 +134,7 @@ fun WorkoutRoute(
             onDeleteLastSet = viewModel::onDeleteLastSet,
             onExerciseNote = viewModel::onExerciseNoteRequest,
             onMoveExercise = viewModel::onMoveExercise,
+            onReorderExercises = viewModel::onReorderExercises,
             onRemoveExercise = viewModel::onRemoveExerciseRequest,
             onRestTime = viewModel::onRestTimeRequest,
             onRestTimeChange = viewModel::onRestTimeChange,

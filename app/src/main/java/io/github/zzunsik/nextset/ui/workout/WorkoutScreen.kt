@@ -114,6 +114,7 @@ data class WorkoutActions(
     val onDeleteLastSet: (workoutExerciseId: Long) -> Unit = {},
     val onExerciseNote: (workoutExerciseId: Long) -> Unit = {},
     val onMoveExercise: (workoutExerciseId: Long, delta: Int) -> Unit = { _, _ -> },
+    val onReorderExercises: (orderedIds: List<Long>) -> Unit = {},
     val onRemoveExercise: (workoutExerciseId: Long) -> Unit = {},
     val onRestTime: (workoutExerciseId: Long) -> Unit = {},
     val onRestTimeChange: (exerciseId: String, seconds: Int?) -> Unit = { _, _ -> },
