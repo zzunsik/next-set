@@ -15,6 +15,7 @@ import androidx.core.graphics.drawable.toDrawable
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
+import io.github.zzunsik.nextset.rest.RestTimerService
 import io.github.zzunsik.nextset.ui.navigation.NextSetNavDisplay
 import io.github.zzunsik.nextset.ui.settings.AppThemeViewModel
 import io.github.zzunsik.nextset.ui.theme.DarkColors
@@ -46,9 +47,24 @@ class MainActivity : ComponentActivity() {
                     workoutRepository = container.workoutRepository,
                     routineRepository = container.routineRepository,
                     backupRepository = container.backupRepository,
+                    restTimer = container.restTimer,
                 )
             }
         }
+    }
+
+    /**
+     * 앱이 보이면 휴식 타이머가 끝 알림을 지우고, 프로세스가 죽었다 살아났으면 서비스를 다시 띄운다(docs/rest-timer.md "되살리는 방법").
+     * 앱이 보이는 동안이라 포그라운드 서비스를 시작할 수 있다.
+     */
+    override fun onStart() {
+        super.onStart()
+        container.restTimer.onAppVisible(serviceRunning = RestTimerService.running)
+    }
+
+    override fun onStop() {
+        container.restTimer.onAppHidden()
+        super.onStop()
     }
 
     /**

@@ -135,6 +135,8 @@ fun WorkoutRoute(
             onExerciseNote = viewModel::onExerciseNoteRequest,
             onMoveExercise = viewModel::onMoveExercise,
             onRemoveExercise = viewModel::onRemoveExerciseRequest,
+            onRestTime = viewModel::onRestTimeRequest,
+            onRestTimeChange = viewModel::onRestTimeChange,
         ),
     )
 }

@@ -2,10 +2,12 @@ package io.github.zzunsik.nextset.ui.workout
 
 import io.github.zzunsik.nextset.domain.model.RecordType
 import io.github.zzunsik.nextset.domain.model.SetValue
+import io.github.zzunsik.nextset.domain.model.Settings
 import io.github.zzunsik.nextset.domain.model.Target
 import io.github.zzunsik.nextset.domain.model.Weight
 import io.github.zzunsik.nextset.domain.model.Workout
 import io.github.zzunsik.nextset.domain.rule.nextSet
+import io.github.zzunsik.nextset.domain.rule.restSecondsFor
 import io.github.zzunsik.nextset.domain.rule.suggestedValue
 import io.github.zzunsik.nextset.ui.component.NumberFieldKind
 import io.github.zzunsik.nextset.ui.component.NumberPadSession
@@ -41,8 +43,13 @@ data class ExerciseBlockUi(
     val note: String?,
     val target: Target,
     val sets: List<SetRowUi>,
+    /** 이 종목에 따로 정한 휴식 시간. null이면 설정의 기본값을 쓴다(REST-03). */
+    val restSeconds: Int? = null,
 ) {
     val allDone: Boolean get() = sets.isNotEmpty() && sets.all { it.completed }
+
+    /** 이 종목에 적용할 휴식 시간(REST-03). */
+    fun restSecondsOr(defaultRestSeconds: Int): Int = restSecondsFor(restSeconds, defaultRestSeconds)
 }
 
 /** 다음 세트 표시(docs/DESIGN.md `NextSetDisplay`). 값은 세트 행에 든 값과 같다. */
@@ -80,6 +87,12 @@ sealed interface WorkoutDialog {
 
     /** 종목 순서 바꾸기. 종목 이름만 나열한다(docs/DESIGN.md "운동 중"). */
     data object Reorder : WorkoutDialog
+
+    /**
+     * 종목의 휴식 시간 고르기(REST-03, docs/DESIGN.md `ExerciseHeader`). [restSeconds]가 null이면 기본값을 따른다.
+     * 값은 종목에 하나라 다른 루틴과 다음 운동에도 같다.
+     */
+    data class RestTime(val exerciseId: String, val name: String, val restSeconds: Int?) : WorkoutDialog
 }
 
 data class WorkoutUiState(
@@ -92,6 +105,8 @@ data class WorkoutUiState(
     val nextSet: NextSetUi? = null,
     val numberPad: NumberPadSession<SetFieldId>? = null,
     val dialog: WorkoutDialog? = null,
+    /** 설정의 기본 휴식 시간(SET-01). 휴식 시간을 정하지 않은 종목이 쓴다. */
+    val defaultRestSeconds: Int = Settings.DEFAULT_REST_SECONDS,
 ) {
     /** 모든 세트를 끝냈다. 다음 세트 자리에 운동 끝내기를 내세운다. */
     val allDone: Boolean get() = exercises.isNotEmpty() && nextSet == null && exercises.any { it.sets.isNotEmpty() }
@@ -147,6 +162,7 @@ fun buildWorkoutUiState(
             recordType = exercise.recordType,
             note = exercise.note,
             target = exercise.target,
+            restSeconds = exercise.exercise.restSeconds,
             sets = sets.mapIndexed { index, set ->
                 val value = valueOf(set.id, set.value)
                 val suggestion = suggestedValue(

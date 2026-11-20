@@ -145,6 +145,33 @@
     <string name="rest_seconds">%1$d초</string>
     <string name="rest_minutes_seconds">%1$d분 %2$d초</string>
 
+    <!-- 휴식 타이머(#26, docs/DESIGN.md `RestTimerBar`, docs/rest-timer.md). 늘리고 줄이는 폭 %1$d는 코드의 RestTimerRules.STEP_SECONDS를 넘긴다 -->
+    <string name="rest_decrease">−%1$d초</string>
+    <string name="rest_increase">+%1$d초</string>
+    <string name="rest_skip">건너뛰기</string>
+    <string name="rest_decrease_description">휴식 %1$d초 줄이기</string>
+    <string name="rest_increase_description">휴식 %1$d초 늘리기</string>
+    <string name="rest_skip_description">휴식 건너뛰기</string>
+    <!-- %1$s 남은 시간 "1:45" -->
+    <string name="rest_remaining_description">남은 휴식 시간 %1$s</string>
+    <!-- %1$s 종목 이름과 값 "벤치 프레스 60kg × 10" -->
+    <string name="rest_next_set">다음 %1$s</string>
+    <!-- %1$s 종목 이름, %2$s 값 "60kg × 10" -->
+    <string name="rest_next_set_value">%1$s %2$s</string>
+    <!-- 종목 머리의 휴식 시간 버튼. %1$s "2:00" -->
+    <string name="rest_time_button">휴식 %1$s</string>
+    <!-- %1$s 종목 이름, %2$s "2:00" -->
+    <string name="rest_time_button_description">%1$s 휴식 시간 %2$s, 바꾸기</string>
+    <!-- %1$s 종목 이름 -->
+    <string name="rest_time_dialog_title">%1$s 휴식 시간</string>
+    <string name="rest_channel_ongoing">휴식 타이머</string>
+    <string name="rest_channel_done">휴식 끝</string>
+    <string name="rest_notification_title">휴식 중</string>
+    <string name="rest_done_title">휴식 끝</string>
+    <string name="notifications_enable">알림 켜기</string>
+    <string name="settings_notifications_off">알림 꺼짐</string>
+    <string name="settings_notifications_caption">켜면 다른 앱을 쓰는 동안에도 남은 휴식 시간이 보여요.</string>
+
     <!-- 오픈소스 라이선스(SET-03) -->
     <string name="licenses_title">오픈소스 라이선스</string>
     <!-- 라이선스 목록 행의 보조 줄. 만든 곳 · 라이선스 이름 -->

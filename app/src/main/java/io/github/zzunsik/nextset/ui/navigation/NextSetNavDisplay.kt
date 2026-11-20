@@ -18,6 +18,7 @@ import io.github.zzunsik.nextset.domain.repository.LicenseRepository
 import io.github.zzunsik.nextset.domain.repository.RoutineRepository
 import io.github.zzunsik.nextset.domain.repository.SettingsRepository
 import io.github.zzunsik.nextset.domain.repository.WorkoutRepository
+import io.github.zzunsik.nextset.domain.rest.RestTimer
 import io.github.zzunsik.nextset.ui.exercise.exerciseEntries
 import io.github.zzunsik.nextset.ui.home.HomeRoute
 import io.github.zzunsik.nextset.ui.home.HomeViewModel
@@ -42,6 +43,7 @@ fun NextSetNavDisplay(
     routineRepository: RoutineRepository,
     backupRepository: BackupRepository,
     modifier: Modifier = Modifier,
+    restTimer: RestTimer? = null,
 ) {
     val backStack = rememberNavBackStack(HomeKey)
     val results = remember { NavResults() }
@@ -59,7 +61,7 @@ fun NextSetNavDisplay(
         }
         // 기록 탭의 자리. 기록 목록(#27)이 이 줄을 기록 화면으로 바꾼다.
         entry<HistoryKey> { HistoryPlaceholderScreen() }
-        workoutEntries(backStack, results, workoutRepository, routineRepository)
+        workoutEntries(backStack, results, workoutRepository, routineRepository, settingsRepository, exerciseRepository, restTimer)
         routineEntries(backStack, results, routineRepository, exerciseRepository, settingsRepository)
         settingsEntries(
             backStack = backStack,
@@ -67,6 +69,7 @@ fun NextSetNavDisplay(
             licenseRepository = licenseRepository,
             onManageExercises = { backStack.add(ExercisePickerKey(mode = ExercisePickerMode.Manage)) },
             onBackup = { backStack.add(BackupKey) },
+            onNotificationsAllowed = { restTimer?.onNotificationsAllowed() },
         )
         backupEntries(backStack = backStack, backupRepository = backupRepository)
     }
