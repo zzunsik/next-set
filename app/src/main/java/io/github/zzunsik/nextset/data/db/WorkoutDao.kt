@@ -63,6 +63,27 @@ internal interface WorkoutDao {
     )
     suspend fun getSetsOfWorkout(workoutId: Long): List<WorkoutSetEntity>
 
+    @Query(
+        """
+        SELECT we.* FROM workout_exercise we
+        JOIN workout w ON w.id = we.workout_id
+        WHERE w.finished_at IS NOT NULL
+        ORDER BY we.workout_id, we.position, we.id
+        """,
+    )
+    suspend fun getExercisesOfFinishedWorkouts(): List<WorkoutExerciseEntity>
+
+    @Query(
+        """
+        SELECT s.* FROM workout_set s
+        JOIN workout_exercise we ON we.id = s.workout_exercise_id
+        JOIN workout w ON w.id = we.workout_id
+        WHERE w.finished_at IS NOT NULL
+        ORDER BY s.workout_exercise_id, s.position, s.id
+        """,
+    )
+    suspend fun getSetsOfFinishedWorkouts(): List<WorkoutSetEntity>
+
     @Query("SELECT * FROM workout_set WHERE workout_exercise_id = :workoutExerciseId ORDER BY position, id")
     suspend fun getSets(workoutExerciseId: Long): List<WorkoutSetEntity>
 

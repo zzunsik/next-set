@@ -23,6 +23,12 @@ interface WorkoutRepository {
     fun observeHistory(): Flow<List<WorkoutSummary>>
 
     /**
+     * 끝난 운동을 종목과 세트까지 시작 시각의 역순으로(HIST-01~HIST-03). 기록 목록의 한 줄, 요약의 숫자와 최고 기록 표시를
+     * 이 목록 하나로 계산한다. 지난 기록을 고친 동안 생긴 완료하지 않은 세트도 들어 있다.
+     */
+    fun observeFinishedWorkouts(): Flow<List<Workout>>
+
+    /**
      * 루틴에서 운동을 시작한다(HOME-01). 루틴 이름, 종목, 목표, 기록 방식을 복사하고
      * 세트 수만큼 세트를 만들어 미리 채운 값(LOG-03)을 써 둔다.
      * 진행 중인 운동이 있으면 [io.github.zzunsik.nextset.domain.model.WorkoutInProgressException].
@@ -35,8 +41,10 @@ interface WorkoutRepository {
     /**
      * 지난 날짜의 운동을 끝난 기록으로 바로 만든다(HIST-06). 종목과 세트는 아래 함수로 더한다.
      * 세트는 완료([completeSet])해야 기록으로 친다.
+     * [routineId]를 주면 루틴에서 시작할 때([startFromRoutine])처럼 루틴 이름, 종목, 목표, 세트 수를 복사하고 값을 미리 채운다.
+     * 미리 채운 세트는 완료하지 않은 상태다.
      */
-    suspend fun addPastWorkout(startedAt: Instant, finishedAt: Instant): Long
+    suspend fun addPastWorkout(startedAt: Instant, finishedAt: Instant, routineId: Long? = null): Long
 
     /** 운동 끝에 종목을 더한다. 종목의 지금 기록 방식을 복사하고 [setCount]만큼 세트를 미리 채워 만든다. */
     suspend fun addExercise(workoutId: Long, exerciseId: String, setCount: Int = 1): Long

@@ -105,7 +105,7 @@ internal fun WorkoutDialogs(dialog: WorkoutDialog, state: WorkoutUiState, action
 }
 
 @Composable
-private fun Confirm(
+internal fun Confirm(
     text: String,
     confirm: String,
     dismiss: String,
@@ -138,7 +138,7 @@ private fun DialogButton(text: String, color: Color, onClick: () -> Unit) {
 }
 
 @Composable
-private fun NoteDialog(title: String, note: String, onNoteChange: (String) -> Unit, onDismiss: () -> Unit) {
+internal fun NoteDialog(title: String, note: String, onNoteChange: (String) -> Unit, onDismiss: () -> Unit) {
     val colors = NextSetTheme.colors
     AlertDialog(
         onDismissRequest = onDismiss,

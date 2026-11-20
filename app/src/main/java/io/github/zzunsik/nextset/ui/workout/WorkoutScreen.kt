@@ -31,7 +31,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
@@ -85,6 +84,7 @@ import io.github.zzunsik.nextset.ui.component.NumberInputField
 import io.github.zzunsik.nextset.ui.component.NumberPadKey
 import io.github.zzunsik.nextset.ui.component.NumberPadScaffold
 import io.github.zzunsik.nextset.ui.component.PrimaryButton
+import io.github.zzunsik.nextset.ui.component.RecordBadgeIcon
 import io.github.zzunsik.nextset.ui.component.numberFieldKinds
 import io.github.zzunsik.nextset.ui.component.padSpec
 import io.github.zzunsik.nextset.ui.theme.NextSetMotion
@@ -670,7 +670,7 @@ private val SET_NUMBER_WIDTH = 32.dp
  * 남는 폭은 직전 기록 열이 내준다. 입력 칸과 체크 버튼의 폭은 그대로다.
  */
 @Composable
-private fun setNumberWidth(): Dp {
+internal fun setNumberWidth(): Dp {
     val measurer = rememberTextMeasurer()
     val style = NextSetTheme.typography.label
     val text = stringResource(R.string.set_table_set)
@@ -680,7 +680,7 @@ private fun setNumberWidth(): Dp {
 }
 
 /** 입력 칸의 폭(docs/DESIGN.md `SetRow`). 칸이 하나인 종목은 88dp다. */
-private fun fieldWidth(kind: NumberFieldKind, count: Int) = when {
+internal fun fieldWidth(kind: NumberFieldKind, count: Int) = when {
     count == 1 -> 88.dp
     kind == NumberFieldKind.WEIGHT -> 72.dp
     else -> 64.dp
@@ -794,25 +794,11 @@ fun checkTag(setId: Long) = "check-$setId"
  */
 @Composable
 private fun RecordBadge(visible: Boolean) {
-    val label = stringResource(R.string.record_badge)
     AnimatedVisibility(
         visible = visible,
         enter = scaleIn(NextSetMotion.expressiveSpatialFast.spec()),
         exit = scaleOut(NextSetMotion.standardSpatialFast.spec()),
     ) {
-        Box(
-            modifier = Modifier
-                .size(24.dp)
-                .background(NextSetTheme.colors.text, CircleShape)
-                .semantics { contentDescription = label },
-            contentAlignment = Alignment.Center,
-        ) {
-            Icon(
-                painter = painterResource(R.drawable.ic_trophy),
-                contentDescription = null,
-                tint = NextSetTheme.colors.bg,
-                modifier = Modifier.size(16.dp),
-            )
-        }
+        RecordBadgeIcon()
     }
 }

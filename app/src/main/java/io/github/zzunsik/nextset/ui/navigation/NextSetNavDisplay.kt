@@ -20,6 +20,7 @@ import io.github.zzunsik.nextset.domain.repository.SettingsRepository
 import io.github.zzunsik.nextset.domain.repository.WorkoutRepository
 import io.github.zzunsik.nextset.domain.rest.RestTimer
 import io.github.zzunsik.nextset.ui.exercise.exerciseEntries
+import io.github.zzunsik.nextset.ui.history.historyEntries
 import io.github.zzunsik.nextset.ui.home.HomeRoute
 import io.github.zzunsik.nextset.ui.home.HomeViewModel
 import io.github.zzunsik.nextset.ui.workout.workoutEntries
@@ -59,9 +60,8 @@ fun NextSetNavDisplay(
                 onOpenRoutine = { id, isNew -> backStack.add(RoutineEditKey(id, isNew)) },
             )
         }
-        // 기록 탭의 자리. 기록 목록(#27)이 이 줄을 기록 화면으로 바꾼다.
-        entry<HistoryKey> { HistoryPlaceholderScreen() }
         workoutEntries(backStack, results, workoutRepository, routineRepository, settingsRepository, exerciseRepository, restTimer)
+        historyEntries(backStack, results, workoutRepository, routineRepository)
         routineEntries(backStack, results, routineRepository, exerciseRepository, settingsRepository)
         settingsEntries(
             backStack = backStack,

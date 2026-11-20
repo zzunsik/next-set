@@ -79,8 +79,6 @@
     <string name="nav_home">홈</string>
     <string name="nav_history">기록</string>
     <string name="nav_settings">설정</string>
-    <!-- 기록 목록(#27)이 생기기 전까지 "기록" 탭에 보이는 문구. #27이 기록 목록으로 바꾸면 지운다. -->
-    <string name="history_placeholder">아직 준비 중이에요.</string>
 
     <!-- 설정(docs/DESIGN.md "설정") -->
     <string name="settings_title">설정</string>
@@ -267,10 +265,8 @@
     <string name="note_hint">메모</string>
     <string name="reorder_move_up">%1$s 위로 옮기기</string>
     <string name="reorder_move_down">%1$s 아래로 옮기기</string>
-    <!-- 운동을 끝낸 뒤의 완료 화면. 운동 요약(#27)이 생기면 바뀐다 -->
+    <!-- 빈 운동을 끝낸 뒤 운동 요약의 결론 문장 -->
     <string name="workout_done_title">운동을 끝냈어요.</string>
-    <!-- %1$d 완료한 세트 수, %2$s 운동 시간 -->
-    <string name="workout_done_detail">세트 %1$d개 · %2$s</string>
     <string name="workout_duration_minutes">%1$d분</string>
     <string name="workout_duration_hours_minutes">%1$d시간 %2$d분</string>
     <string name="action_confirm">확인</string>
@@ -360,4 +356,45 @@
     <string name="routine_exercise_rest_default">기본값 따름(%1$s)</string>
     <string name="routine_exercise_rest_note">휴식 시간은 종목마다 하나예요. 여기서 바꾸면 다른 루틴과 운동 중에도 같아요.</string>
     <string name="routine_exercise_remove">루틴에서 빼기</string>
+
+    <!-- 기록 목록(docs/DESIGN.md "기록 목록", HIST-01, HIST-06) -->
+    <string name="history_title">기록</string>
+    <string name="history_add_past">지난 운동 적기</string>
+    <!-- 달 머리 "2026년 11월" -->
+    <string name="history_month">%1$d년 %2$d월</string>
+    <string name="history_empty">아직 기록이 없어요. 운동을 마치면 여기에 쌓여요.</string>
+    <string name="history_go_home">홈으로</string>
+    <!-- 기록 행의 보조 줄 "48분 · 15세트 · 4,250kg". 볼륨이 없는 기록(횟수만, 시간 종목뿐)은 볼륨을 뺀다 -->
+    <string name="history_row_detail">%1$s · %2$d세트 · %3$s</string>
+    <string name="history_row_detail_no_volume">%1$s · %2$d세트</string>
+    <!-- 지난 운동 적기에서 날짜를 고른 뒤 묻는 것. %1$s 날짜 -->
+    <string name="history_add_past_question">%1$s에 한 운동을 골라 주세요.</string>
+    <string name="history_add_past_blank">빈 기록</string>
+
+    <!-- 운동 요약과 기록 상세(docs/DESIGN.md "운동 요약", "기록 상세·수정", HIST-02, HIST-03, HIST-05) -->
+    <!-- 결론 문장. %1$s 루틴 이름과 조사("가슴 루틴을") -->
+    <string name="summary_done_routine">%1$s 끝냈어요.</string>
+    <string name="summary_records">최고 기록 %1$d개를 세웠어요.</string>
+    <string name="report_duration">운동 시간</string>
+    <string name="report_sets">세트</string>
+    <string name="report_volume">볼륨</string>
+    <!-- 볼륨 "4,250kg" -->
+    <string name="report_volume_value">%1$skg</string>
+    <!-- 같은 루틴의 지난 기록과 견준 볼륨. %1$s "+120kg", "−50kg" -->
+    <string name="report_volume_delta">지난번보다 %1$s</string>
+    <string name="report_volume_same">지난번과 볼륨이 같아요.</string>
+    <string name="report_records_title">최고 기록</string>
+    <string name="report_note_title">운동 메모</string>
+    <!-- 기록 상세의 시작 시각 "오후 6:30 시작" -->
+    <string name="report_started_at">%1$s 시작</string>
+    <string name="report_edit">수정</string>
+    <string name="report_edit_done">완료</string>
+    <string name="report_more">기록 메뉴</string>
+    <string name="report_delete_confirm">이 기록을 지울까요? 되돌릴 수 없어요.</string>
+    <string name="report_date">날짜</string>
+    <string name="report_start_time">시작 시각</string>
+    <string name="report_minutes">운동 시간(분)</string>
+    <string name="unit_minutes">분</string>
+    <!-- 세트 값을 단위까지 적는다(docs/DESIGN.md "숫자와 단위": 60kg × 10회) -->
+    <string name="set_value_weight_reps_full">%1$skg × %2$s회</string>
 </resources>

@@ -207,18 +207,18 @@ class HomeNavigationTest {
         waitFor(hasText(text(R.string.home_empty)))
 
         compose.onNodeWithText(text(R.string.nav_history)).performClick()
-        waitFor(hasText(text(R.string.history_placeholder)))
+        waitFor(hasText(text(R.string.history_empty)))
 
         compose.onNodeWithText(text(R.string.nav_settings)).performClick()
         waitFor(hasText(text(R.string.settings_default_rest)))
-        compose.onNodeWithText(text(R.string.history_placeholder)).assertDoesNotExist()
+        compose.onNodeWithText(text(R.string.history_empty)).assertDoesNotExist()
 
         // 탭 화면에서 뒤로 가면 홈이다.
         compose.runOnUiThread { app.onBackPressedDispatcher.onBackPressed() }
         waitFor(hasText(text(R.string.home_empty)))
 
         compose.onNodeWithText(text(R.string.nav_history)).performClick()
-        waitFor(hasText(text(R.string.history_placeholder)))
+        waitFor(hasText(text(R.string.history_empty)))
         compose.onNodeWithText(text(R.string.nav_home)).performClick()
         waitFor(hasText(text(R.string.home_empty)))
     }
