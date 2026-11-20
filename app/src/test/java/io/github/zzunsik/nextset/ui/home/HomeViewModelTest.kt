@@ -2,7 +2,6 @@ package io.github.zzunsik.nextset.ui.home
 
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStore
-import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import io.github.zzunsik.nextset.data.repository.TestDb
@@ -10,15 +9,13 @@ import io.github.zzunsik.nextset.data.repository.TestExercises.BENCH
 import io.github.zzunsik.nextset.data.repository.TestExercises.PULL_UP
 import io.github.zzunsik.nextset.data.repository.TestExercises.SQUAT
 import io.github.zzunsik.nextset.data.repository.at
+import io.github.zzunsik.nextset.ui.ViewModelJobs
 import io.github.zzunsik.nextset.ui.exercise.MainDispatcherRule
 import java.time.LocalDate
 import java.time.ZoneOffset
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.job
-import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
@@ -53,15 +50,11 @@ class HomeViewModelTest {
     @Before
     fun setUp() = runBlocking { db = TestDb().seed(); Unit }
 
-    /** 만든 화면 상태의 코루틴 범위(`viewModelScope`). 데이터베이스를 닫기 전에 모두 끝났는지 기다린다. */
-    private val viewModelJobs = mutableListOf<Job>()
+    private val viewModelJobs = ViewModelJobs()
 
     @After
     fun tearDown() {
-        // 화면 상태를 지우면 viewModelScope가 취소되지만 돌던 데이터베이스 작업이 끝나야 실제로 끝난다. 그 전에 닫으면
-        // 남은 작업이 닫힌 데이터베이스를 읽는다. 모든 화면 상태 코루틴이 끝난 뒤에 닫는다(#75).
-        store.clear()
-        runBlocking { withContext(Dispatchers.Default) { withTimeout(TIMEOUT) { viewModelJobs.joinAll() } } }
+        viewModelJobs.clearAndAwait(store)
         db.close()
     }
 
@@ -71,8 +64,7 @@ class HomeViewModelTest {
                 HomeViewModel(db.workouts, db.routines, db.settings, NEW_NAME, clock = { at(clockMinutes++) }, zone = ZoneOffset.UTC)
             }
         }
-        return ViewModelProvider.create(store, factory)[HomeViewModel::class]
-            .also { viewModelJobs += it.viewModelScope.coroutineContext.job }
+        return viewModelJobs.track(ViewModelProvider.create(store, factory)[HomeViewModel::class])
     }
 
     private fun HomeViewModel.awaitState(predicate: (HomeUiState) -> Boolean): HomeUiState = await(uiState) { !it.loading && predicate(it) }
