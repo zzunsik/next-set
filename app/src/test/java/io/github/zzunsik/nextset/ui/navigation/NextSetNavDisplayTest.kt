@@ -15,6 +15,8 @@ import io.github.zzunsik.nextset.ui.exercise.FakeExerciseRepository
 import io.github.zzunsik.nextset.ui.settings.FakeLicenseRepository
 import io.github.zzunsik.nextset.ui.settings.FakeSettingsRepository
 import io.github.zzunsik.nextset.ui.theme.NextSetTheme
+import io.github.zzunsik.nextset.data.repository.TestDb
+import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
@@ -30,6 +32,12 @@ class NextSetNavDisplayTest {
     private val app = RuntimeEnvironment.getApplication()
     private val opened = mutableListOf<String>()
     private var browserMissing = false
+
+    /** 운동과 루틴은 메모리 데이터베이스의 진짜 저장소를 쓴다. 홈의 운동 입구(#24)가 읽는다. */
+    private val db = TestDb()
+
+    @After
+    fun closeDb() = db.close()
 
     private val uriHandler = object : UriHandler {
         override fun openUri(uri: String) {
@@ -47,6 +55,8 @@ class NextSetNavDisplayTest {
                         settingsRepository = FakeSettingsRepository(),
                         licenseRepository = FakeLicenseRepository(),
                         exerciseRepository = FakeExerciseRepository(),
+                        workoutRepository = db.workouts,
+                        routineRepository = db.routines,
                     )
                 }
             }

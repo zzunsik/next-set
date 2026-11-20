@@ -48,3 +48,11 @@ data object LicensesKey : NavKey
 /** 오픈소스 라이선스 한 건. [id]는 `assets/licenses/index.json`의 항목 id다. */
 @Serializable
 data class LicenseDetailKey(val id: String) : NavKey
+
+/** 운동 중(docs/DESIGN.md "운동 중"). 운동은 저장돼 있어 프로세스가 죽었다 살아나도 같은 화면으로 돌아온다(LOG-13). */
+@Serializable
+data class WorkoutKey(val workoutId: Long) : NavKey
+
+/** 운동을 끝낸 뒤의 완료 화면. 운동 요약(#27)이 생기면 그 화면으로 바뀐다. */
+@Serializable
+data class WorkoutDoneKey(val workoutId: Long) : NavKey

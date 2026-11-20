@@ -130,6 +130,30 @@ internal class RoomWorkoutRepository(private val database: NextSetDatabase) : Wo
         }
     }
 
+    override suspend fun restoreSet(workoutExerciseId: Long, position: Int, value: SetValue, completedAt: Instant?): Long {
+        value.validate()
+        return database.withWriteTransaction {
+            val exercise = requireNotNull(workoutDao.getExercise(workoutExerciseId)) { "운동 기록 종목 $workoutExerciseId 가 없다" }
+            val sets = workoutDao.getSets(workoutExerciseId)
+            val at = position.coerceIn(0, sets.size)
+            sets.forEachIndexed { index, set ->
+                val moved = if (index < at) index else index + 1
+                if (set.position != moved) workoutDao.setSetPosition(set.id, moved)
+            }
+            val fitted = value.fitTo(exercise.recordType)
+            workoutDao.insertSet(
+                WorkoutSetEntity(
+                    workoutExerciseId = workoutExerciseId,
+                    position = at,
+                    weightG = fitted.weight?.grams,
+                    reps = fitted.reps,
+                    durationS = fitted.durationSeconds,
+                    completedAt = completedAt?.toEpochMilli(),
+                ),
+            )
+        }
+    }
+
     override suspend fun updateSet(setId: Long, value: SetValue) {
         value.validate()
         database.withWriteTransaction {
