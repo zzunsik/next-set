@@ -115,6 +115,8 @@ data class WorkoutActions(
     val onExerciseNote: (workoutExerciseId: Long) -> Unit = {},
     val onMoveExercise: (workoutExerciseId: Long, delta: Int) -> Unit = { _, _ -> },
     val onRemoveExercise: (workoutExerciseId: Long) -> Unit = {},
+    val onRestTime: (workoutExerciseId: Long) -> Unit = {},
+    val onRestTimeChange: (exerciseId: String, seconds: Int?) -> Unit = { _, _ -> },
 )
 
 const val WORKOUT_LIST_TAG = "workoutList"
@@ -490,6 +492,7 @@ private fun ExerciseList(
             item(key = "exercise-${block.id}", contentType = "header") {
                 ExerciseHeader(
                     block = block,
+                    defaultRestSeconds = state.defaultRestSeconds,
                     first = index == 0,
                     canMoveUp = index > 0,
                     canMoveDown = index < state.exercises.lastIndex,
@@ -538,6 +541,7 @@ private fun ExerciseList(
 @Composable
 private fun ExerciseHeader(
     block: ExerciseBlockUi,
+    defaultRestSeconds: Int,
     first: Boolean,
     canMoveUp: Boolean,
     canMoveDown: Boolean,
@@ -559,21 +563,32 @@ private fun ExerciseHeader(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(spacing.sm),
         ) {
-            Text(
-                text = block.name,
-                style = NextSetTheme.typography.heading,
-                color = colors.text,
-                modifier = Modifier.weight(1f, fill = false).semantics { heading() },
-            )
-            if (block.allDone) {
-                Icon(
-                    painter = painterResource(R.drawable.ic_check),
-                    contentDescription = stringResource(R.string.exercise_header_all_done),
-                    tint = colors.done,
-                    modifier = Modifier.size(NextSetTheme.sizes.icon),
+            // 이름과 체크 아이콘이 남는 폭을 모두 쓴다. 휴식 시간 버튼과 더보기 버튼은 제 폭만 쓴다.
+            Row(
+                modifier = Modifier.weight(1f),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(spacing.sm),
+            ) {
+                Text(
+                    text = block.name,
+                    style = NextSetTheme.typography.heading,
+                    color = colors.text,
+                    modifier = Modifier.weight(1f, fill = false).semantics { heading() },
                 )
+                if (block.allDone) {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_check),
+                        contentDescription = stringResource(R.string.exercise_header_all_done),
+                        tint = colors.done,
+                        modifier = Modifier.size(NextSetTheme.sizes.icon),
+                    )
+                }
             }
-            Spacer(Modifier.weight(1f))
+            RestTimeButton(
+                seconds = block.restSecondsOr(defaultRestSeconds),
+                exerciseName = block.name,
+                onClick = { actions.onRestTime(block.id) },
+            )
             Box {
                 IconButton(onClick = { menu = true }, modifier = Modifier.size(NextSetTheme.sizes.minTouchTarget)) {
                     Icon(

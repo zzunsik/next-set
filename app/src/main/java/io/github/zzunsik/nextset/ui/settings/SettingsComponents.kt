@@ -173,3 +173,44 @@ internal fun <T> OptionDialog(
         },
     )
 }
+
+/**
+ * 설정의 "알림" 행(docs/DESIGN.md "설정" 4번, REST-09). 알림이 꺼져 있을 때만 보인다.
+ * "알림 꺼짐" 표시와 보조 문구, 오른쪽 끝의 "알림 켜기" 글자 버튼이다.
+ */
+@Composable
+internal fun NotificationsOffRow(onEnable: () -> Unit, modifier: Modifier = Modifier) {
+    val spacing = NextSetTheme.spacing
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .heightIn(min = NextSetTheme.sizes.listRowMinHeight)
+            .padding(start = spacing.lg, end = spacing.xs, top = spacing.sm, bottom = spacing.sm),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(spacing.sm),
+    ) {
+        Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(spacing.xs)) {
+            Text(
+                text = stringResource(R.string.settings_notifications_off),
+                style = NextSetTheme.typography.body,
+                color = NextSetTheme.colors.text,
+            )
+            Text(
+                text = stringResource(R.string.settings_notifications_caption),
+                style = NextSetTheme.typography.caption,
+                color = NextSetTheme.colors.text2,
+            )
+        }
+        TextButton(
+            onClick = onEnable,
+            modifier = Modifier.heightIn(min = NextSetTheme.sizes.minTouchTarget),
+            shape = NextSetTheme.radius.md,
+        ) {
+            Text(
+                text = stringResource(R.string.notifications_enable),
+                style = NextSetTheme.typography.label,
+                color = NextSetTheme.colors.accent,
+            )
+        }
+    }
+}

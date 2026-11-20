@@ -20,7 +20,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import io.github.zzunsik.nextset.R
+import io.github.zzunsik.nextset.domain.rule.defaultRestChoices
 import io.github.zzunsik.nextset.ui.component.TextInputField
+import io.github.zzunsik.nextset.ui.settings.OptionDialog
+import io.github.zzunsik.nextset.ui.settings.restDurationText
 import io.github.zzunsik.nextset.ui.theme.NextSetTheme
 
 /**
@@ -83,6 +86,21 @@ internal fun WorkoutDialogs(dialog: WorkoutDialog, state: WorkoutUiState, action
             onDismiss = actions.onDismissDialog,
         )
         WorkoutDialog.Reorder -> ReorderDialog(state, actions)
+        is WorkoutDialog.RestTime -> OptionDialog(
+            title = stringResource(R.string.rest_time_dialog_title, dialog.name),
+            note = stringResource(R.string.routine_exercise_rest_note),
+            options = listOf<Int?>(null) + defaultRestChoices,
+            selected = dialog.restSeconds,
+            label = { seconds ->
+                if (seconds == null) {
+                    stringResource(R.string.routine_exercise_rest_default, restDurationText(state.defaultRestSeconds))
+                } else {
+                    restDurationText(seconds)
+                }
+            },
+            onSelect = { actions.onRestTimeChange(dialog.exerciseId, it) },
+            onDismiss = actions.onDismissDialog,
+        )
     }
 }
 

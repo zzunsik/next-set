@@ -16,6 +16,7 @@ import io.github.zzunsik.nextset.domain.repository.LicenseRepository
 import io.github.zzunsik.nextset.domain.repository.RoutineRepository
 import io.github.zzunsik.nextset.domain.repository.SettingsRepository
 import io.github.zzunsik.nextset.domain.repository.WorkoutRepository
+import io.github.zzunsik.nextset.domain.rest.RestTimer
 import io.github.zzunsik.nextset.ui.exercise.exerciseEntries
 import io.github.zzunsik.nextset.ui.home.HomeScreen
 import io.github.zzunsik.nextset.ui.home.HomeWorkoutEntryRoute
@@ -39,6 +40,7 @@ fun NextSetNavDisplay(
     routineRepository: RoutineRepository,
     backupRepository: BackupRepository,
     modifier: Modifier = Modifier,
+    restTimer: RestTimer? = null,
 ) {
     val backStack = rememberNavBackStack(HomeKey)
     val results = remember { NavResults() }
@@ -58,7 +60,7 @@ fun NextSetNavDisplay(
                 onOpenRoutines = { backStack.add(RoutineListKey) },
             )
         }
-        workoutEntries(backStack, results, workoutRepository, routineRepository)
+        workoutEntries(backStack, results, workoutRepository, routineRepository, settingsRepository, exerciseRepository, restTimer)
         routineEntries(backStack, results, routineRepository, exerciseRepository, settingsRepository)
         settingsEntries(
             backStack = backStack,
@@ -66,6 +68,7 @@ fun NextSetNavDisplay(
             licenseRepository = licenseRepository,
             onManageExercises = { backStack.add(ExercisePickerKey(mode = ExercisePickerMode.Manage)) },
             onBackup = { backStack.add(BackupKey) },
+            onNotificationsAllowed = { restTimer?.onNotificationsAllowed() },
         )
         backupEntries(backStack = backStack, backupRepository = backupRepository)
     }

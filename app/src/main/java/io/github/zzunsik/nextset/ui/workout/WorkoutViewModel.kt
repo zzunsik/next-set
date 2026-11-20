@@ -5,9 +5,12 @@ import androidx.lifecycle.viewModelScope
 import io.github.zzunsik.nextset.domain.model.FinishResult
 import io.github.zzunsik.nextset.domain.model.RecordType
 import io.github.zzunsik.nextset.domain.model.SetValue
+import io.github.zzunsik.nextset.domain.model.Settings
 import io.github.zzunsik.nextset.domain.model.Weight
 import io.github.zzunsik.nextset.domain.model.Workout
+import io.github.zzunsik.nextset.domain.repository.ExerciseRepository
 import io.github.zzunsik.nextset.domain.repository.RoutineRepository
+import io.github.zzunsik.nextset.domain.repository.SettingsRepository
 import io.github.zzunsik.nextset.domain.repository.WorkoutRepository
 import io.github.zzunsik.nextset.domain.rule.RoutineUpdatePlan
 import io.github.zzunsik.nextset.domain.rule.applyRoutineUpdate
@@ -29,7 +32,10 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapLatest
+import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
@@ -79,6 +85,10 @@ class WorkoutViewModel(
     private val routineRepository: RoutineRepository,
     private val workoutId: Long,
     private val clock: () -> Instant = Instant::now,
+    /** 기본 휴식 시간을 읽는다. 없으면 기본값(2분)을 쓴다. */
+    private val settingsRepository: SettingsRepository? = null,
+    /** 종목의 휴식 시간을 고친다(REST-03). 없으면 고르기만 하고 저장하지 않는다. */
+    private val exerciseRepository: ExerciseRepository? = null,
 ) : ViewModel() {
     private val writes = Mutex()
     private val previousCache = mutableMapOf<Pair<String, RecordType>, List<SetValue>>()
@@ -89,16 +99,21 @@ class WorkoutViewModel(
 
     val events: Flow<WorkoutEvent> = eventChannel.receiveAsFlow()
 
+    private val defaultRest: Flow<Int> = settingsRepository?.observeSettings()?.map { it.defaultRestSeconds }
+        ?.onStart { emit(Settings.DEFAULT_REST_SECONDS) }
+        ?: flowOf(Settings.DEFAULT_REST_SECONDS)
+
     /** 저장된 운동과 그 종목들의 직전 기록. 운동이 없어지면 null이다. */
     private val stored: StateFlow<Stored?> = workoutRepository.observeWorkout(workoutId)
         .mapLatest { workout -> workout?.let { Stored(it, previousOf(it)) } }
         .stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
-    val uiState: StateFlow<WorkoutUiState> = combine(stored, local) { stored, local ->
+    val uiState: StateFlow<WorkoutUiState> = combine(stored, local, defaultRest) { stored, local, defaultRest ->
         if (stored == null) {
-            WorkoutUiState(loading = true, dialog = local.dialog)
+            WorkoutUiState(loading = true, dialog = local.dialog, defaultRestSeconds = defaultRest)
         } else {
             buildWorkoutUiState(stored.workout, stored.previous, local.numberPad, local.records, local.dialog)
+                .copy(defaultRestSeconds = defaultRest)
         }
     }.stateIn(viewModelScope, SharingStarted.Eagerly, WorkoutUiState())
 
@@ -306,6 +321,21 @@ class WorkoutViewModel(
     }
 
     fun onReorderRequest() = showDialog(WorkoutDialog.Reorder)
+
+    // ---- 휴식 시간(REST-03) ----
+
+    /** 종목 머리의 "휴식 2:00". 이 종목의 휴식 시간을 고르는 대화상자를 연다. */
+    fun onRestTimeRequest(workoutExerciseId: Long) {
+        val block = uiState.value.exercises.firstOrNull { it.id == workoutExerciseId } ?: return
+        showDialog(WorkoutDialog.RestTime(block.exerciseId, block.name, block.restSeconds))
+    }
+
+    /** 고르면 바로 저장하고 닫는다. null이면 기본값을 따른다. 지금 도는 휴식은 그대로다. */
+    fun onRestTimeChange(exerciseId: String, seconds: Int?) {
+        dismissDialog()
+        val repository = exerciseRepository ?: return
+        write { repository.setRestSeconds(exerciseId, seconds) }
+    }
 
     fun dismissDialog() = local.update { it.copy(dialog = null) }
 

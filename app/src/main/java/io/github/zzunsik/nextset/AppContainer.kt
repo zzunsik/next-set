@@ -17,6 +17,12 @@ import io.github.zzunsik.nextset.domain.repository.LicenseRepository
 import io.github.zzunsik.nextset.domain.repository.RoutineRepository
 import io.github.zzunsik.nextset.domain.repository.SettingsRepository
 import io.github.zzunsik.nextset.domain.repository.WorkoutRepository
+import io.github.zzunsik.nextset.domain.rest.RestTimerEngine
+import io.github.zzunsik.nextset.rest.AndroidRestTimerEffects
+import io.github.zzunsik.nextset.rest.RestTimerController
+import android.os.SystemClock
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -56,6 +62,18 @@ class AppContainer(context: Context) {
                 versionName = info.versionName.orEmpty(),
                 versionCode = PackageInfoCompat.getLongVersionCode(info),
             ),
+        )
+    }
+
+    /**
+     * 휴식 타이머(REST-01~REST-09). 앱에 하나다. 처음 쓸 때 남겨 둔 휴식을 되살리고 신호를 내기 시작한다.
+     * 신호는 앱이 살아 있는 동안 도는 범위에서 낸다. 프로세스가 끝나면 함께 끝난다.
+     */
+    val restTimer: RestTimerController by lazy {
+        RestTimerController(
+            engine = RestTimerEngine(SystemClock::elapsedRealtime),
+            scope = CoroutineScope(SupervisorJob() + Dispatchers.Default),
+            effects = AndroidRestTimerEffects(appContext),
         )
     }
 
