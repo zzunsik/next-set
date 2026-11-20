@@ -10,6 +10,7 @@ import io.github.zzunsik.nextset.data.repository.TestExercises.PULL_UP
 import io.github.zzunsik.nextset.data.repository.at
 import io.github.zzunsik.nextset.domain.model.Target
 import io.github.zzunsik.nextset.domain.model.Weight
+import io.github.zzunsik.nextset.ui.ViewModelJobs
 import io.github.zzunsik.nextset.ui.exercise.MainDispatcherRule
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
@@ -39,9 +40,12 @@ class WorkoutRestTimeViewModelTest {
     @Before
     fun setUp() = runBlocking { db = TestDb().seed(); Unit }
 
+    /** 데이터베이스를 닫기 전에 화면 상태의 코루틴이 모두 끝나기를 기다린다(#75). */
+    private val viewModelJobs = ViewModelJobs()
+
     @After
     fun tearDown() {
-        store.clear()
+        viewModelJobs.clearAndAwait(store)
         db.close()
     }
 
@@ -58,7 +62,7 @@ class WorkoutRestTimeViewModelTest {
                 )
             }
         }
-        return ViewModelProvider.create(store, factory)["vm", WorkoutViewModel::class]
+        return viewModelJobs.track(ViewModelProvider.create(store, factory)["vm", WorkoutViewModel::class])
     }
 
     private fun WorkoutViewModel.awaitState(predicate: (WorkoutUiState) -> Boolean): WorkoutUiState = runBlocking {
