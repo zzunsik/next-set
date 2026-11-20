@@ -180,6 +180,21 @@ class HistoryRulesTest {
     }
 
     @Test
+    fun inProgressWorkoutMarksOnlyItsOwnSetsAgainstEarlierWorkouts() {
+        val first = workout(0, exercise("bench", RecordType.WEIGHT_REPS, S(wr(60.0, 10))))
+        // 진행 중인 운동보다 나중에 시작한 기록은 견주지 않는다. 그 기록의 표시도 돌려주지 않는다.
+        val later = workout(300, exercise("bench", RecordType.WEIGHT_REPS, S(wr(100.0, 1))))
+        val current = workout(
+            100,
+            exercise("bench", RecordType.WEIGHT_REPS, S(wr(60.0, 10)), S(wr(62.5, 8)), S(wr(70.0, 5), done = false)),
+            exercise("pull-up", RecordType.REPS, S(reps(20))),
+        ).copy(finishedAt = null)
+        // 같은 값은 넘은 것이 아니다. 처음 하는 종목(풀업)과 완료하지 않은 세트에는 표시가 없다.
+        assertEquals(setOf(current.setIds(0)[1]), current.recordSetIdsAgainst(listOf(later, first)))
+        assertEquals("앞선 기록이 없으면 표시가 없다", emptySet<Long>(), current.recordSetIdsAgainst(listOf(later)))
+    }
+
+    @Test
     fun previousOfTheSameRoutineIsTheLatestEarlierOne() {
         val a = workout(0, routineId = 1)
         val b = workout(100, routineId = 2)
