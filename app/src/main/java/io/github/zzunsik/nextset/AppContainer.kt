@@ -1,6 +1,9 @@
 package io.github.zzunsik.nextset
 
 import android.content.Context
+import androidx.core.content.pm.PackageInfoCompat
+import io.github.zzunsik.nextset.data.backup.BackupApp
+import io.github.zzunsik.nextset.data.backup.RoomBackupRepository
 import io.github.zzunsik.nextset.data.db.NextSetDatabase
 import io.github.zzunsik.nextset.data.repository.AssetLicenseRepository
 import io.github.zzunsik.nextset.data.repository.RoomExerciseRepository
@@ -8,6 +11,7 @@ import io.github.zzunsik.nextset.data.repository.RoomRoutineRepository
 import io.github.zzunsik.nextset.data.repository.RoomSettingsRepository
 import io.github.zzunsik.nextset.data.repository.RoomWorkoutRepository
 import io.github.zzunsik.nextset.data.seed.BuiltinExerciseSeeder
+import io.github.zzunsik.nextset.domain.repository.BackupRepository
 import io.github.zzunsik.nextset.domain.repository.ExerciseRepository
 import io.github.zzunsik.nextset.domain.repository.LicenseRepository
 import io.github.zzunsik.nextset.domain.repository.RoutineRepository
@@ -23,7 +27,9 @@ import kotlinx.coroutines.withContext
 class AppContainer(context: Context) {
     private val appContext = context.applicationContext
 
-    /** 처음 쓸 때 연다. 앱 시작 때 디스크를 건드리지 않는다. */
+    /**
+     * 처음 쓸 때 연다. 첫 화면이 화면 모드를 읽고, API 31 이상에서는 `SystemNightModeSync`도 앱 시작 때 읽는다(#54).
+     */
     private val database: NextSetDatabase by lazy { NextSetDatabase.build(appContext) }
 
     /** 내장 종목은 종목을 처음 읽을 때 반영한다. */
@@ -39,6 +45,19 @@ class AppContainer(context: Context) {
     val routineRepository: RoutineRepository by lazy { RoomRoutineRepository(database) }
     val workoutRepository: WorkoutRepository by lazy { RoomWorkoutRepository(database) }
     val settingsRepository: SettingsRepository by lazy { RoomSettingsRepository(database) }
+
+    /** 백업 파일 내보내기와 가져오기(DATA-03, DATA-04). */
+    val backupRepository: BackupRepository by lazy {
+        val info = appContext.packageManager.getPackageInfo(appContext.packageName, 0)
+        RoomBackupRepository(
+            database = database,
+            seeder = seeder,
+            appVersion = BackupApp(
+                versionName = info.versionName.orEmpty(),
+                versionCode = PackageInfoCompat.getLongVersionCode(info),
+            ),
+        )
+    }
 
     /** 오픈소스 라이선스(SET-03). `assets/licenses/`의 파일만 읽는다. */
     val licenseRepository: LicenseRepository by lazy {

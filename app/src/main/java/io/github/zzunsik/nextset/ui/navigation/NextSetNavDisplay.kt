@@ -10,6 +10,7 @@ import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
+import io.github.zzunsik.nextset.domain.repository.BackupRepository
 import io.github.zzunsik.nextset.domain.repository.ExerciseRepository
 import io.github.zzunsik.nextset.domain.repository.LicenseRepository
 import io.github.zzunsik.nextset.domain.repository.RoutineRepository
@@ -21,6 +22,7 @@ import io.github.zzunsik.nextset.ui.home.HomeWorkoutEntryRoute
 import io.github.zzunsik.nextset.ui.home.HomeWorkoutViewModel
 import io.github.zzunsik.nextset.ui.workout.workoutEntries
 import androidx.lifecycle.viewmodel.compose.viewModel
+import io.github.zzunsik.nextset.ui.settings.backupEntries
 import io.github.zzunsik.nextset.ui.settings.settingsEntries
 
 /**
@@ -34,6 +36,7 @@ fun NextSetNavDisplay(
     exerciseRepository: ExerciseRepository,
     workoutRepository: WorkoutRepository,
     routineRepository: RoutineRepository,
+    backupRepository: BackupRepository,
     modifier: Modifier = Modifier,
 ) {
     val backStack = rememberNavBackStack(HomeKey)
@@ -59,7 +62,9 @@ fun NextSetNavDisplay(
             settingsRepository = settingsRepository,
             licenseRepository = licenseRepository,
             onManageExercises = { backStack.add(ExercisePickerKey(mode = ExercisePickerMode.Manage)) },
+            onBackup = { backStack.add(BackupKey) },
         )
+        backupEntries(backStack = backStack, backupRepository = backupRepository)
     }
 }
 

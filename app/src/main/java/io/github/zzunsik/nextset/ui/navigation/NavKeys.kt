@@ -56,3 +56,7 @@ data class WorkoutKey(val workoutId: Long) : NavKey
 /** 운동을 끝낸 뒤의 완료 화면. 운동 요약(#27)이 생기면 그 화면으로 바뀐다. */
 @Serializable
 data class WorkoutDoneKey(val workoutId: Long) : NavKey
+
+/** 백업 파일 내보내기와 가져오기(DATA-03, DATA-04). */
+@Serializable
+data object BackupKey : NavKey

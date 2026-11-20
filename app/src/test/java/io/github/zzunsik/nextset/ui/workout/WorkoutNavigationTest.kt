@@ -18,6 +18,7 @@ import io.github.zzunsik.nextset.domain.model.Target
 import io.github.zzunsik.nextset.domain.model.Weight
 import io.github.zzunsik.nextset.ui.exercise.EXERCISE_LIST_TAG
 import io.github.zzunsik.nextset.ui.navigation.NextSetNavDisplay
+import io.github.zzunsik.nextset.ui.settings.FakeBackupRepository
 import io.github.zzunsik.nextset.ui.settings.FakeLicenseRepository
 import io.github.zzunsik.nextset.ui.settings.FakeSettingsRepository
 import io.github.zzunsik.nextset.ui.theme.NextSetTheme
@@ -61,6 +62,7 @@ class WorkoutNavigationTest {
                     exerciseRepository = db.exercises,
                     workoutRepository = db.workouts,
                     routineRepository = db.routines,
+                    backupRepository = FakeBackupRepository(),
                 )
             }
         }

@@ -43,6 +43,8 @@ abstract class NextSetDatabase : RoomDatabase() {
 
     internal abstract fun settingsDao(): SettingsDao
 
+    internal abstract fun backupDao(): BackupDao
+
     /**
      * [tables]가 바뀔 때마다 [read]를 읽기 트랜잭션 하나에서 돌려 내보낸다.
      * 여러 테이블을 한 번에 읽어 서로 어긋난 중간 상태를 내보내지 않는다.

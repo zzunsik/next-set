@@ -1,0 +1,196 @@
+{
+  "format": "next-set-backup",
+  "formatVersion": 1,
+  "exportedAt": 1794961800000,
+  "app": { "versionName": "0.1.0", "versionCode": 1 },
+  "settings": {
+    "defaultRestSeconds": 90,
+    "themeMode": "DARK",
+    "pinnedRoutineId": 7
+  },
+  "exercises": [
+    {
+      "id": "test-bench",
+      "builtin": true,
+      "nameKo": "옛 벤치 이름",
+      "nameEn": "Old Bench Name",
+      "aliases": ["옛 별칭"],
+      "bodyPart": "CHEST",
+      "subPart": null,
+      "equipment": "BARBELL",
+      "recordType": "WEIGHT_REPS",
+      "archived": false,
+      "restSeconds": 180
+    },
+    {
+      "id": "test-pull-up",
+      "builtin": true,
+      "nameKo": "테스트 풀업",
+      "nameEn": "Test Pull-Up",
+      "aliases": [],
+      "bodyPart": "BACK",
+      "subPart": null,
+      "equipment": "BODYWEIGHT",
+      "recordType": "REPS",
+      "archived": false,
+      "restSeconds": null
+    },
+    {
+      "id": "test-retired-curl",
+      "builtin": true,
+      "nameKo": "다른 판의 컬",
+      "nameEn": "Other Edition Curl",
+      "aliases": [],
+      "bodyPart": "ARMS",
+      "subPart": "BICEPS",
+      "equipment": "DUMBBELL",
+      "recordType": "WEIGHT_REPS",
+      "archived": false,
+      "restSeconds": null
+    },
+    {
+      "id": "custom-0b9f6c1e-3a57-4d2c-9e41-7f2a5c8d1e60",
+      "builtin": false,
+      "nameKo": "원암 케이블 푸시다운",
+      "nameEn": null,
+      "aliases": ["푸시다운"],
+      "bodyPart": "ARMS",
+      "subPart": "TRICEPS",
+      "equipment": "CABLE",
+      "recordType": "DURATION",
+      "archived": true,
+      "restSeconds": 45
+    }
+  ],
+  "routines": [
+    {
+      "id": 7,
+      "name": "가슴과 삼두",
+      "position": 0,
+      "exercises": [
+        {
+          "exerciseId": "test-bench",
+          "setCount": 4,
+          "targetWeightG": 60000,
+          "targetRepsMin": 8,
+          "targetRepsMax": 10,
+          "targetDurationS": null
+        },
+        {
+          "exerciseId": "custom-0b9f6c1e-3a57-4d2c-9e41-7f2a5c8d1e60",
+          "setCount": 2,
+          "targetWeightG": null,
+          "targetRepsMin": null,
+          "targetRepsMax": null,
+          "targetDurationS": 30
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "name": "등",
+      "position": 1,
+      "exercises": [
+        {
+          "exerciseId": "test-pull-up",
+          "setCount": 3,
+          "targetWeightG": null,
+          "targetRepsMin": null,
+          "targetRepsMax": null,
+          "targetDurationS": null
+        }
+      ]
+    }
+  ],
+  "workouts": [
+    {
+      "routineId": 7,
+      "routineName": "가슴과 삼두",
+      "startedAt": 1794825000000,
+      "finishedAt": 1794828720000,
+      "note": "지어낸 기록",
+      "exercises": [
+        {
+          "exerciseId": "test-bench",
+          "recordType": "WEIGHT_REPS",
+          "note": "어깨가 뻐근했다",
+          "targetWeightG": 60000,
+          "targetRepsMin": 8,
+          "targetRepsMax": 10,
+          "targetDurationS": null,
+          "sets": [
+            { "weightG": 60000, "reps": 10, "durationS": null, "completedAt": 1794825250000 },
+            { "weightG": 62500, "reps": 8, "durationS": null, "completedAt": 1794825445000 }
+          ]
+        },
+        {
+          "exerciseId": "custom-0b9f6c1e-3a57-4d2c-9e41-7f2a5c8d1e60",
+          "recordType": "WEIGHT_REPS",
+          "note": null,
+          "targetWeightG": null,
+          "targetRepsMin": null,
+          "targetRepsMax": null,
+          "targetDurationS": null,
+          "sets": [
+            { "weightG": 20000, "reps": 12, "durationS": null, "completedAt": 1794826000000 }
+          ]
+        }
+      ]
+    },
+    {
+      "routineId": null,
+      "routineName": null,
+      "startedAt": 1794911400000,
+      "finishedAt": 1794913200000,
+      "note": null,
+      "exercises": [
+        {
+          "exerciseId": "test-retired-curl",
+          "recordType": "WEIGHT_REPS",
+          "note": null,
+          "targetWeightG": null,
+          "targetRepsMin": null,
+          "targetRepsMax": null,
+          "targetDurationS": null,
+          "sets": [
+            { "weightG": 12500, "reps": 10, "durationS": null, "completedAt": 1794911700000 }
+          ]
+        },
+        {
+          "exerciseId": "test-pull-up",
+          "recordType": "REPS",
+          "note": null,
+          "targetWeightG": null,
+          "targetRepsMin": null,
+          "targetRepsMax": null,
+          "targetDurationS": null,
+          "sets": [
+            { "weightG": null, "reps": 9, "durationS": null, "completedAt": 1794912000000 }
+          ]
+        }
+      ]
+    },
+    {
+      "routineId": 3,
+      "routineName": "등",
+      "startedAt": 1794990000000,
+      "finishedAt": null,
+      "note": null,
+      "exercises": [
+        {
+          "exerciseId": "test-pull-up",
+          "recordType": "REPS",
+          "note": null,
+          "targetWeightG": null,
+          "targetRepsMin": null,
+          "targetRepsMax": null,
+          "targetDurationS": null,
+          "sets": [
+            { "weightG": null, "reps": 8, "durationS": null, "completedAt": 1794990300000 },
+            { "weightG": null, "reps": 8, "durationS": null, "completedAt": null }
+          ]
+        }
+      ]
+    }
+  ]
+}
