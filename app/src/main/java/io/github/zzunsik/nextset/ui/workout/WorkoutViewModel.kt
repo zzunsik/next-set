@@ -13,7 +13,6 @@ import io.github.zzunsik.nextset.domain.repository.RoutineRepository
 import io.github.zzunsik.nextset.domain.repository.SettingsRepository
 import io.github.zzunsik.nextset.domain.repository.WorkoutRepository
 import io.github.zzunsik.nextset.domain.rule.RoutineUpdatePlan
-import io.github.zzunsik.nextset.domain.rule.applyRoutineUpdate
 import io.github.zzunsik.nextset.domain.rule.isFilled
 import io.github.zzunsik.nextset.domain.rule.planRoutineUpdate
 import io.github.zzunsik.nextset.domain.rule.suggestedValue
