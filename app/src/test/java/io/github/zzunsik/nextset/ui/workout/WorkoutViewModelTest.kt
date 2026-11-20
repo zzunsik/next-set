@@ -19,6 +19,7 @@ import io.github.zzunsik.nextset.domain.model.Target
 import io.github.zzunsik.nextset.domain.model.Weight
 import io.github.zzunsik.nextset.ui.component.NumberFieldKind
 import io.github.zzunsik.nextset.ui.component.NumberPadKey
+import io.github.zzunsik.nextset.ui.ViewModelJobs
 import io.github.zzunsik.nextset.ui.exercise.MainDispatcherRule
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -59,9 +60,12 @@ class WorkoutViewModelTest {
     @Before
     fun setUp() = runBlocking { db = TestDb().seed(); Unit }
 
+    /** 데이터베이스를 닫기 전에 화면 상태의 코루틴이 모두 끝나기를 기다린다(#75). */
+    private val viewModelJobs = ViewModelJobs()
+
     @After
     fun tearDown() {
-        store.clear()
+        viewModelJobs.clearAndAwait(store)
         db.close()
     }
 
@@ -71,7 +75,7 @@ class WorkoutViewModelTest {
         val factory = viewModelFactory {
             initializer { WorkoutViewModel(db.workouts, db.routines, workoutId, clock = { at(clockMinutes++) }) }
         }
-        return ViewModelProvider.create(store, factory)["vm-${created++}", WorkoutViewModel::class]
+        return viewModelJobs.track(ViewModelProvider.create(store, factory)["vm-${created++}", WorkoutViewModel::class])
     }
 
     private fun WorkoutViewModel.awaitState(predicate: (WorkoutUiState) -> Boolean): WorkoutUiState = runBlocking {
