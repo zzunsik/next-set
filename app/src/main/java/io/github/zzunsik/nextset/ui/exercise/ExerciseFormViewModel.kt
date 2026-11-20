@@ -42,6 +42,17 @@ data class ExerciseFormUiState(
     val canSave: Boolean
         get() = !loading && !busy && outcome == null &&
             name.isNotBlank() && bodyPart != null && equipment != null && !nameConflict
+
+    /**
+     * 이름을 적었는데 부위를 고르지 않았다. "저장" 위에 고를 항목을 알린다(#55).
+     * 이름이 비었을 때는 빈 이름 칸이 이유이므로 알리지 않는다.
+     */
+    val missingBodyPart: Boolean
+        get() = !loading && name.isNotBlank() && bodyPart == null
+
+    /** 이름을 적었는데 장비를 고르지 않았다. [missingBodyPart]와 같은 때에 알린다. */
+    val missingEquipment: Boolean
+        get() = !loading && name.isNotBlank() && equipment == null
 }
 
 sealed interface ExerciseFormOutcome {

@@ -68,6 +68,9 @@
     <string name="exercise_form_save">저장</string>
     <string name="exercise_form_delete">종목 지우기</string>
     <string name="exercise_form_name_conflict">이미 있는 종목 이름이에요. 다른 이름을 적어 주세요.</string>
+    <string name="exercise_form_missing_body_part">부위를 골라야 저장할 수 있어요.</string>
+    <string name="exercise_form_missing_equipment">장비를 골라야 저장할 수 있어요.</string>
+    <string name="exercise_form_missing_both">부위와 장비를 골라야 저장할 수 있어요.</string>
     <string name="exercise_form_record_type_notice">기록 방식을 바꾸면 최고 기록과 지난번 기록은 새 방식으로 적은 세트만 봐요. 지난 기록은 그대로 남아요.</string>
     <string name="exercise_delete_confirm">이 종목을 지울까요? 운동 기록은 남아요.</string>
 

@@ -149,4 +149,22 @@ class ExerciseFormScreenshotTest {
     fun nameConflict() = capture(
         ExerciseFormUiState(name = "바벨 벤치 프레스", bodyPart = BodyPart.CHEST, equipment = Equipment.BARBELL, nameConflict = true),
     )
+
+    /** 이름만 적고 부위와 장비를 고르지 않은 상태. "저장" 위에 고를 항목이 보인다(#55). */
+    private val nameOnly = ExerciseFormUiState(name = "스레드 풀다운")
+
+    @Test
+    fun missingChoices() = capture(nameOnly)
+
+    @Test
+    @Config(fontScale = LARGE_FONT_SCALE)
+    fun missingChoicesLargeFont() = capture(nameOnly)
+
+    @Test
+    @Config(qualifiers = "+night")
+    fun missingChoicesDark() = capture(nameOnly)
+
+    @Test
+    @Config(qualifiers = "+night", fontScale = LARGE_FONT_SCALE)
+    fun missingChoicesDarkLargeFont() = capture(nameOnly)
 }

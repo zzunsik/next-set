@@ -100,14 +100,33 @@ fun ExerciseFormScreen(
             )
         },
         bottomBar = {
-            PrimaryButton(
-                text = stringResource(R.string.exercise_form_save),
-                onClick = onSave,
-                enabled = state.canSave,
+            Column(
                 modifier = Modifier
                     .navigationBarsPadding()
                     .padding(horizontal = spacing.lg, vertical = spacing.sm),
-            )
+                verticalArrangement = Arrangement.spacedBy(spacing.sm),
+            ) {
+                // 저장이 왜 비활성인지 버튼 바로 위에 적는다. 글자가 커져 고를 항목이 화면 밖에 있어도 보인다(#55).
+                val missingChoice = when {
+                    state.missingBodyPart && state.missingEquipment -> R.string.exercise_form_missing_both
+                    state.missingBodyPart -> R.string.exercise_form_missing_body_part
+                    state.missingEquipment -> R.string.exercise_form_missing_equipment
+                    else -> null
+                }
+                if (missingChoice != null) {
+                    Text(
+                        text = stringResource(missingChoice),
+                        style = NextSetTheme.typography.caption,
+                        color = colors.text2,
+                        modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite },
+                    )
+                }
+                PrimaryButton(
+                    text = stringResource(R.string.exercise_form_save),
+                    onClick = onSave,
+                    enabled = state.canSave,
+                )
+            }
         },
     ) { innerPadding ->
         if (state.loading) return@Scaffold

@@ -209,4 +209,25 @@ class ExerciseFormViewModelTest {
         form.delete()
         assertNull(form.uiState.value.outcome)
     }
+
+    /** 이름을 적은 뒤 빠진 부위와 장비를 알린다. 고를 때마다 알림이 줄어 저장할 수 있게 되면 사라진다(#55). */
+    @Test
+    fun tellsWhichChoicesAreMissingOnceNameIsFilled() = runTest {
+        val form = form()
+        assertFalse("이름이 비면 빈 이름 칸이 이유다", form.uiState.value.missingBodyPart)
+        assertFalse(form.uiState.value.missingEquipment)
+
+        form.onNameChange("스레드 풀다운")
+        assertTrue(form.uiState.value.missingBodyPart)
+        assertTrue(form.uiState.value.missingEquipment)
+        assertFalse(form.uiState.value.canSave)
+
+        form.onBodyPartSelect(BodyPart.BACK)
+        assertFalse(form.uiState.value.missingBodyPart)
+        assertTrue(form.uiState.value.missingEquipment)
+
+        form.onEquipmentSelect(Equipment.CABLE)
+        assertFalse(form.uiState.value.missingEquipment)
+        assertTrue(form.uiState.value.canSave)
+    }
 }
