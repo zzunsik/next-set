@@ -149,7 +149,7 @@ v1은 GitHub Releases에 서명한 APK를 올려 배포한다(REL-01). 태그를
 
 - 로컬에서 서명한 릴리스 APK를 만들 때는 환경 변수 `NEXTSET_RELEASE_STORE_FILE`, `NEXTSET_RELEASE_STORE_PASSWORD`, `NEXTSET_RELEASE_KEY_ALIAS`(키 비밀번호가 다르면 `NEXTSET_RELEASE_KEY_PASSWORD`)를 주거나 같은 이름의 Gradle 속성을 `~/.gradle/gradle.properties`에 둔다. 저장소 안의 `gradle.properties`에는 넣지 않는다. 키스토어 경로가 없으면 서명하지 않은 APK가 나오고 디버그 빌드와 CI 검사는 영향을 받지 않는다.
 - **키를 잃으면 되돌릴 수 없다.** Android는 처음 설치한 APK와 같은 키로 서명한 APK만 업데이트로 받는다. 첫 APK를 배포한 뒤 키를 잃거나 바꾸면 기존 사용자는 앱을 지우고(기록도 함께 지워진다) 다시 설치해야 한다. 키가 새면 다른 사람이 업데이트로 위장한 APK를 만들 수 있다. 키스토어와 비밀번호는 저장소 밖 두 곳 이상(예: 비밀번호 관리자와 오프라인 저장 장치)에 나눠 보관한다. Android 개발자 인증(`docs/requirements.md` "Android 개발자 인증(11번)")에도 이 키의 인증서 지문을 등록하므로 키를 잃으면 등록도 할 수 없다.
-- 태그 보호(권장, 소유자 설정): `v*` 태그에 ruleset을 걸어 태그를 옮기거나 지우지 못하게 한다(Restrict updates, Restrict deletions). 지금은 걸려 있지 않다. 걸면 "저장소 설정" 절에 적는다.
+- 릴리스 태그는 옮기거나 지울 수 없다(ruleset `protect-release-tags`, "저장소 설정"). 잘못 단 태그는 고치지 말고 다음 버전으로 새 태그를 단다. 워크플로나 설정을 시험할 때는 `v`로 시작하지 않는 태그 이름을 쓴다.
 
 ## 저장소 설정
 
@@ -161,6 +161,7 @@ GitHub 설정으로 강제하는 것들입니다. 설정을 바꾸면 이 절도
   - `develop` 대상 PR은 `develop`의 최신 커밋을 포함해야 하고 squash로만 합쳐진다.
   - `main` 대상 PR은 머지 커밋으로만 합쳐진다. 릴리스 머지 커밋은 `develop`에 없으므로 최신 반영 조건은 두지 않는다.
   - 우회 목록이 비어 있어 저장소 소유자도 같은 규칙을 따른다.
+- `v*` 태그는 ruleset `protect-release-tags`로 보호한다. 태그를 옮기거나(update) 지우는(deletion) push는 거부된다. 새 태그를 다는 것은 막지 않는다. 우회 목록이 비어 있다(#81).
 - 머지된 작업 브랜치는 자동으로 지워진다.
 - 시크릿 스캐닝과 푸시 차단이 켜져 있다.
 - Dependabot이 보안 알림과 보안 업데이트 PR을 보내고, 주 1회 의존성 업데이트 PR을 보낸다(`.github/dependabot.yml`). Dependabot PR은 이슈 없이 받고 다른 PR과 같은 검사를 거친다.
