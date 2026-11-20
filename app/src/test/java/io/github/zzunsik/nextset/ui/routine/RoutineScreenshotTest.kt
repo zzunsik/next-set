@@ -5,7 +5,6 @@ import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onRoot
 import com.github.takahirom.roborazzi.captureRoboImage
 import io.github.zzunsik.nextset.domain.model.Exercise
-import io.github.zzunsik.nextset.domain.model.Routine
 import io.github.zzunsik.nextset.domain.model.RoutineExercise
 import io.github.zzunsik.nextset.domain.model.Target
 import io.github.zzunsik.nextset.domain.model.Weight
@@ -39,8 +38,6 @@ private object Samples {
         item(7, TestExercises.lyingLegCurl, 3, Target(repsMax = 15)),
         item(8, TestExercises.plank, 2, Target(durationSeconds = 60)),
     )
-
-    val routines = listOf("가슴과 삼두", "등과 이두", "하체", "어깨").mapIndexed { i, name -> Routine(i + 1L, name, i) }
 }
 
 /** 루틴 편집의 스크린샷 비교와 접근성 검사. 화면 모드는 시스템 설정(`+night`)을 따른다. */
@@ -192,43 +189,4 @@ class RoutineExerciseScreenshotTest {
             loading = false,
         ),
     )
-}
-
-/** 루틴 목록(임시 화면)의 스크린샷 비교와 접근성 검사. */
-@RunWith(RobolectricTestRunner::class)
-@GraphicsMode(GraphicsMode.Mode.NATIVE)
-@Config(qualifiers = SCREENSHOT_DEVICE)
-class RoutineListScreenshotTest {
-    @get:Rule
-    val compose = createComposeRule()
-
-    private val routines = RoutineListUiState(routines = Samples.routines, loading = false)
-
-    private fun capture(state: RoutineListUiState) {
-        compose.setContent {
-            NextSetTheme {
-                RoutineListScreen(state = state, onBack = {}, onNewRoutine = {}, onOpenRoutine = {}, onReorder = {})
-            }
-        }
-        compose.assertAccessible()
-        compose.onRoot().captureRoboImage()
-    }
-
-    @Test
-    fun light() = capture(routines)
-
-    @Test
-    @Config(fontScale = LARGE_FONT_SCALE)
-    fun lightLargeFont() = capture(routines)
-
-    @Test
-    @Config(qualifiers = "+night")
-    fun dark() = capture(routines)
-
-    @Test
-    @Config(qualifiers = "+night", fontScale = LARGE_FONT_SCALE)
-    fun darkLargeFont() = capture(routines)
-
-    @Test
-    fun empty() = capture(RoutineListUiState(loading = false))
 }

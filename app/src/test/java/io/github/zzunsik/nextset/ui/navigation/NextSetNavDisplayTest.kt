@@ -66,14 +66,16 @@ class NextSetNavDisplayTest {
     }
 
     private fun openSettings() {
-        compose.onNodeWithText(app.getString(R.string.home_open_settings)).performClick()
+        // 하단 내비게이션의 "설정" 탭(#23).
+        compose.onNodeWithText(app.getString(R.string.nav_settings)).performClick()
         compose.onNodeWithText(app.getString(R.string.settings_default_rest)).assertIsDisplayed()
     }
 
     @Test
     fun startsAtHome() {
         show()
-        compose.onNodeWithText(app.getString(R.string.home_placeholder)).assertIsDisplayed()
+        // 루틴이 없는 홈의 빈 상태(#23).
+        compose.onNodeWithText(app.getString(R.string.home_empty)).assertIsDisplayed()
     }
 
     @Test

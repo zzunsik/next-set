@@ -36,6 +36,7 @@ import sh.calvin.reorderable.ReorderableCollectionItemScope
  * - 손잡이를 끌면 [Reorderable](https://github.com/Calvin-LL/Reorderable)이 행을 옮긴다. 놓으면 [onDragStopped]가 불린다.
  * - 화면 낭독기에는 "위로 옮기기", "아래로 옮기기" 동작을 붙인다([onMove], 끌기가 어려운 사용자를 위한 길).
  * - 행을 누르면 [onClick]. [onClickLabel]은 화면 낭독기가 읽는 동작 이름이다.
+ * - [trailing]은 행 끝의 버튼 자리다(홈 순서 편집의 지우기 버튼).
  */
 @Composable
 internal fun ReorderableCollectionItemScope.ReorderableRow(
@@ -49,6 +50,7 @@ internal fun ReorderableCollectionItemScope.ReorderableRow(
     onDragStopped: () -> Unit,
     isDragging: Boolean,
     modifier: Modifier = Modifier,
+    trailing: @Composable (() -> Unit)? = null,
 ) {
     val colors = NextSetTheme.colors
     val spacing = NextSetTheme.spacing
@@ -66,7 +68,7 @@ internal fun ReorderableCollectionItemScope.ReorderableRow(
                     if (canMoveDown) add(CustomAccessibilityAction(moveDown) { onMove(1); true })
                 }
             }
-            .padding(start = spacing.xs, end = spacing.lg),
+            .padding(start = spacing.xs, end = if (trailing != null) spacing.xs else spacing.lg),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(spacing.xs),
     ) {
@@ -95,6 +97,7 @@ internal fun ReorderableCollectionItemScope.ReorderableRow(
                 Text(text = caption, style = NextSetTheme.typography.caption, color = colors.text2)
             }
         }
+        trailing?.invoke()
     }
 }
 
