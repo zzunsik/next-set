@@ -19,6 +19,7 @@ import io.github.zzunsik.nextset.domain.model.Target
 import io.github.zzunsik.nextset.domain.model.Weight
 import io.github.zzunsik.nextset.ui.component.NumberFieldKind
 import io.github.zzunsik.nextset.ui.component.NumberPadKey
+import io.github.zzunsik.nextset.ui.ViewModelJobs
 import io.github.zzunsik.nextset.ui.exercise.MainDispatcherRule
 import java.time.Duration
 import java.time.LocalDate
@@ -28,8 +29,8 @@ import java.time.ZoneOffset
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.cancel
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.cancelAndJoin
+import kotlinx.coroutines.job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
@@ -69,19 +70,20 @@ class HistoryViewModelTest {
     /** 화면이 보는 것처럼 화면 상태를 구독해 둔다. 화면 상태는 구독하는 동안에만 데이터베이스를 읽는다. */
     private val screens = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 
+    private val viewModelJobs = ViewModelJobs()
+
     @After
     fun tearDown() {
-        screens.cancel()
-        // 화면 상태가 차례로 하던 쓰기(예: 더한 세트의 값 맞추기)가 끝나기를 잠깐 기다린다. 그 사이에 데이터베이스를 닫으면
-        // 남은 쓰기가 닫힌 데이터베이스를 읽어 뒤에 도는 다른 테스트 클래스가 UncaughtExceptionsBeforeTest로 실패한다.
-        runBlocking { withContext(Dispatchers.Default) { delay(WRITE_DRAIN_MILLIS) } }
-        store.clear()
+        runBlocking { screens.coroutineContext.job.cancelAndJoin() }
+        // 화면 상태가 하던 쓰기(예: 더한 세트의 값 맞추기)가 끝나기를 시간을 정해 기다리지 않고, 화면 상태를 지운 뒤 그
+        // 코루틴이 모두 끝난 다음에 데이터베이스를 닫는다(#75).
+        viewModelJobs.clearAndAwait(store)
         db.close()
     }
 
     private inline fun <reified T : ViewModel> create(crossinline make: () -> T): T {
         val factory = viewModelFactory { initializer { make() } }
-        return ViewModelProvider.create(store, factory)["vm-${created++}", T::class]
+        return viewModelJobs.track(ViewModelProvider.create(store, factory)["vm-${created++}", T::class])
     }
 
     private fun list() = create { HistoryListViewModel(db.workouts, db.routines, clock = { at(nowMinutes) }, zone = ZoneOffset.UTC) }.also { vm -> screens.launch { vm.uiState.collect {} } }
@@ -285,6 +287,5 @@ class HistoryViewModelTest {
 
     private companion object {
         const val TIMEOUT = 5_000L
-        const val WRITE_DRAIN_MILLIS = 500L
     }
 }
