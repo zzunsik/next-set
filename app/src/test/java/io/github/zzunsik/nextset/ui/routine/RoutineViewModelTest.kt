@@ -20,18 +20,13 @@ import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 
-/** 루틴 목록, 루틴 편집, 종목 설정의 화면 상태(RTN-01~RTN-05). */
+/** 루틴 편집과 종목 설정의 화면 상태(RTN-01~RTN-05). 새 루틴 만들기와 루틴 순서 바꾸기는 홈(`HomeViewModelTest`)이 맡는다. */
 class RoutineViewModelTest {
     @get:Rule
     val main = MainDispatcherRule()
 
     private val repository = FakeRoutineRepository()
     private val settings = FakeSettingsRepository()
-
-    private fun TestScope.list(): RoutineListViewModel =
-        RoutineListViewModel(repository, NEW_NAME).also { vm ->
-            backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { vm.uiState.collect {} }
-        }
 
     private fun TestScope.edit(routineId: Long, isNew: Boolean = false): RoutineEditViewModel =
         RoutineEditViewModel(repository, routineId, isNew, NEW_NAME).also { vm ->
@@ -55,16 +50,6 @@ class RoutineViewModelTest {
     }
 
     // RTN-01
-
-    @Test
-    fun newRoutineIsSavedAtTheEndWithTheDefaultName() = runTest {
-        routineWith("가슴")
-        var opened: Long? = null
-        list().createRoutine { opened = it }
-
-        assertEquals(listOf("가슴", NEW_NAME), names())
-        assertEquals(repository.routines.value.last().id, opened)
-    }
 
     @Test
     fun newRoutineShowsAnEmptyNameFieldAndRenamesAsYouType() = runTest {
@@ -309,19 +294,6 @@ class RoutineViewModelTest {
     }
 
     // RTN-05
-
-    @Test
-    fun routineListCanBeReordered() = runTest {
-        val a = routineWith("가슴")
-        val b = routineWith("등")
-        val c = routineWith("하체")
-        val list = list()
-        list.reorder(listOf(c, a, b))
-
-        assertEquals(listOf("하체", "가슴", "등"), names())
-        assertEquals(listOf(0, 1, 2), repository.routines.value.map { it.position })
-        assertEquals(listOf(c, a, b), list.uiState.value.routines.map { it.id })
-    }
 
     @Test
     fun movedReturnsNullAtTheEdges() {

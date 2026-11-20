@@ -31,7 +31,7 @@ enum class SettingsDialog { DefaultRest, Theme }
  * 설정 화면(docs/DESIGN.md "설정").
  *
  * 아직 만들지 않은 화면으로 가는 행([onManageExercises], [onBackup]이 null)은 "준비 중이에요."를 보이고 누르는 요소가 아니다.
- * 알림이 꺼져 있으면([notificationsOff]) "알림 꺼짐" 행을 보인다(REST-09). 하단 내비게이션은 홈(#23)이 생길 때 더한다.
+ * 알림이 꺼져 있으면([notificationsOff]) "알림 꺼짐" 행을 보인다(REST-09).
  */
 @Composable
 fun SettingsScreen(
