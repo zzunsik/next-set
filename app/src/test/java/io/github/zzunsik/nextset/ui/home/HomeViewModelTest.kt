@@ -2,6 +2,7 @@ package io.github.zzunsik.nextset.ui.home
 
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStore
+import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import io.github.zzunsik.nextset.data.repository.TestDb
@@ -13,8 +14,11 @@ import io.github.zzunsik.nextset.ui.exercise.MainDispatcherRule
 import java.time.LocalDate
 import java.time.ZoneOffset
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.job
+import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
@@ -49,9 +53,15 @@ class HomeViewModelTest {
     @Before
     fun setUp() = runBlocking { db = TestDb().seed(); Unit }
 
+    /** 만든 화면 상태의 코루틴 범위(`viewModelScope`). 데이터베이스를 닫기 전에 모두 끝났는지 기다린다. */
+    private val viewModelJobs = mutableListOf<Job>()
+
     @After
     fun tearDown() {
+        // 화면 상태를 지우면 viewModelScope가 취소되지만 돌던 데이터베이스 작업이 끝나야 실제로 끝난다. 그 전에 닫으면
+        // 남은 작업이 닫힌 데이터베이스를 읽는다. 모든 화면 상태 코루틴이 끝난 뒤에 닫는다(#75).
         store.clear()
+        runBlocking { withContext(Dispatchers.Default) { withTimeout(TIMEOUT) { viewModelJobs.joinAll() } } }
         db.close()
     }
 
@@ -62,9 +72,18 @@ class HomeViewModelTest {
             }
         }
         return ViewModelProvider.create(store, factory)[HomeViewModel::class]
+            .also { viewModelJobs += it.viewModelScope.coroutineContext.job }
     }
 
     private fun HomeViewModel.awaitState(predicate: (HomeUiState) -> Boolean): HomeUiState = await(uiState) { !it.loading && predicate(it) }
+
+    /**
+     * 물음(dialog)을 띄우거나 닫은 뒤 화면 상태에 들어올 때까지 기다린다. 물음은 바로 바뀌지만 화면 상태는 저장소의 흐름과
+     * 합쳐 만들므로 늦게 따라올 수 있다. 기다리지 않고 `uiState.value`를 읽으면 이전 상태를 보고 실패했다(#75).
+     */
+    private fun HomeViewModel.awaitDialog(shown: Boolean) {
+        awaitState { (it.dialog != null) == shown }
+    }
 
     private fun <T> await(flow: Flow<T>, predicate: (T) -> Boolean = { true }): T = runBlocking {
         withContext(Dispatchers.Default) { withTimeout(TIMEOUT) { flow.first(predicate) } }
@@ -240,12 +259,14 @@ class HomeViewModelTest {
         vm.awaitState { it.inProgress != null }
 
         vm.onStartRoutine(b)
+        vm.awaitDialog(shown = true)
         val dialog = vm.uiState.value.dialog as HomeDialog.InProgress
         assertEquals(PendingStart.FromRoutine(b), dialog.pending)
         assertEquals("새 운동은 아직 시작하지 않는다", workoutId, inProgress()?.id)
 
         vm.onPromptResume()
         assertEquals(workoutId, vm.nextOpened())
+        vm.awaitDialog(shown = false)
         assertNull(vm.uiState.value.dialog)
     }
 
@@ -263,6 +284,7 @@ class HomeViewModelTest {
         vm.awaitState { it.inProgress != null }
 
         vm.onStartEmpty()
+        vm.awaitDialog(shown = true)
         assertEquals(PendingStart.Empty, (vm.uiState.value.dialog as HomeDialog.InProgress).pending)
         vm.onStartRoutine(b)
         vm.onPromptFinishAndStart()
@@ -281,7 +303,9 @@ class HomeViewModelTest {
         val vm = viewModel()
         vm.awaitState { it.inProgress != null }
         vm.onStartEmpty()
+        vm.awaitDialog(shown = true)
         vm.dismissDialog()
+        vm.awaitDialog(shown = false)
         assertNull(vm.uiState.value.dialog)
         assertEquals(workoutId, inProgress()?.id)
     }
@@ -311,6 +335,7 @@ class HomeViewModelTest {
         vm.awaitState { it.topPinned && it.routines.size == 2 }
 
         vm.onDeleteRequest(b)
+        vm.awaitDialog(shown = true)
         assertEquals(HomeDialog.DeleteRoutine(b, "등"), vm.uiState.value.dialog)
         vm.onDeleteConfirm()
         val state = vm.awaitState { it.routines.size == 1 && it.top?.routine?.id == a }
