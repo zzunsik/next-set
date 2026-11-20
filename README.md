@@ -6,6 +6,22 @@
 
 시작 화면만 있는 뼈대 단계입니다. 첫 버전에 넣을 것과 뺄 것은 [요구사항](docs/requirements.md)에 정리했습니다.
 
+## 설치
+
+Play 스토어에는 올리지 않고 [GitHub Releases](https://github.com/zzunsik/next-set/releases)로 배포합니다. 아직 올린 버전이 없습니다. Android 8.0 이상에서 설치할 수 있습니다.
+
+1. Releases에서 원하는 버전의 `next-set-vX.Y.Z.apk`를 기기에 내려받습니다.
+2. (선택) 같은 곳의 `next-set-vX.Y.Z.apk.sha256`와 내려받은 파일의 SHA-256 값이 같은지 확인합니다.
+
+   ```bash
+   sha256sum -c next-set-vX.Y.Z.apk.sha256
+   ```
+
+3. 기기에서 APK를 엽니다. 처음이면 내려받은 앱(브라우저나 파일 앱)에 "출처를 알 수 없는 앱 설치"를 허용하라는 안내가 나옵니다.
+4. 업데이트할 때도 새 버전의 APK를 같은 방법으로 설치합니다. 기록은 그대로 남습니다. 앱을 지우면 기록도 지워지므로 지우기 전에는 설정 > 백업에서 백업 파일을 내보내 둡니다.
+
+APK는 CI가 서명해 올립니다. 절차는 [AGENTS.md](AGENTS.md)의 "릴리스"에 있습니다.
+
 ## 빌드
 
 JDK 17 이상과 Android SDK(platform 37)가 필요합니다. Android Studio는 없어도 됩니다.
