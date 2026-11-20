@@ -66,3 +66,7 @@ data class RoutineEditKey(val routineId: Long, val isNew: Boolean = false) : Nav
 /** 루틴 종목 하나의 세트 수, 목표, 휴식 시간을 고치는 종목 설정(docs/DESIGN.md "루틴 편집"의 종목 설정). */
 @Serializable
 data class RoutineExerciseKey(val routineId: Long, val routineExerciseId: Long) : NavKey
+
+/** 백업 파일 내보내기와 가져오기(DATA-03, DATA-04). */
+@Serializable
+data object BackupKey : NavKey

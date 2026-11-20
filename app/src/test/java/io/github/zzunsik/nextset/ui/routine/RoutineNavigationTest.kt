@@ -20,6 +20,7 @@ import io.github.zzunsik.nextset.ui.exercise.EXERCISE_LIST_TAG
 import io.github.zzunsik.nextset.ui.exercise.TestExercises.benchPress
 import io.github.zzunsik.nextset.ui.exercise.TestExercises.pushUp
 import io.github.zzunsik.nextset.ui.navigation.NextSetNavDisplay
+import io.github.zzunsik.nextset.ui.settings.FakeBackupRepository
 import io.github.zzunsik.nextset.ui.settings.FakeLicenseRepository
 import io.github.zzunsik.nextset.ui.settings.FakeSettingsRepository
 import io.github.zzunsik.nextset.ui.theme.NextSetTheme
@@ -51,6 +52,7 @@ class RoutineNavigationTest {
                     licenseRepository = FakeLicenseRepository(),
                     exerciseRepository = repository.exercises,
                     routineRepository = repository,
+                    backupRepository = FakeBackupRepository(),
                 )
             }
         }

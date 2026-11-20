@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- 백업 정책을 정하기 전까지는 클라우드 백업과 기기 이전에 데이터를 넣지 않는다. -->
+<!-- 클라우드 백업과 기기 간 직접 전송에 앱 데이터를 넣지 않는다(DATA-05, docs/architecture.md "확인이 남은 항목" 6번).
+     기기를 옮길 때는 백업 파일 내보내기와 가져오기(DATA-03, DATA-04)를 쓴다. BackupPolicyTest가 이 규칙을 지킨다. -->
 <data-extraction-rules>
     <cloud-backup>
         <exclude domain="root" />

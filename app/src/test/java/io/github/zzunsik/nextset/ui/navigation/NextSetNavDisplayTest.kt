@@ -13,6 +13,7 @@ import androidx.compose.ui.test.performScrollTo
 import io.github.zzunsik.nextset.R
 import io.github.zzunsik.nextset.ui.exercise.FakeExerciseRepository
 import io.github.zzunsik.nextset.ui.routine.FakeRoutineRepository
+import io.github.zzunsik.nextset.ui.settings.FakeBackupRepository
 import io.github.zzunsik.nextset.ui.settings.FakeLicenseRepository
 import io.github.zzunsik.nextset.ui.settings.FakeSettingsRepository
 import io.github.zzunsik.nextset.ui.theme.NextSetTheme
@@ -49,6 +50,7 @@ class NextSetNavDisplayTest {
                         licenseRepository = FakeLicenseRepository(),
                         exerciseRepository = FakeExerciseRepository(),
                         routineRepository = FakeRoutineRepository(),
+                        backupRepository = FakeBackupRepository(),
                     )
                 }
             }
@@ -92,6 +94,20 @@ class NextSetNavDisplayTest {
         compose.onNodeWithText(app.getString(R.string.settings_manage_exercises)).performScrollTo().performClick()
         compose.onNodeWithText(app.getString(R.string.exercise_manage_title)).assertIsDisplayed()
         compose.onNodeWithText(app.getString(R.string.exercise_add_selected, 0)).assertDoesNotExist()
+
+        compose.onNodeWithContentDescription(app.getString(R.string.navigate_back)).performClick()
+        compose.onNodeWithText(app.getString(R.string.settings_default_rest)).assertIsDisplayed()
+    }
+
+    /** 설정의 "백업"이 백업 화면을 연다(#29). 앱에서는 "준비 중이에요."가 남지 않는다. */
+    @Test
+    fun backupRowOpensBackupScreen() {
+        show()
+        openSettings()
+        compose.onNodeWithText(app.getString(R.string.settings_not_ready)).assertDoesNotExist()
+        compose.onNodeWithText(app.getString(R.string.settings_backup)).performScrollTo().performClick()
+        compose.onNodeWithText(app.getString(R.string.backup_export)).assertIsDisplayed()
+        compose.onNodeWithText(app.getString(R.string.backup_import)).assertIsDisplayed()
 
         compose.onNodeWithContentDescription(app.getString(R.string.navigate_back)).performClick()
         compose.onNodeWithText(app.getString(R.string.settings_default_rest)).assertIsDisplayed()

@@ -22,7 +22,7 @@ import kotlinx.coroutines.launch
 /**
  * 설정과 오픈소스 라이선스 화면을 [backStack]에 잇는다.
  *
- * [onManageExercises]는 종목 고르기를 관리로 연다(#21, `NextSetNavDisplay`가 넘긴다). [onBackup]은 백업(#29) 화면이 생기면 넘긴다.
+ * [onManageExercises]는 종목 고르기를 관리로 연다(#21, `NextSetNavDisplay`가 넘긴다). [onBackup]은 백업 화면(#29, [backupEntries])을 연다.
  * null이면 그 행은 "준비 중이에요."를 보이고 누르는 요소가 아니다.
  */
 fun EntryProviderScope<NavKey>.settingsEntries(

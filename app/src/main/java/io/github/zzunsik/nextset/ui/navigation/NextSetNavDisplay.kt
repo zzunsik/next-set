@@ -10,6 +10,7 @@ import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
+import io.github.zzunsik.nextset.domain.repository.BackupRepository
 import io.github.zzunsik.nextset.domain.repository.ExerciseRepository
 import io.github.zzunsik.nextset.domain.repository.LicenseRepository
 import io.github.zzunsik.nextset.domain.repository.RoutineRepository
@@ -17,6 +18,7 @@ import io.github.zzunsik.nextset.domain.repository.SettingsRepository
 import io.github.zzunsik.nextset.ui.exercise.exerciseEntries
 import io.github.zzunsik.nextset.ui.home.HomeScreen
 import io.github.zzunsik.nextset.ui.routine.routineEntries
+import io.github.zzunsik.nextset.ui.settings.backupEntries
 import io.github.zzunsik.nextset.ui.settings.settingsEntries
 
 /**
@@ -29,6 +31,7 @@ fun NextSetNavDisplay(
     licenseRepository: LicenseRepository,
     exerciseRepository: ExerciseRepository,
     routineRepository: RoutineRepository,
+    backupRepository: BackupRepository,
     modifier: Modifier = Modifier,
 ) {
     val backStack = rememberNavBackStack(HomeKey)
@@ -51,13 +54,15 @@ fun NextSetNavDisplay(
             settingsRepository = settingsRepository,
             licenseRepository = licenseRepository,
             onManageExercises = { backStack.add(ExercisePickerKey(mode = ExercisePickerMode.Manage)) },
+            onBackup = { backStack.add(BackupKey) },
         )
+        backupEntries(backStack = backStack, backupRepository = backupRepository)
     }
 }
 
 /**
  * [backStack]을 그리는 곳. 여러 화면이 함께 쓰는 화면(종목 고르기 등)은 여기서 잇고,
- * 부르는 쪽 화면은 [entries]로 더한다. 테스트와 디버그 빌드의 시험 화면도 이 함수로 같은 화면을 띄운다.
+ * 부르는 쪽 화면은 [entries]로 더한다. 테스트도 이 함수로 같은 화면을 띄운다.
  * [results]는 뒤 화면이 앞 화면에 값을 돌려줄 때 쓴다.
  */
 @Composable
