@@ -105,6 +105,11 @@ jobs:
             exit 1
           fi
 
+      # 릴리스 빌드는 R8로 코드를 줄인다(docs/architecture.md "코드 축소(R8)"). 규칙이 모자라 R8이 실패하면
+      # 태그를 단 뒤가 아니라 PR에서 알도록 서명 없이 빌드해 본다. 서명은 release.yml만 한다.
+      - name: Release build (R8, unsigned)
+        run: ./gradlew assembleRelease --console=plain
+
       - name: Lint
         run: ./gradlew lint --console=plain
 
