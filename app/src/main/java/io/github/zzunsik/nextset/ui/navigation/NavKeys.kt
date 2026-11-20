@@ -48,3 +48,21 @@ data object LicensesKey : NavKey
 /** 오픈소스 라이선스 한 건. [id]는 `assets/licenses/index.json`의 항목 id다. */
 @Serializable
 data class LicenseDetailKey(val id: String) : NavKey
+
+/**
+ * 루틴 목록. 홈(#23)이 생기기 전까지 쓰는 임시 화면이다. 홈의 "순서 편집" 상태와 같은 일(RTN-05)을 하고
+ * "새 루틴"과 행을 눌러 루틴 편집을 연다. 홈이 이 일을 맡으면 지운다.
+ */
+@Serializable
+data object RoutineListKey : NavKey
+
+/**
+ * 루틴 편집(docs/DESIGN.md "루틴 편집"). [routineId]의 루틴은 이미 저장돼 있다.
+ * [isNew]면 "새 루틴"으로 막 만든 루틴이다. 제목이 "새 루틴"이고, 이름도 종목도 없이 나가면 버린다.
+ */
+@Serializable
+data class RoutineEditKey(val routineId: Long, val isNew: Boolean = false) : NavKey
+
+/** 루틴 종목 하나의 세트 수, 목표, 휴식 시간을 고치는 종목 설정(docs/DESIGN.md "루틴 편집"의 종목 설정). */
+@Serializable
+data class RoutineExerciseKey(val routineId: Long, val routineExerciseId: Long) : NavKey

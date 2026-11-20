@@ -111,6 +111,7 @@ flowchart LR
 | 직렬화 | kotlinx.serialization(JSON) | 플랫폼 `org.json`, Moshi, Gson | 아래 "직렬화" |
 | 비동기 | Kotlin 코루틴, Flow | RxJava, 스레드 풀 직접 사용 | Room 3이 코루틴을 요구한다 |
 | 화면 상태 | `lifecycle-viewmodel-compose`, `lifecycle-runtime-compose` | | 화면 회전과 화면 이동을 거쳐도 상태를 유지한다 |
+| 목록 순서 바꾸기 | Reorderable(`sh.calvin.reorderable:reorderable`) | 직접 구현, aclassen/ComposeReorderable, "위로"·"아래로" 버튼만 | `docs/DESIGN.md` "UI 라이브러리 선택"에서 정했다(2026-11-18 협의). 루틴 편집(#22)에서 넣었다 |
 | 날짜와 시간 | `java.time` | kotlinx-datetime | minSdk 26부터 플랫폼에 들어 있어 의존성이 필요 없다 |
 | 글꼴 | Pretendard 파일을 앱에 넣는다(협의) | 기기 기본 글꼴, 내려받는 글꼴 | 아래 "글꼴과 라이선스 고지" |
 | 스크린샷 테스트(테스트 전용) | Roborazzi | Paparazzi | 아래 "화면 검증" |
@@ -129,6 +130,7 @@ flowchart LR
 | Lifecycle(ViewModel) | 없음 | 통과 | 없음 | 탐침 |
 | kotlinx.serialization | Kotlin 컴파일러 플러그인. KSP와 KAPT가 필요 없다 | 통과 | 없음(JVM 라이브러리라 매니페스트가 없다) | 공식, 탐침 |
 | kotlinx.coroutines | 없음 | 통과 | 없음(위와 같다) | 공식, 탐침 |
+| Reorderable | 없음 | 통과(#22에서 검사 명령으로 확인) | 없음. 매니페스트가 없는 Compose 라이브러리다. `ManifestPermissionTest`와 CI의 릴리스 매니페스트 검사가 본다 | #22 빌드 |
 
 - 인터넷 권한은 디버그와 릴리스 빌드의 병합된 매니페스트에서 확인했다. 두 쪽 모두 `uses-permission`은 `DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION` 하나뿐이다. 이미 쓰고 있는 `androidx.core`가 넣는 앱 전용 권한이다(탐침).
 - Room 3이 `androidx.room3.MultiInstanceInvalidationService` 서비스 선언을 매니페스트에 더한다. `exported="false"`이고 권한을 요구하지 않는다(탐침).
@@ -1178,6 +1180,7 @@ CI에서 빌드한 뒤 `git status --porcelain app/schemas`가 비어 있는지 
 | DataStore(`datastore-preferences`). 고르지 않았다 | 1.3.0 | 탐침 테스트 |
 | Pretendard | 1.3.9(2023-11-05 릴리스) | 저장소의 파일 크기와 `LICENSE`, 탐침 빌드 |
 | Roborazzi(`roborazzi`, `roborazzi-accessibility-check`, Gradle 플러그인) | 1.79.0(2026-11-12 릴리스). #19에서 2026-11-19에 확인 | Maven Central 메타데이터, 빌드와 테스트, 릴리스 노트 |
+| Reorderable(`reorderable`) | 3.1.0(2026-04-20 릴리스). #22에서 2026-11-20에 확인. Compose foundation 1.7.0 이상을 요구한다 | Maven Central 메타데이터와 POM, 빌드와 테스트 |
 | Accessibility Test Framework | 4.1.1. `roborazzi-accessibility-check`가 끌어온다. 같은 날 Google Maven의 최신 안정판 | POM, 테스트 |
 
 탐침에서 한 일은 다음과 같다.

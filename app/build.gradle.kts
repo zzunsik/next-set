@@ -85,6 +85,7 @@ dependencies {
     ksp(libs.androidx.room3.compiler)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.kotlinx.coroutines.android)
+    implementation(libs.reorderable)
 
     testImplementation(libs.junit)
     testImplementation(libs.robolectric)

@@ -12,9 +12,11 @@ import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import io.github.zzunsik.nextset.domain.repository.ExerciseRepository
 import io.github.zzunsik.nextset.domain.repository.LicenseRepository
+import io.github.zzunsik.nextset.domain.repository.RoutineRepository
 import io.github.zzunsik.nextset.domain.repository.SettingsRepository
 import io.github.zzunsik.nextset.ui.exercise.exerciseEntries
 import io.github.zzunsik.nextset.ui.home.HomeScreen
+import io.github.zzunsik.nextset.ui.routine.routineEntries
 import io.github.zzunsik.nextset.ui.settings.settingsEntries
 
 /**
@@ -26,6 +28,7 @@ fun NextSetNavDisplay(
     settingsRepository: SettingsRepository,
     licenseRepository: LicenseRepository,
     exerciseRepository: ExerciseRepository,
+    routineRepository: RoutineRepository,
     modifier: Modifier = Modifier,
 ) {
     val backStack = rememberNavBackStack(HomeKey)
@@ -36,7 +39,13 @@ fun NextSetNavDisplay(
         exerciseRepository = exerciseRepository,
         modifier = modifier,
     ) {
-        entry<HomeKey> { HomeScreen(onOpenSettings = { backStack.add(SettingsKey) }) }
+        entry<HomeKey> {
+            HomeScreen(
+                onOpenSettings = { backStack.add(SettingsKey) },
+                onOpenRoutines = { backStack.add(RoutineListKey) },
+            )
+        }
+        routineEntries(backStack, results, routineRepository, exerciseRepository, settingsRepository)
         settingsEntries(
             backStack = backStack,
             settingsRepository = settingsRepository,

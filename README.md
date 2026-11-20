@@ -50,6 +50,7 @@ AGP, Gradle, Kotlin, Compose는 작업 시점의 최신 안정 버전을 쓰고,
 | 화면 | Jetpack Compose, Material 3 |
 | 화면 이동 | Navigation 3 |
 | 화면 상태 | Lifecycle(ViewModel) |
+| 목록 순서 바꾸기 | [Reorderable](https://github.com/Calvin-LL/Reorderable)(Apache License 2.0) |
 | 데이터베이스 | Room 3, `BundledSQLiteDriver`(`androidx.sqlite`). 주석 처리기는 KSP |
 | 직렬화 | kotlinx.serialization(JSON) |
 | 비동기 | kotlinx.coroutines |
@@ -106,5 +107,6 @@ AGP, Gradle, Kotlin, Compose는 작업 시점의 최신 안정 버전을 쓰고,
 | `app/src/main/res/drawable/ic_backspace.xml` | 커밋 [`10ecc14`](https://github.com/google/material-design-icons/blob/10ecc14790612ca8fd164e3f4ffe9c16fc50d5b7/symbols/android/backspace/materialsymbolsrounded/backspace_24px.xml)의 `symbols/android/backspace/materialsymbolsrounded/backspace_24px.xml` |
 | `app/src/main/res/drawable/ic_check.xml` | 커밋 [`10ecc14`](https://github.com/google/material-design-icons/blob/10ecc14790612ca8fd164e3f4ffe9c16fc50d5b7/symbols/android/check/materialsymbolsrounded/check_24px.xml)의 `symbols/android/check/materialsymbolsrounded/check_24px.xml` |
 | `app/src/main/res/drawable/ic_close.xml` | 커밋 [`10ecc14`](https://github.com/google/material-design-icons/blob/10ecc14790612ca8fd164e3f4ffe9c16fc50d5b7/symbols/android/close/materialsymbolsrounded/close_24px.xml)의 `symbols/android/close/materialsymbolsrounded/close_24px.xml` |
+| `app/src/main/res/drawable/ic_drag_indicator.xml` | 커밋 [`10ecc14`](https://github.com/google/material-design-icons/blob/10ecc14790612ca8fd164e3f4ffe9c16fc50d5b7/symbols/android/drag_indicator/materialsymbolsrounded/drag_indicator_24px.xml)의 `symbols/android/drag_indicator/materialsymbolsrounded/drag_indicator_24px.xml` |
 | `app/src/main/res/drawable/ic_keyboard_hide.xml` | 커밋 [`10ecc14`](https://github.com/google/material-design-icons/blob/10ecc14790612ca8fd164e3f4ffe9c16fc50d5b7/symbols/android/keyboard_hide/materialsymbolsrounded/keyboard_hide_24px.xml)의 `symbols/android/keyboard_hide/materialsymbolsrounded/keyboard_hide_24px.xml` |
 | `app/src/main/res/drawable/ic_search.xml` | 커밋 [`10ecc14`](https://github.com/google/material-design-icons/blob/10ecc14790612ca8fd164e3f4ffe9c16fc50d5b7/symbols/android/search/materialsymbolsrounded/search_24px.xml)의 `symbols/android/search/materialsymbolsrounded/search_24px.xml` |
