@@ -169,7 +169,7 @@ v1에 넣지 않는다. 이후 버전에서 다시 본다.
 
 ## 확인이 남은 항목
 
-설계 이슈에서 정한 것은 [정함]으로 표시하고 반영한 곳을 괄호 안에 적었다. 남은 것은 11번이다.
+설계 이슈에서 정한 것은 [정함], 조사로 확인한 것은 [확인함]으로 표시하고 반영한 곳을 괄호 안에 적었다.
 
 1. [정함] 직접 고른 맨 위 루틴은 그 루틴으로 운동을 마칠 때까지 유지한다. 다른 루틴이나 빈 운동을 마쳐도 풀리지 않고, 사용자가 자동 순서로 되돌리거나 그 루틴을 지우면 풀린다. (반영: HOME-03, DESIGN.md)
 2. [정함] 휴식 시간의 기본값은 2분이고 늘리고 줄이는 폭은 15초다. (반영: SET-01, REST-02, REST-03, DESIGN.md)
@@ -181,11 +181,33 @@ v1에 넣지 않는다. 이후 버전에서 다시 본다.
 8. [정함] 붙인다. 버튼은 시간 줄이기, 시간 늘리기, 건너뛰기 3개다. 승격된 알림에서 실제로 어떻게 보이는지는 구현할 때 에뮬레이터로 확인한다. (반영: REST-07, `docs/rest-timer.md`)
 9. [정함] 내장 종목은 130개다. 검수에서 고친 종목과 빠진 종목은 없었고, 그 뒤에 중량 종목 3개와 세부 부위를 더했다. (반영: EX-01, `docs/exercise-list.md`)
 10. [정함] 강조색과 완료 색은 디자인 방향 A의 값으로 정했다. 밝은 화면과 어두운 화면 모두 대비 기준을 넘는다. 값은 DESIGN.md의 색 토큰 표에 두고, 기기 화면 검토에서 바뀌면 그 표를 고친다. (반영: DESIGN.md)
-11. 한국에 Android 개발자 인증 의무가 적용될 때의 등록 절차. 2027년 이후 전 세계로 넓힌다고 발표됐다.
+11. [확인함] 한국에 Android 개발자 인증 의무가 적용될 때의 등록 절차. 전 세계 확대는 2027년 1월에 시작해 몇 달에 걸쳐 모든 국가와 모든 설치 경로로 넓힌다고 발표됐다. 한국만 따로 적은 날짜는 공식 문서에서 찾지 못했다. 저장소 소유자가 Android Developer Console에 등록하고 패키지 이름과 릴리스 키를 등록해야 한다. (반영: 아래 "Android 개발자 인증(11번)", `AGENTS.md` "릴리스", #30)
+
+### Android 개발자 인증(11번)
+
+#30에서 Google 공식 문서로 확인했다. 모든 링크는 2026-11-20에 열어 봤다. 날짜가 적힌 글은 날짜를 함께 적었다.
+
+**언제 적용되나**
+
+- 2026-09-30부터 브라질, 인도네시아, 싱가포르, 태국에서 참여 스토어(Google Play, Galaxy Store 등 7곳)로 설치하는 앱에 먼저 적용됐다. 이 1단계에서는 직접 내려받아 설치하는 앱(GitHub Releases의 APK 같은)에는 아직 적용되지 않는다. [개발자 인증 개요](https://developer.android.com/developer-verification), [FAQ](https://developer.android.com/developer-verification/guides/faq), [2026-03-30 글과 2026-09-29 수정 공지](https://android-developers.googleblog.com/2026/03/android-developer-verification-rolling-out-to-all-developers.html)
+- 전 세계 확대는 2027년 1월에 시작한다. 몇 달에 걸쳐 모든 국가의 인증된 Android 기기에서 모든 설치 경로로 넓힌다. [Expanding Android developer verification in 2027(2026-11-19)](https://developer.android.com/blog/posts/android-developer-verification-2027)
+- 한국만 따로 적은 날짜는 찾지 못했다. 늦어도 2027년 중에는 GitHub Releases로 받은 이 앱의 설치와 업데이트에도 적용된다고 보고 준비한다.
+- 적용되면 등록하지 않은 앱은 인증된 기기에서 설치와 업데이트가 막힌다. 사용자가 개발자 옵션에서 한 번 설정하는 "고급 흐름"(24시간 대기 포함)을 거치면 경고와 함께 설치할 수 있다. `adb` 설치는 인증이 필요 없다. [FAQ](https://developer.android.com/developer-verification/guides/faq), [2026-03-19 글](https://android-developers.googleblog.com/2026/03/android-developer-verification.html)
+
+**등록 절차(Play 밖에서만 배포하는 경우)**
+
+1. [Android Developer Console](https://developer.android.com/developer-verification/guides/android-developer-console)에서 계정을 만든다. 유형은 둘이다.
+   - 전체 배포(Full distribution): 설치 수 제한이 없다. 등록비 25달러, 정부 발급 신분증과 주소 증빙, 이메일과 전화 인증이 필요하다. 개인(Personal)과 조직(Organization)이 있다. [전체 배포 안내](https://developer.android.com/developer-verification/guides/full-distribution), [계정 유형](https://support.google.com/android-developer-console/answer/16641046)
+   - 제한 배포(Limited distribution): 무료이고 신분증이 필요 없지만 사용자가 승인한 기기 50대까지만 설치된다. 공개 배포에는 맞지 않는다. [제한 배포 안내](https://developer.android.com/developer-verification/guides/limited-distribution)
+2. 패키지 이름(`io.github.zzunsik.nextset`)과 릴리스 서명 인증서의 SHA-256 지문을 등록한다. 이미 배포한 패키지면 콘솔이 주는 파일을 APK의 `assets`에 넣고(오픈소스 안내의 파일 이름은 `assets/adi-registration.properties`) 릴리스 키로 서명한 APK를 올려 키를 가졌음을 증명한다. [Android Developer Console 안내](https://developer.android.com/developer-verification/guides/android-developer-console), [오픈소스 앱 등록](https://developer.android.com/developer-verification/guides/open-source-app-registration)
+3. 서명 키를 잃으면 등록할 수 없다. 키 보관 책임은 `AGENTS.md` "릴리스"에 적었다. [FAQ](https://developer.android.com/developer-verification/guides/faq)
+
+확인하지 못한 것: 한국의 시행일, 한국 개인이 내야 하는 신분증과 서류의 정확한 목록, 이미 설치된 미등록 앱이 실행 중에 영향을 받는지. 등록은 저장소 소유자의 개인 정보가 필요해 이 저장소의 작업으로 하지 않는다. 위 2번의 `assets` 파일을 넣어야 하면 그때 이슈를 만든다.
 
 ## 참고한 자료
 
 - [디자인 레퍼런스](design-references.md), [종목 데이터 조사](exercise-data.md)
 - [Back up user data with Auto Backup](https://developer.android.com/identity/data/autobackup)
 - [Android developer verification: Rolling out to all developers](https://android-developers.googleblog.com/2026/03/android-developer-verification-rolling-out-to-all-developers.html)
+- [Expanding Android developer verification in 2027](https://developer.android.com/blog/posts/android-developer-verification-2027)
 - [Play Console 앱 테스트 요건](https://support.google.com/googleplay/android-developer/answer/14151465)

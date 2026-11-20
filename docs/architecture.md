@@ -291,6 +291,24 @@ class AppContainer(context: Context) {
 - 기준 이미지는 `app/src/test/screenshots/`에 커밋한다. `gradle.properties`의 `roborazzi.test.verify=true`로 `testDebugUnitTest`가 늘 기준 이미지와 비교한다. 검사 명령과 CI가 따로 비교 단계를 부르지 않아도 화면이 바뀌면 실패한다.
 - 기기 조건은 폭 360dp, xhdpi다. 밝은 화면과 어두운 화면, 글자 크기 기본(100%)과 크게(200%)의 네 조합을 찍는다. Robolectric의 `@Config(qualifiers = "+night", fontScale = 2.0f)`로 시스템 설정을 바꿔 찍으므로 화면 모드의 "시스템 설정 따름"과 Android 14의 비선형 글자 크기 조절을 함께 거친다.
 
+### 코드 축소(R8)
+
+#30에서 정했다. 릴리스 빌드는 R8로 코드를 줄이고(`isMinifyEnabled = true`) 쓰지 않는 리소스를 뺀다(`isShrinkResources = true`). 기본 규칙은 `proguard-android-optimize.txt`이고 앱 규칙 파일(`app/proguard-rules.pro`)은 비어 있다. Room 3, kotlinx.serialization, Navigation 3, Compose가 라이브러리에 함께 싣는 규칙(consumer rules)만으로 아래 흐름이 동작했기 때문이다. 규칙이 더 필요해지면 근거와 함께 그 파일에 적는다.
+
+| 항목 | 축소 끔 | 축소 켬 |
+|---|---|---|
+| 서명하지 않은 릴리스 APK 크기 | 17,588,149바이트(약 16.8MiB) | 9,955,406바이트(약 9.5MiB) |
+
+확인한 것(#30, 2026-11-20). 축소를 켜고 버리는 키로 서명한 릴리스 APK를 Android 16(API 36) 에뮬레이터에 설치해 돌렸다.
+
+- 앱 시작, 내장 종목 목록(`exercises.json`을 직렬화로 읽는다), 오픈소스 라이선스 목록(`assets/licenses`).
+- 루틴을 만들고 종목 둘을 넣은 뒤 운동을 시작해 세트 하나를 기록했다. 휴식 타이머가 돌고 포그라운드 서비스(`specialUse`)가 올라왔다. +15초와 건너뛰기를 눌렀다.
+- 운동 중에 앱을 백그라운드로 보내고 `am kill`로 프로세스를 죽인 뒤 다시 열었다. 운동 화면과 입력한 세트가 그대로 돌아왔다. 화면 키(`@Serializable` `NavKey`)의 뒤로 가기 스택 복원이 축소 뒤에도 동작한다.
+- 운동을 끝내고 백업 파일을 내보냈다. 파일의 JSON 키 이름이 바뀌지 않았다(`format`, `formatVersion`, `exercises` 등). 내보낸 뒤 휴식 시간 기본값을 바꾸고 그 파일을 가져오자 기록과 설정이 백업의 값으로 돌아왔다.
+- 위 동안 crash 로그가 없었다.
+
+확인하지 않은 것: 휴식이 끝날 때의 소리와 진동, 알림 버튼, Android 8.0(API 26) 기기에서의 릴리스 APK. 버전 간 업데이트 설치(같은 키로 서명한 다음 버전을 덮어 설치)는 첫 릴리스 뒤에 본다.
+
 ## 저장 스키마
 
 이슈의 초안에서 출발해 다음을 고쳤다.
@@ -1234,7 +1252,7 @@ CI에서 빌드한 뒤 `git status --porcelain app/schemas`가 비어 있는지 
 - **KSP와 Kotlin 2.4.21.** 릴리스 노트에서 이 버전을 지원한다고 적은 문장을 찾지 못했다. 빌드 통과로만 확인했다. 바로 앞 KSP 릴리스의 노트에는 회귀가 있다는 안내가 있는데 내용은 확인하지 않았다.
 - **고르지 않은 후보의 호환.** Hilt, Koin, SQLDelight는 이 빌드 조합에서 빌드해 보지 않았다. Hilt는 Gradle 플러그인이 AGP 9를 요구한다는 것만 릴리스 노트에서 확인했다.
 - **Room 2의 앞날.** Room 2가 유지보수만 받는다는 공식 문장은 찾지 못했다. 그래서 고른 이유에 넣지 않았다.
-- **코드 축소(R8).** 릴리스 빌드는 지금 축소를 끈 상태다. 켰을 때 Room 3과 직렬화에 규칙이 더 필요한지 확인하지 않았다.
+- **코드 축소(R8)의 나머지.** #30에서 축소를 켜고 주요 흐름을 에뮬레이터에서 확인했다("코드 축소(R8)"). 휴식 종료 신호, 알림 버튼, API 26 기기는 축소한 APK로 확인하지 않았다.
 - **전원이 갑자기 끊길 때.** Room 기본값으로 파일 데이터베이스는 WAL 저널에 `synchronous = NORMAL`(1)이다(#20, Robolectric에서 `PRAGMA`로 확인. 테스트가 이 값을 붙잡아 둔다). 이 조합에서 앱이 죽어도 커밋한 쓰기는 남는다. 전원이 갑자기 끊기면 마지막 커밋 몇 개가 되돌아갈 수 있지만 파일은 깨지지 않는다. LOG-13의 재시작 테스트는 데이터베이스를 닫았다 다시 열어 확인했고, 실제 전원 차단은 기기가 필요해 확인하지 않았다. `FULL`로 올릴지는 실제로 잃는 일이 생기면 다시 본다.
 - **화면 이동의 화면 테스트.** `NavDisplay`가 Robolectric에서 그려지는지 돌려 보지 않았다.
 - **파일 선택기의 형식 필터.** JSON 파일을 `application/json`으로 걸렀을 때 문서 제공자마다 파일이 보이는지 확인하지 않았다. #29에서 가져오기의 형식 필터를 `application/json`, `application/octet-stream`, `text/plain`으로 넓히고 파일 내용의 `format` 값으로 가린다. Android 8.0(API 26) 에뮬레이터의 기본 파일 선택기(Downloads)에서 앱이 내보낸 파일, `adb push`로 넣은 `.json`, `.txt`가 모두 고를 수 있게 보이고, 백업이 아닌 `.txt`는 내용 검사에서 거부되는 것을 봤다. Google Drive 같은 다른 문서 제공자와 새 Android 판의 파일 선택기는 확인하지 않았다.
