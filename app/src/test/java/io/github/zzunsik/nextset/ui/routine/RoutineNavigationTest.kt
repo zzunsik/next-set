@@ -3,6 +3,7 @@ package io.github.zzunsik.nextset.ui.routine
 import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.semantics.getOrNull
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
@@ -65,6 +66,8 @@ class RoutineNavigationTest {
                 )
             }
         }
+        // 홈은 저장소를 읽은 뒤에 목록을 그린다(#23). 그 전에 누르지 않도록 기다린다.
+        compose.waitUntil(5_000) { compose.onAllNodes(hasTestTag(HOME_LIST_TAG)).fetchSemanticsNodes().isNotEmpty() }
     }
 
     private fun text(id: Int, vararg args: Any) = app.getString(id, *args)
