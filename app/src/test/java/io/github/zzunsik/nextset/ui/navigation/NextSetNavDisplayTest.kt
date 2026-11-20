@@ -17,8 +17,7 @@ import io.github.zzunsik.nextset.ui.settings.FakeBackupRepository
 import io.github.zzunsik.nextset.ui.settings.FakeLicenseRepository
 import io.github.zzunsik.nextset.ui.settings.FakeSettingsRepository
 import io.github.zzunsik.nextset.ui.theme.NextSetTheme
-import io.github.zzunsik.nextset.data.repository.TestDb
-import org.junit.After
+import io.github.zzunsik.nextset.data.repository.TestDbRule
 import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
@@ -28,18 +27,18 @@ import org.robolectric.RuntimeEnvironment
 
 @RunWith(RobolectricTestRunner::class)
 class NextSetNavDisplayTest {
-    @get:Rule
+    @get:Rule(order = 1)
     val compose = createComposeRule()
 
     private val app = RuntimeEnvironment.getApplication()
     private val opened = mutableListOf<String>()
     private var browserMissing = false
 
-    /** 운동과 루틴은 메모리 데이터베이스의 진짜 저장소를 쓴다. 홈의 운동 입구(#24)가 읽는다. */
-    private val db = TestDb()
+    /** 메모리 데이터베이스. Compose 규칙보다 바깥이라 화면이 사라진 뒤에 닫힌다. */
+    @get:Rule(order = 0)
+    internal val dbRule = TestDbRule(seed = false)
 
-    @After
-    fun closeDb() = db.close()
+    private val db get() = dbRule.db
 
     private val uriHandler = object : UriHandler {
         override fun openUri(uri: String) {

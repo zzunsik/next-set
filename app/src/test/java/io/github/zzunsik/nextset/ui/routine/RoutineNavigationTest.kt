@@ -27,8 +27,7 @@ import io.github.zzunsik.nextset.ui.theme.NextSetTheme
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
-import io.github.zzunsik.nextset.data.repository.TestDb
-import org.junit.After
+import io.github.zzunsik.nextset.data.repository.TestDbRule
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -40,17 +39,17 @@ import org.robolectric.RobolectricTestRunner
  */
 @RunWith(RobolectricTestRunner::class)
 class RoutineNavigationTest {
-    @get:Rule
+    @get:Rule(order = 1)
     val compose = createAndroidComposeRule<ComponentActivity>()
 
     private val app get() = compose.activity
     private val repository = FakeRoutineRepository()
 
-    /** 홈의 운동 입구(#24)가 읽는 운동 저장소. 메모리 데이터베이스다. */
-    private val db = TestDb()
+    /** 메모리 데이터베이스. Compose 규칙보다 바깥이라 화면이 사라진 뒤에 닫힌다. */
+    @get:Rule(order = 0)
+    internal val dbRule = TestDbRule(seed = false)
 
-    @After
-    fun closeDb() = db.close()
+    private val db get() = dbRule.db
 
     private fun show() {
         compose.setContent {

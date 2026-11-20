@@ -10,7 +10,7 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollToNode
 import androidx.compose.ui.test.onNodeWithTag
 import io.github.zzunsik.nextset.R
-import io.github.zzunsik.nextset.data.repository.TestDb
+import io.github.zzunsik.nextset.data.repository.TestDbRule
 import io.github.zzunsik.nextset.data.repository.TestExercises.BENCH
 import io.github.zzunsik.nextset.data.repository.TestExercises.PULL_UP
 import io.github.zzunsik.nextset.data.repository.wr
@@ -24,11 +24,9 @@ import io.github.zzunsik.nextset.ui.settings.FakeSettingsRepository
 import io.github.zzunsik.nextset.ui.theme.NextSetTheme
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
-import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
-import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -41,17 +39,15 @@ import org.robolectric.RuntimeEnvironment
  */
 @RunWith(RobolectricTestRunner::class)
 class WorkoutNavigationTest {
-    @get:Rule
+    @get:Rule(order = 1)
     val compose = createComposeRule()
 
     private val app = RuntimeEnvironment.getApplication()
-    private lateinit var db: TestDb
+    /** 메모리 데이터베이스. Compose 규칙보다 바깥이라 화면이 사라진 뒤에 닫힌다. */
+    @get:Rule(order = 0)
+    internal val dbRule = TestDbRule(seed = true)
 
-    @Before
-    fun setUp() = runBlocking { db = TestDb().seed(); Unit }
-
-    @After
-    fun tearDown() = db.close()
+    private val db get() = dbRule.db
 
     private fun show() {
         compose.setContent {

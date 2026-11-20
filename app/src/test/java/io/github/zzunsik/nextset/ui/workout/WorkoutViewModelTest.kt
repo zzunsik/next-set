@@ -1,5 +1,9 @@
 package io.github.zzunsik.nextset.ui.workout
 
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.ViewModelStore
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
 import io.github.zzunsik.nextset.data.repository.TestDb
 import io.github.zzunsik.nextset.data.repository.TestExercises.BENCH
 import io.github.zzunsik.nextset.data.repository.TestExercises.PLANK
@@ -49,16 +53,26 @@ class WorkoutViewModelTest {
 
     private lateinit var db: TestDb
     private var clockMinutes = 60L
-    private val viewModels = mutableListOf<WorkoutViewModel>()
+    /** 화면 상태를 담는 곳. 데이터베이스를 닫기 전에 비워 화면 상태의 구독을 끝낸다. */
+    private val store = ViewModelStore()
 
     @Before
     fun setUp() = runBlocking { db = TestDb().seed(); Unit }
 
     @After
-    fun tearDown() = db.close()
+    fun tearDown() {
+        store.clear()
+        db.close()
+    }
 
-    private fun viewModel(workoutId: Long) =
-        WorkoutViewModel(db.workouts, db.routines, workoutId, clock = { at(clockMinutes++) }).also { viewModels += it }
+    private var created = 0
+
+    private fun viewModel(workoutId: Long): WorkoutViewModel {
+        val factory = viewModelFactory {
+            initializer { WorkoutViewModel(db.workouts, db.routines, workoutId, clock = { at(clockMinutes++) }) }
+        }
+        return ViewModelProvider.create(store, factory)["vm-${created++}", WorkoutViewModel::class]
+    }
 
     private fun WorkoutViewModel.awaitState(predicate: (WorkoutUiState) -> Boolean): WorkoutUiState = runBlocking {
         withContext(Dispatchers.Default) { withTimeout(TIMEOUT) { uiState.first { !it.loading && predicate(it) } } }
