@@ -2,6 +2,8 @@ package io.github.zzunsik.nextset.ui.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.ui.res.stringResource
+import io.github.zzunsik.nextset.R
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
 import androidx.navigation3.runtime.EntryProviderScope
@@ -17,9 +19,8 @@ import io.github.zzunsik.nextset.domain.repository.RoutineRepository
 import io.github.zzunsik.nextset.domain.repository.SettingsRepository
 import io.github.zzunsik.nextset.domain.repository.WorkoutRepository
 import io.github.zzunsik.nextset.ui.exercise.exerciseEntries
-import io.github.zzunsik.nextset.ui.home.HomeScreen
-import io.github.zzunsik.nextset.ui.home.HomeWorkoutEntryRoute
-import io.github.zzunsik.nextset.ui.home.HomeWorkoutViewModel
+import io.github.zzunsik.nextset.ui.home.HomeRoute
+import io.github.zzunsik.nextset.ui.home.HomeViewModel
 import io.github.zzunsik.nextset.ui.workout.workoutEntries
 import androidx.lifecycle.viewmodel.compose.viewModel
 import io.github.zzunsik.nextset.ui.routine.routineEntries
@@ -29,6 +30,8 @@ import io.github.zzunsik.nextset.ui.settings.settingsEntries
 /**
  * 앱의 화면 이동. 뒤로 가기 스택은 화면 키의 목록이다.
  * 화면을 더할 때는 [NavKeys.kt]에 키를 만들고 [NextSetNavHost]의 entryProvider에 연결한다.
+ *
+ * 탭 화면(홈, 기록, 설정) 아래에는 하단 내비게이션을 붙인다([TopLevelScaffold]). 운동 중과 하위 화면에서는 숨긴다.
  */
 @Composable
 fun NextSetNavDisplay(
@@ -42,22 +45,20 @@ fun NextSetNavDisplay(
 ) {
     val backStack = rememberNavBackStack(HomeKey)
     val results = remember { NavResults() }
-    NextSetNavHost(
-        backStack = backStack,
-        results = results,
-        exerciseRepository = exerciseRepository,
-        modifier = modifier,
-    ) {
+    val entries: EntryProviderScope<NavKey>.() -> Unit = {
         entry<HomeKey> {
-            HomeScreen(
-                onOpenSettings = { backStack.add(SettingsKey) },
-                workoutEntry = {
-                    val viewModel = viewModel { HomeWorkoutViewModel(workoutRepository, routineRepository) }
-                    HomeWorkoutEntryRoute(viewModel = viewModel, onOpenWorkout = { backStack.add(WorkoutKey(it)) })
-                },
-                onOpenRoutines = { backStack.add(RoutineListKey) },
+            val newRoutineName = stringResource(R.string.routine_new)
+            val viewModel = viewModel {
+                HomeViewModel(workoutRepository, routineRepository, settingsRepository, newRoutineName)
+            }
+            HomeRoute(
+                viewModel = viewModel,
+                onOpenWorkout = { backStack.add(WorkoutKey(it)) },
+                onOpenRoutine = { id, isNew -> backStack.add(RoutineEditKey(id, isNew)) },
             )
         }
+        // 기록 탭의 자리. 기록 목록(#27)이 이 줄을 기록 화면으로 바꾼다.
+        entry<HistoryKey> { HistoryPlaceholderScreen() }
         workoutEntries(backStack, results, workoutRepository, routineRepository)
         routineEntries(backStack, results, routineRepository, exerciseRepository, settingsRepository)
         settingsEntries(
@@ -68,6 +69,19 @@ fun NextSetNavDisplay(
             onBackup = { backStack.add(BackupKey) },
         )
         backupEntries(backStack = backStack, backupRepository = backupRepository)
+    }
+    TopLevelScaffold(
+        current = backStack.lastOrNull(),
+        onSelect = { backStack.selectTab(it) },
+        modifier = modifier,
+    ) { contentModifier ->
+        NextSetNavHost(
+            backStack = backStack,
+            results = results,
+            exerciseRepository = exerciseRepository,
+            modifier = contentModifier,
+            entries = entries,
+        )
     }
 }
 

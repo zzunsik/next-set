@@ -23,7 +23,6 @@ import io.github.zzunsik.nextset.ui.navigation.ResultEffect
 import io.github.zzunsik.nextset.ui.navigation.ResultKey
 import io.github.zzunsik.nextset.ui.navigation.RoutineEditKey
 import io.github.zzunsik.nextset.ui.navigation.RoutineExerciseKey
-import io.github.zzunsik.nextset.ui.navigation.RoutineListKey
 import io.github.zzunsik.nextset.ui.navigation.pickedExercisesKey
 import kotlinx.coroutines.launch
 
@@ -34,7 +33,7 @@ internal fun routinePickerResultName(routineId: Long) = "routine-edit/$routineId
 internal fun removedRoutineExerciseKey(routineId: Long) = ResultKey<RemovedRoutineExercise>("routine-edit/$routineId/removed")
 
 /**
- * 루틴 목록(임시), 루틴 편집, 종목 설정을 [backStack]에 잇는다.
+ * 루틴 편집과 종목 설정을 [backStack]에 잇는다. 루틴 편집은 홈의 "새 루틴"과 메뉴의 "편집"이 연다.
  *
  * - 루틴 편집의 "종목 추가"는 종목 고르기를 고르기로 열고, 고른 종목을 [NavResults]로 받아 루틴 끝에 더한다.
  * - 종목 설정의 "루틴에서 빼기"는 뺀 종목을 루틴 편집에 돌려주고, 루틴 편집이 "되돌리기"가 있는 알림 줄을 보인다.
@@ -53,15 +52,6 @@ fun EntryProviderScope<NavKey>.routineEntries(
         if (backStack.lastOrNull() == key) backStack.removeAt(backStack.lastIndex)
     }
 
-    entry<RoutineListKey> {
-        val newRoutineName = stringResource(R.string.routine_new)
-        val viewModel = viewModel { RoutineListViewModel(routineRepository, newRoutineName) }
-        RoutineListRoute(
-            viewModel = viewModel,
-            onBack = { close(RoutineListKey) },
-            onOpenRoutine = { id, isNew -> backStack.add(RoutineEditKey(id, isNew)) },
-        )
-    }
     entry<RoutineEditKey> { key ->
         val newRoutineName = stringResource(R.string.routine_new)
         val viewModel = viewModel { RoutineEditViewModel(routineRepository, key.routineId, key.isNew, newRoutineName) }
