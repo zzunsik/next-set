@@ -6,7 +6,6 @@ import io.github.zzunsik.nextset.data.repository.TestExercises.PULL_UP
 import io.github.zzunsik.nextset.data.repository.TestExercises.SQUAT
 import io.github.zzunsik.nextset.domain.model.Target
 import io.github.zzunsik.nextset.domain.model.Weight
-import io.github.zzunsik.nextset.domain.rule.applyRoutineUpdate
 import io.github.zzunsik.nextset.domain.rule.planRoutineUpdate
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest

@@ -5,6 +5,7 @@ import io.github.zzunsik.nextset.domain.model.RoutineDetail
 import io.github.zzunsik.nextset.domain.model.RoutineExercise
 import io.github.zzunsik.nextset.domain.model.Target
 import io.github.zzunsik.nextset.domain.repository.RoutineRepository
+import io.github.zzunsik.nextset.domain.rule.RoutineUpdatePlan
 import io.github.zzunsik.nextset.domain.rule.fitTo
 import io.github.zzunsik.nextset.domain.rule.requireSameItems
 import io.github.zzunsik.nextset.domain.rule.validateRoutineExercise
@@ -113,6 +114,36 @@ class FakeRoutineRepository(
         val exercise = checkNotNull(exercises.getExercise(item.exerciseId))
         items.value = items.value.map {
             if (it.id == routineExerciseId) it.copy(setCount = setCount, target = target.fitTo(exercise.recordType)) else it
+        }
+    }
+
+    /** Room 구현처럼 한 번에 반영한다. 도중에 실패하면 반영 전 종목으로 되돌린다. */
+    override suspend fun applyRoutineUpdate(plan: RoutineUpdatePlan) {
+        val before = items.value
+        try {
+            plan.remove.forEach { removeRoutineExercise(it) }
+            val kept = mutableSetOf<Long>()
+            plan.keep.forEach { (id, setCount) ->
+                if (setCount < 1) {
+                    removeRoutineExercise(id)
+                } else {
+                    updateRoutineExercise(id, setCount, plan.targets[id] ?: Target.NONE)
+                    kept += id
+                }
+            }
+            val added = plan.add.map { (exerciseId, setCount) ->
+                if (setCount < 1) null else addRoutineExercise(plan.routineId, exerciseId, setCount)
+            }
+            val ordered = plan.order.mapNotNull { slot ->
+                when (slot) {
+                    is RoutineUpdatePlan.Slot.Existing -> slot.routineExerciseId.takeIf { it in kept }
+                    is RoutineUpdatePlan.Slot.New -> added[slot.addIndex]
+                }
+            }
+            reorderRoutineExercises(plan.routineId, ordered)
+        } catch (e: Exception) {
+            items.value = before
+            throw e
         }
     }
 

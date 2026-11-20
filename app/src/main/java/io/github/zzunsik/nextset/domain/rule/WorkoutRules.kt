@@ -7,7 +7,6 @@ import io.github.zzunsik.nextset.domain.model.Target
 import io.github.zzunsik.nextset.domain.model.Workout
 import io.github.zzunsik.nextset.domain.model.WorkoutExercise
 import io.github.zzunsik.nextset.domain.model.WorkoutSet
-import io.github.zzunsik.nextset.domain.repository.RoutineRepository
 
 /** 다음 세트(LOG-06)의 자리. 순서대로 봤을 때 완료하지 않은 첫 세트다(docs/architecture.md "진행 중인 운동의 저장"). */
 data class NextSetRef(val exercise: WorkoutExercise, val set: WorkoutSet)
@@ -102,31 +101,4 @@ fun planRoutineUpdate(workout: Workout, routine: RoutineDetail): RoutineUpdatePl
         remove = unmatched.map { it.id },
         order = order,
     )
-}
-
-/**
- * [plan]을 루틴에 반영한다. 세트 수가 0인 종목(운동에서 세트를 모두 지운 종목)은 루틴에서 뺀다.
- * 저장소 함수를 차례로 부르므로 한 트랜잭션이 아니다. 중간에 실패하면 일부만 반영될 수 있다.
- */
-suspend fun RoutineRepository.applyRoutineUpdate(plan: RoutineUpdatePlan) {
-    plan.remove.forEach { removeRoutineExercise(it) }
-    val keptIds = mutableMapOf<Long, Long>()
-    plan.keep.forEach { (id, setCount) ->
-        if (setCount < 1) {
-            removeRoutineExercise(id)
-        } else {
-            updateRoutineExercise(id, setCount, plan.targets[id] ?: Target.NONE)
-            keptIds[id] = id
-        }
-    }
-    val addedIds = plan.add.map { (exerciseId, setCount) ->
-        if (setCount < 1) null else addRoutineExercise(plan.routineId, exerciseId, setCount)
-    }
-    val ordered = plan.order.mapNotNull { slot ->
-        when (slot) {
-            is RoutineUpdatePlan.Slot.Existing -> keptIds[slot.routineExerciseId]
-            is RoutineUpdatePlan.Slot.New -> addedIds[slot.addIndex]
-        }
-    }
-    if (ordered.isNotEmpty()) reorderRoutineExercises(plan.routineId, ordered)
 }
