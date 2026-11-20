@@ -40,8 +40,7 @@ data class ExerciseFormKey(
 ) : NavKey
 
 /**
- * 기록 목록(docs/DESIGN.md "기록 목록"). 하단 내비게이션의 "기록" 탭이다.
- * 기록 목록(#27)이 생기기 전까지는 `NextSetNavDisplay`가 자리만 잡은 화면을 잇는다.
+ * 기록 목록(docs/DESIGN.md "기록 목록", HIST-01). 하단 내비게이션의 "기록" 탭이다. 화면은 `historyEntries`가 잇는다.
  */
 @Serializable
 data object HistoryKey : NavKey
@@ -62,9 +61,16 @@ data class LicenseDetailKey(val id: String) : NavKey
 @Serializable
 data class WorkoutKey(val workoutId: Long) : NavKey
 
-/** 운동을 끝낸 뒤의 완료 화면. 운동 요약(#27)이 생기면 그 화면으로 바뀐다. */
+/** 운동을 끝낸 뒤의 운동 요약(docs/DESIGN.md "운동 요약", LOG-15). "확인"과 뒤로 가기는 홈으로 간다. */
 @Serializable
-data class WorkoutDoneKey(val workoutId: Long) : NavKey
+data class WorkoutSummaryKey(val workoutId: Long) : NavKey
+
+/**
+ * 기록 상세·수정(docs/DESIGN.md "기록 상세·수정"). [editing]이면 수정 상태로 연다.
+ * [isNew]면 "지난 운동 적기"로 막 만든 기록이다. 완료한 세트 없이 나가면 기록을 지운다.
+ */
+@Serializable
+data class HistoryDetailKey(val workoutId: Long, val editing: Boolean = false, val isNew: Boolean = false) : NavKey
 
 /**
  * 루틴 편집(docs/DESIGN.md "루틴 편집"). [routineId]의 루틴은 이미 저장돼 있다.

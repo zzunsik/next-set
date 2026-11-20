@@ -3,9 +3,7 @@ package io.github.zzunsik.nextset.ui.navigation
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.consumeWindowInsets
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -18,7 +16,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.navigation3.runtime.NavKey
 import io.github.zzunsik.nextset.R
-import io.github.zzunsik.nextset.ui.settings.ScreenTitleBar
 import io.github.zzunsik.nextset.ui.theme.NextSetTheme
 
 /** 하단 내비게이션의 탭(docs/DESIGN.md "이동 구조"). 홈, 기록, 설정 셋이다. */
@@ -94,24 +91,5 @@ fun NextSetBottomBar(selected: TopLevelTab, onSelect: (TopLevelTab) -> Unit, mod
                 ),
             )
         }
-    }
-}
-
-/** 기록 탭의 자리. 기록 목록(#27)이 `HistoryKey`의 화면을 이것 대신 잇고 이 함수와 `history_placeholder`를 지운다. */
-@Composable
-internal fun HistoryPlaceholderScreen(modifier: Modifier = Modifier) {
-    Scaffold(
-        modifier = modifier.fillMaxSize(),
-        containerColor = NextSetTheme.colors.bg,
-        topBar = { ScreenTitleBar(title = stringResource(R.string.nav_history), modifier = Modifier.statusBarsPadding()) },
-    ) { innerPadding ->
-        Text(
-            text = stringResource(R.string.history_placeholder),
-            style = NextSetTheme.typography.body,
-            color = NextSetTheme.colors.text2,
-            modifier = Modifier
-                .padding(innerPadding)
-                .padding(horizontal = NextSetTheme.spacing.lg, vertical = NextSetTheme.spacing.xl),
-        )
     }
 }

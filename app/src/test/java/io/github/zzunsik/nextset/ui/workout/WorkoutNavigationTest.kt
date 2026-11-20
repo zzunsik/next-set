@@ -34,7 +34,7 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.RuntimeEnvironment
 
 /**
- * 홈의 운동 입구에서 운동 중 화면, 종목 고르기, 완료 화면까지 앱의 화면 이동 그대로 지나간다.
+ * 홈의 운동 입구에서 운동 중 화면, 종목 고르기, 운동 요약까지 앱의 화면 이동 그대로 지나간다.
  * 저장소는 메모리 데이터베이스의 진짜 구현이다.
  */
 @RunWith(RobolectricTestRunner::class)
@@ -100,7 +100,8 @@ class WorkoutNavigationTest {
         waitFor(hasText(text(R.string.next_set_finish)))
         compose.onNodeWithText(text(R.string.next_set_finish)).performClick()
         waitFor(hasText(text(R.string.workout_done_title)))
-        compose.onNodeWithText(text(R.string.workout_done_detail, 1, text(R.string.workout_duration_minutes, 0))).assertExists()
+        // 운동 요약(#27): 숫자 셋 가운데 볼륨이 40kg × 5회다.
+        compose.onNodeWithText(text(R.string.report_volume_value, "200")).assertExists()
         compose.onNodeWithText(text(R.string.action_confirm)).performClick()
 
         waitFor(hasText(text(R.string.home_start_empty)))

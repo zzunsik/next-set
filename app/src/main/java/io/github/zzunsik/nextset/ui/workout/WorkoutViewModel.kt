@@ -68,7 +68,7 @@ sealed interface WorkoutExit {
     /** 버렸거나 운동이 없어졌다. 홈으로 간다. */
     data object Home : WorkoutExit
 
-    /** 끝냈다. 요약(#27, 그 전에는 완료 화면)으로 간다. */
+    /** 끝냈다. 운동 요약으로 간다. */
     data class Finished(val workoutId: Long) : WorkoutExit
 }
 
