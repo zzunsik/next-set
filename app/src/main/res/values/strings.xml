@@ -165,4 +165,63 @@
     <string name="number_field_weight">무게</string>
     <string name="number_field_reps">횟수</string>
     <string name="number_field_duration">시간</string>
+
+    <!-- 홈이 만들어지기 전(#23)까지 루틴 목록으로 가는 임시 버튼 -->
+    <string name="home_open_routines">루틴</string>
+
+    <!-- 루틴 목록(임시 화면). 홈(#23)의 순서 편집 상태와 같은 일을 한다(RTN-05). -->
+    <string name="routine_list_title">루틴</string>
+    <string name="routine_list_empty">아직 루틴이 없어요.</string>
+    <string name="routine_create">루틴 만들기</string>
+    <!-- "새 루틴" 버튼, 새 루틴의 제목, 이름을 비웠을 때 저장하는 이름 -->
+    <string name="routine_new">새 루틴</string>
+    <string name="routine_edit_action">루틴 편집</string>
+    <!-- 화면 낭독기의 순서 바꾸기 동작(docs/DESIGN.md "UI 라이브러리 선택"의 덧붙임) -->
+    <string name="move_up">위로 옮기기</string>
+    <string name="move_down">아래로 옮기기</string>
+
+    <!-- 루틴 편집(docs/DESIGN.md "루틴 편집") -->
+    <string name="routine_edit_title">루틴 편집</string>
+    <string name="routine_name">이름</string>
+    <string name="routine_name_hint">루틴 이름</string>
+    <string name="routine_exercises">종목</string>
+    <string name="routine_no_exercises">종목을 추가해 주세요.</string>
+    <string name="routine_add_exercise">종목 추가</string>
+    <string name="routine_delete">루틴 지우기</string>
+    <string name="routine_delete_confirm">이 루틴을 지울까요? 운동 기록은 남아요.</string>
+    <string name="routine_exercise_settings_action">종목 설정</string>
+    <!-- 루틴에서 종목을 뺀 뒤의 알림 줄. %1$s 종목 이름 -->
+    <string name="routine_exercise_removed">루틴에서 %1$s 종목을 뺐어요.</string>
+    <string name="action_undo">되돌리기</string>
+    <!-- 종목 행의 보조 줄 "3세트 · 60kg × 8~12회". %1$s 세트 수, %2$s 목표 -->
+    <string name="routine_row_detail">%1$s · %2$s</string>
+    <string name="routine_set_count">%1$d세트</string>
+    <string name="routine_target_weight">%1$skg</string>
+    <!-- 무게와 횟수 목표. %1$s 무게("60kg"), %2$s 횟수("8~12회") -->
+    <string name="routine_target_weight_reps">%1$s × %2$s</string>
+    <string name="routine_target_reps">%1$d회</string>
+    <string name="routine_target_reps_range">%1$d~%2$d회</string>
+    <string name="routine_target_reps_at_least">%1$d회 이상</string>
+    <string name="routine_target_reps_at_most">%1$d회 이하</string>
+
+    <!-- 종목 설정(루틴 편집에서 종목 행을 누르면 열린다) -->
+    <string name="routine_exercise_sets">세트 수</string>
+    <string name="routine_exercise_sets_decrease">세트 수 줄이기</string>
+    <string name="routine_exercise_sets_increase">세트 수 늘리기</string>
+    <string name="routine_exercise_target">목표</string>
+    <string name="routine_exercise_target_note">비워 둬도 돼요.</string>
+    <string name="routine_target_weight_label">목표 무게</string>
+    <string name="routine_target_reps_label">목표 횟수</string>
+    <string name="routine_target_duration_label">목표 시간</string>
+    <string name="routine_target_reps_min">최소 횟수</string>
+    <string name="routine_target_reps_max">최대 횟수</string>
+    <string name="unit_kg">kg</string>
+    <string name="unit_reps">회</string>
+    <string name="range_separator">~</string>
+    <string name="routine_target_reps_invalid">최소 횟수가 최대 횟수보다 커요. 값을 고쳐 주세요.</string>
+    <string name="routine_exercise_rest">휴식 시간</string>
+    <!-- 휴식 시간을 따로 정하지 않은 종목. %1$s 설정의 기본값("2분") -->
+    <string name="routine_exercise_rest_default">기본값 따름(%1$s)</string>
+    <string name="routine_exercise_rest_note">휴식 시간은 종목마다 하나예요. 여기서 바꾸면 다른 루틴과 운동 중에도 같아요.</string>
+    <string name="routine_exercise_remove">루틴에서 빼기</string>
 </resources>

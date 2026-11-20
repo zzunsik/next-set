@@ -12,6 +12,7 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import io.github.zzunsik.nextset.R
 import io.github.zzunsik.nextset.ui.exercise.FakeExerciseRepository
+import io.github.zzunsik.nextset.ui.routine.FakeRoutineRepository
 import io.github.zzunsik.nextset.ui.settings.FakeBackupRepository
 import io.github.zzunsik.nextset.ui.settings.FakeLicenseRepository
 import io.github.zzunsik.nextset.ui.settings.FakeSettingsRepository
@@ -48,6 +49,7 @@ class NextSetNavDisplayTest {
                         settingsRepository = FakeSettingsRepository(),
                         licenseRepository = FakeLicenseRepository(),
                         exerciseRepository = FakeExerciseRepository(),
+                        routineRepository = FakeRoutineRepository(),
                         backupRepository = FakeBackupRepository(),
                     )
                 }

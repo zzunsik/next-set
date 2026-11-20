@@ -1,8 +1,0 @@
-<resources>
-    <!-- 디버그 빌드의 시험 화면(ExerciseTryOutActivity) 문구. 릴리스 APK에는 없다. -->
-    <string name="debug_exercise_try_out_title">종목 고르기 시험</string>
-    <string name="debug_open_picker">종목 고르기 열기</string>
-    <string name="debug_open_manager">종목 관리 열기</string>
-    <string name="debug_picked_none">돌려받은 종목이 없어요.</string>
-    <string name="debug_picked">돌려받은 종목: %1$s</string>
-</resources>
