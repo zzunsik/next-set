@@ -19,6 +19,7 @@ import io.github.zzunsik.nextset.domain.model.Target
 import io.github.zzunsik.nextset.domain.model.Weight
 import io.github.zzunsik.nextset.ui.component.NumberFieldKind
 import io.github.zzunsik.nextset.ui.component.NumberPadKey
+import io.github.zzunsik.nextset.ui.ViewModelJobs
 import io.github.zzunsik.nextset.ui.exercise.MainDispatcherRule
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -59,9 +60,12 @@ class WorkoutViewModelTest {
     @Before
     fun setUp() = runBlocking { db = TestDb().seed(); Unit }
 
+    /** 데이터베이스를 닫기 전에 화면 상태의 코루틴이 모두 끝나기를 기다린다(#75). */
+    private val viewModelJobs = ViewModelJobs()
+
     @After
     fun tearDown() {
-        store.clear()
+        viewModelJobs.clearAndAwait(store)
         db.close()
     }
 
@@ -71,7 +75,7 @@ class WorkoutViewModelTest {
         val factory = viewModelFactory {
             initializer { WorkoutViewModel(db.workouts, db.routines, workoutId, clock = { at(clockMinutes++) }) }
         }
-        return ViewModelProvider.create(store, factory)["vm-${created++}", WorkoutViewModel::class]
+        return viewModelJobs.track(ViewModelProvider.create(store, factory)["vm-${created++}", WorkoutViewModel::class])
     }
 
     private fun WorkoutViewModel.awaitState(predicate: (WorkoutUiState) -> Boolean): WorkoutUiState = runBlocking {
@@ -502,6 +506,30 @@ class WorkoutViewModelTest {
 
         vm.onCheck(bench.sets[1].id)
         assertFalse("완료를 풀면 표시도 사라진다", vm.awaitState { !it.exercises[0].sets[1].completed }.exercises[0].sets[1].isRecord)
+    }
+
+    /** #76: 프로세스가 죽었다 살아나 화면 상태를 새로 만들어도 최고 기록 표시는 저장된 기록에서 다시 구한다. */
+    @Test
+    fun recreatedViewModelKeepsTheRecordMark() {
+        db { finishedWorkout(at(0), mapOf(BENCH to listOf(wr(60_000, 8)))) }
+        val workoutId = start(routine())
+        val first = viewModel(workoutId)
+        val bench = first.awaitState { it.exercises.isNotEmpty() }.exercises[0]
+        first.onCheck(bench.sets[0].id)
+        assertEquals(WorkoutEvent.SetCompleted(bench.sets[0].id, bench.id, null), first.nextEvent())
+        first.onFieldClick(bench.sets[1].id, NumberFieldKind.REPS)
+        first.onNumberPadKey(NumberPadKey.Step(1))
+        first.onNumberPadKey(NumberPadKey.Next)
+        assertEquals(WorkoutEvent.NewRecord("테스트 벤치"), first.nextEvent())
+        first.awaitState { it.exercises[0].sets[1].isRecord }
+
+        val second = viewModel(workoutId)
+        val restored = second.awaitState { it.exercises.isNotEmpty() && it.exercises[0].sets[1].completed }.exercises[0]
+        assertTrue("다시 만들어도 최고 기록 세트에 표시가 남는다", restored.sets[1].isRecord)
+        assertFalse("최고 기록이 아닌 세트에는 표시가 없다", restored.sets[0].isRecord)
+        assertFalse("아직 안 한 세트에는 표시가 없다", restored.sets[2].isRecord)
+        // 알림은 완료한 그 자리에서만 띄운다. 다시 만들 때는 띄우지 않는다.
+        assertNull(runBlocking { withContext(Dispatchers.Default) { withTimeoutOrNull(500) { second.events.first() } } })
     }
 
     // ---- 다시 만들기(LOG-13) ----

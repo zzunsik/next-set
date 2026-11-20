@@ -15,6 +15,7 @@ import io.github.zzunsik.nextset.domain.repository.WorkoutRepository
 import io.github.zzunsik.nextset.domain.rule.RoutineUpdatePlan
 import io.github.zzunsik.nextset.domain.rule.isFilled
 import io.github.zzunsik.nextset.domain.rule.planRoutineUpdate
+import io.github.zzunsik.nextset.domain.rule.recordSetIdsAgainst
 import io.github.zzunsik.nextset.domain.rule.suggestedValue
 import io.github.zzunsik.nextset.ui.component.NumberFieldKind
 import io.github.zzunsik.nextset.ui.component.NumberPadEvent
@@ -44,7 +45,7 @@ import kotlinx.coroutines.sync.withLock
 
 /** 운동 중 화면이 한 번만 처리하는 일. */
 sealed interface WorkoutEvent {
-    /** 최고 기록을 넘는 세트를 완료했다(LOG-14). 판정은 저장소가 했다. */
+    /** 최고 기록을 넘는 세트를 완료했다(LOG-14). 판정은 저장소가 했다. 완료한 그 자리에서만 보낸다. */
     data class NewRecord(val exerciseName: String) : WorkoutEvent
 
     /**
@@ -75,7 +76,7 @@ sealed interface WorkoutExit {
  * 운동 중 화면의 상태(LOG-01~LOG-14). 화면은 데이터베이스에서 흘러온 운동을 그린다.
  * 입력 한 번이 쓰기 한 번이고(NF-09) 쓰기는 누른 순서대로 한다([writes]).
  *
- * 화면이 들고 있는 것은 열린 숫자판, 대화상자, 이번에 세운 최고 기록 표시뿐이다. 값과 완료 여부는 모두 저장돼 있어서
+ * 화면이 들고 있는 것은 열린 숫자판과 대화상자뿐이다. 값과 완료 여부는 모두 저장돼 있고 최고 기록 표시는 저장된 기록에서 계산해서
  * 화면을 없앴다 다시 만들어도, 프로세스가 죽었다 살아나도 그대로다(LOG-13).
  */
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -102,16 +103,22 @@ class WorkoutViewModel(
         ?.onStart { emit(Settings.DEFAULT_REST_SECONDS) }
         ?: flowOf(Settings.DEFAULT_REST_SECONDS)
 
-    /** 저장된 운동과 그 종목들의 직전 기록. 운동이 없어지면 null이다. */
-    private val stored: StateFlow<Stored?> = workoutRepository.observeWorkout(workoutId)
-        .mapLatest { workout -> workout?.let { Stored(it, previousOf(it)) } }
+    /**
+     * 저장된 운동, 그 종목들의 직전 기록, 최고 기록을 세운 세트. 운동이 없어지면 null이다.
+     * 최고 기록 표시는 요약(HIST-03)과 같은 규칙으로 기록에서 계산한다. 따로 들고 있지 않아 다시 만들어도 남는다(#76).
+     */
+    private val stored: StateFlow<Stored?> = combine(
+        workoutRepository.observeWorkout(workoutId),
+        workoutRepository.observeFinishedWorkouts(),
+    ) { workout, finished -> workout to finished }
+        .mapLatest { (workout, finished) -> workout?.let { Stored(it, previousOf(it), it.recordSetIdsAgainst(finished)) } }
         .stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
     val uiState: StateFlow<WorkoutUiState> = combine(stored, local, defaultRest) { stored, local, defaultRest ->
         if (stored == null) {
             WorkoutUiState(loading = true, dialog = local.dialog, defaultRestSeconds = defaultRest)
         } else {
-            buildWorkoutUiState(stored.workout, stored.previous, local.numberPad, local.records, local.dialog)
+            buildWorkoutUiState(stored.workout, stored.previous, local.numberPad, stored.records, local.dialog)
                 .copy(defaultRestSeconds = defaultRest)
         }
     }.stateIn(viewModelScope, SharingStarted.Eagerly, WorkoutUiState())
@@ -186,7 +193,6 @@ class WorkoutViewModel(
     fun onCheck(setId: Long) {
         val (_, row) = uiState.value.findSet(setId) ?: return
         if (row.completed) {
-            local.update { it.copy(records = it.records - setId) }
             write { workoutRepository.uncompleteSet(setId) }
             eventChannel.trySend(WorkoutEvent.SetUncompleted(setId))
         } else {
@@ -213,7 +219,6 @@ class WorkoutViewModel(
         write {
             val completion = workoutRepository.completeSet(setId, clock())
             if (completion.isNewRecord) {
-                local.update { it.copy(records = it.records + setId) }
                 eventChannel.send(WorkoutEvent.NewRecord(block.name))
             }
             eventChannel.send(WorkoutEvent.SetCompleted(setId, block.id, restSeconds))
@@ -243,8 +248,7 @@ class WorkoutViewModel(
     fun onDeleteSet(setId: Long) {
         val (block, row) = uiState.value.findSet(setId) ?: return
         val stored = storedExercise(block.id)?.sets?.firstOrNull { it.id == setId } ?: return
-        lastDeleted = DeletedSet(block.id, row.position, stored.value, stored.completedAt, row.isRecord)
-        local.update { it.copy(records = it.records - setId) }
+        lastDeleted = DeletedSet(block.id, row.position, stored.value, stored.completedAt)
         write { workoutRepository.deleteSet(setId) }
         eventChannel.trySend(WorkoutEvent.SetDeleted)
     }
@@ -258,8 +262,7 @@ class WorkoutViewModel(
         val deleted = lastDeleted ?: return
         lastDeleted = null
         write {
-            val id = workoutRepository.restoreSet(deleted.workoutExerciseId, deleted.position, deleted.value, deleted.completedAt)
-            if (deleted.wasRecord) local.update { it.copy(records = it.records + id) }
+            workoutRepository.restoreSet(deleted.workoutExerciseId, deleted.position, deleted.value, deleted.completedAt)
         }
     }
 
@@ -423,13 +426,11 @@ class WorkoutViewModel(
             }
         }
 
-    private data class Stored(val workout: Workout, val previous: Map<Long, List<SetValue>>)
+    private data class Stored(val workout: Workout, val previous: Map<Long, List<SetValue>>, val records: Set<Long>)
 
     private data class LocalState(
         val numberPad: NumberPadSession<SetFieldId>? = null,
         val dialog: WorkoutDialog? = null,
-        /** 이번 화면에서 최고 기록을 넘은 세트. 판정은 저장소가 한다(LOG-14). */
-        val records: Set<Long> = emptySet(),
     )
 
     private data class DeletedSet(
@@ -437,6 +438,5 @@ class WorkoutViewModel(
         val position: Int,
         val value: SetValue,
         val completedAt: Instant?,
-        val wasRecord: Boolean,
     )
 }

@@ -5,6 +5,8 @@ import android.app.Notification
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.service.notification.StatusBarNotification
+import android.util.Log
 import androidx.core.app.NotificationChannelCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
@@ -106,6 +108,41 @@ class RestNotifications(private val context: Context) {
 
     fun cancelDone() = manager.cancel(DONE_ID)
 
+    /** 휴식 중 알림을 지운다. 서비스가 포그라운드인 동안에는 지워지지 않을 수 있다. */
+    fun cancelOngoing() = manager.cancel(ONGOING_ID)
+
+    /**
+     * 휴식이 없고 서비스도 포그라운드가 아닌데 휴식 중 알림이 남아 있으면 지운다(#69).
+     *
+     * 실기기에서 서비스가 끝난 뒤 `FOREGROUND_SERVICE` 표시가 붙은 휴식 중 알림이 남았고 사용자가 지울 수 없었다.
+     * 앱이 지우라고 해도 그 표시가 붙은 알림은 지워지지 않을 수 있다(추론). 그래서 표시가 남은 알림은 같은 ID의 일반 알림으로
+     * 바꾼 다음 지운다. 서비스가 포그라운드가 아니므로 바꾼 알림에는 그 표시가 붙지 않는다(추론).
+     * 남아 있던 알림의 표시는 기기에서 원인을 볼 수 있게 로그에 남긴다(adb logcat -s RestTimer).
+     */
+    @SuppressLint("MissingPermission")
+    fun clearLeftoverOngoing() {
+        val leftover = activeOngoing()
+        if (leftover != null) Log.w(TAG, "휴식이 없는데 휴식 중 알림이 남았다 flags=0x${Integer.toHexString(leftover.notification.flags)}")
+        if (leftover != null && leftover.notification.flags and Notification.FLAG_FOREGROUND_SERVICE != 0 && enabled()) {
+            manager.notify(
+                ONGOING_ID,
+                NotificationCompat.Builder(context, CHANNEL_ONGOING)
+                    .setSmallIcon(R.drawable.ic_rest_timer)
+                    .setContentTitle(context.getString(R.string.rest_notification_title))
+                    .setSilent(true)
+                    .build(),
+            )
+        }
+        manager.cancel(ONGOING_ID)
+    }
+
+    /** 이 앱이 올려 둔 휴식 중 알림. 읽지 못하면 null이다. */
+    private fun activeOngoing(): StatusBarNotification? = try {
+        manager.activeNotifications.firstOrNull { it.id == ONGOING_ID && it.tag == null }
+    } catch (_: RuntimeException) {
+        null
+    }
+
     private fun action(name: String) = RestTimerActionReceiver.pendingIntent(context, name)
 
     /** 알림을 누르면 앱을 연다. 앱이 이미 떠 있으면 그 화면으로 돌아간다. */
@@ -122,6 +159,7 @@ class RestNotifications(private val context: Context) {
         const val CHANNEL_DONE = "rest_done"
         const val ONGOING_ID = 1
         const val DONE_ID = 2
+        private const val TAG = "RestTimer"
 
         /** 끝 알림이 저절로 지워지기까지. 다음 세트를 하러 돌아올 만한 시간이다(이 PR의 판단). */
         const val DONE_TIMEOUT_MILLIS = 5 * 60 * 1000L
