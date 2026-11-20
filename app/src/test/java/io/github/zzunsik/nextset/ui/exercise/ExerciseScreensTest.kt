@@ -1,5 +1,9 @@
 package io.github.zzunsik.nextset.ui.exercise
 
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.SemanticsProperties
+import androidx.compose.ui.test.SemanticsMatcher
+import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertHasClickAction
 import androidx.compose.ui.test.assertHasNoClickAction
 import androidx.compose.ui.test.assertIsDisplayed
@@ -182,5 +186,44 @@ class ExerciseScreensTest {
         compose.onNodeWithText(string(R.string.exercise_delete_confirm)).assertIsDisplayed()
         compose.onNodeWithText(string(R.string.action_delete)).performClick()
         assertEquals(1, deleted)
+    }
+
+    /** 이름만 적고 부위와 장비를 고르지 않으면 "저장"이 왜 비활성인지 화면에 보인다(#55). */
+    @Test
+    fun formTellsWhichChoicesAreMissingWhenSaveIsDisabled() {
+        setForm(ExerciseFormUiState(name = "스레드 풀다운"))
+        compose.onNodeWithText(string(R.string.exercise_form_save)).assertIsNotEnabled()
+        compose.onNodeWithText(string(R.string.exercise_form_missing_both)).assertIsDisplayed()
+            .assert(SemanticsMatcher.expectValue(SemanticsProperties.LiveRegion, LiveRegionMode.Polite))
+    }
+
+    @Test
+    fun formTellsWhenOnlyEquipmentIsMissing() {
+        setForm(ExerciseFormUiState(name = "스레드 풀다운", bodyPart = BodyPart.BACK))
+        compose.onNodeWithText(string(R.string.exercise_form_missing_equipment)).assertIsDisplayed()
+        compose.onNodeWithText(string(R.string.exercise_form_missing_body_part)).assertDoesNotExist()
+        compose.onNodeWithText(string(R.string.exercise_form_missing_both)).assertDoesNotExist()
+    }
+
+    @Test
+    fun formTellsWhenOnlyBodyPartIsMissing() {
+        setForm(ExerciseFormUiState(name = "스레드 풀다운", equipment = Equipment.CABLE))
+        compose.onNodeWithText(string(R.string.exercise_form_missing_body_part)).assertIsDisplayed()
+        compose.onNodeWithText(string(R.string.exercise_form_missing_equipment)).assertDoesNotExist()
+    }
+
+    /** 이름이 비었을 때는 빈 이름 칸이 이유다. 부위와 장비만 빠졌다고 잘못 알리지 않는다. */
+    @Test
+    fun formShowsNoMissingChoiceHintWhileNameIsBlank() {
+        setForm(ExerciseFormUiState())
+        compose.onNodeWithText(string(R.string.exercise_form_missing_both)).assertDoesNotExist()
+    }
+
+    @Test
+    fun formShowsNoMissingChoiceHintWhenEverythingIsChosen() {
+        setForm(ExerciseFormUiState(name = "스레드 풀다운", bodyPart = BodyPart.BACK, equipment = Equipment.CABLE))
+        compose.onNodeWithText(string(R.string.exercise_form_missing_both)).assertDoesNotExist()
+        compose.onNodeWithText(string(R.string.exercise_form_missing_body_part)).assertDoesNotExist()
+        compose.onNodeWithText(string(R.string.exercise_form_missing_equipment)).assertDoesNotExist()
     }
 }
