@@ -107,6 +107,14 @@
       "license": "Apache License 2.0",
       "file": "apache-2.0.txt",
       "modules": ["org.jetbrains.kotlinx:kotlinx-serialization-json"]
+    },
+    {
+      "id": "reorderable",
+      "name": "Reorderable",
+      "author": "Calvin Liang",
+      "license": "Apache License 2.0",
+      "file": "apache-2.0.txt",
+      "modules": ["sh.calvin.reorderable:reorderable"]
     }
   ]
 }

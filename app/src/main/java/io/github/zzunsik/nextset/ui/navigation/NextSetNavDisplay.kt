@@ -22,6 +22,7 @@ import io.github.zzunsik.nextset.ui.home.HomeWorkoutEntryRoute
 import io.github.zzunsik.nextset.ui.home.HomeWorkoutViewModel
 import io.github.zzunsik.nextset.ui.workout.workoutEntries
 import androidx.lifecycle.viewmodel.compose.viewModel
+import io.github.zzunsik.nextset.ui.routine.routineEntries
 import io.github.zzunsik.nextset.ui.settings.backupEntries
 import io.github.zzunsik.nextset.ui.settings.settingsEntries
 
@@ -54,9 +55,11 @@ fun NextSetNavDisplay(
                     val viewModel = viewModel { HomeWorkoutViewModel(workoutRepository, routineRepository) }
                     HomeWorkoutEntryRoute(viewModel = viewModel, onOpenWorkout = { backStack.add(WorkoutKey(it)) })
                 },
+                onOpenRoutines = { backStack.add(RoutineListKey) },
             )
         }
         workoutEntries(backStack, results, workoutRepository, routineRepository)
+        routineEntries(backStack, results, routineRepository, exerciseRepository, settingsRepository)
         settingsEntries(
             backStack = backStack,
             settingsRepository = settingsRepository,
@@ -70,7 +73,7 @@ fun NextSetNavDisplay(
 
 /**
  * [backStack]을 그리는 곳. 여러 화면이 함께 쓰는 화면(종목 고르기 등)은 여기서 잇고,
- * 부르는 쪽 화면은 [entries]로 더한다. 테스트와 디버그 빌드의 시험 화면도 이 함수로 같은 화면을 띄운다.
+ * 부르는 쪽 화면은 [entries]로 더한다. 테스트도 이 함수로 같은 화면을 띄운다.
  * [results]는 뒤 화면이 앞 화면에 값을 돌려줄 때 쓴다.
  */
 @Composable
