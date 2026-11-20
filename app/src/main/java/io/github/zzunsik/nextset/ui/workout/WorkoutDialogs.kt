@@ -1,30 +1,29 @@
 package io.github.zzunsik.nextset.ui.workout
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import io.github.zzunsik.nextset.R
 import io.github.zzunsik.nextset.domain.rule.defaultRestChoices
 import io.github.zzunsik.nextset.ui.component.TextInputField
+import io.github.zzunsik.nextset.ui.routine.ReorderableRow
+import io.github.zzunsik.nextset.ui.routine.moveByKey
+import io.github.zzunsik.nextset.ui.routine.moved
+import io.github.zzunsik.nextset.ui.routine.rememberDragOrder
 import io.github.zzunsik.nextset.ui.settings.OptionDialog
 import io.github.zzunsik.nextset.ui.settings.restDurationText
 import io.github.zzunsik.nextset.ui.theme.NextSetTheme
+import sh.calvin.reorderable.ReorderableItem
+import sh.calvin.reorderable.rememberReorderableLazyListState
 
 /**
  * 운동 중 화면의 대화상자. 확인은 되돌릴 수 없는 일(버리기, 종목 빼기)과 끝내기의 물음(docs/DESIGN.md "끝내기의 순서")에만 쓴다.
@@ -151,53 +150,73 @@ internal fun NoteDialog(title: String, note: String, onNoteChange: (String) -> U
     )
 }
 
-/** 종목 순서 바꾸기. 종목 이름만 나열하고 위로, 아래로 버튼으로 옮긴다. 옮기면 바로 저장한다. */
+/** 종목 순서 바꾸기의 한 줄. 끄는 동안 다른 상태(세트 값 등)가 바뀌어도 순서를 되돌리지 않도록 이름과 키만 둔다. */
+internal data class ReorderEntry(val id: Long, val name: String)
+
+/**
+ * 종목 순서 바꾸기(docs/DESIGN.md "운동 중"). 종목 이름만 나열한 대화상자다.
+ * 손잡이를 끌어 옮기고 놓으면 바로 저장한다(NF-09). 화면 낭독기에는 행마다 "위로/아래로 옮기기" 동작이 있다.
+ * `ModalBottomSheet`가 M3 안정판에서 실험 API라 시트 대신 `AlertDialog`다.
+ */
 @Composable
 private fun ReorderDialog(state: WorkoutUiState, actions: WorkoutActions) {
     val colors = NextSetTheme.colors
     AlertDialog(
         onDismissRequest = actions.onDismissDialog,
         containerColor = colors.surface,
-        title = {
-            Text(text = stringResource(R.string.workout_reorder), style = NextSetTheme.typography.heading, color = colors.text)
-        },
-        text = {
-            Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
-                state.exercises.forEachIndexed { index, block ->
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(NextSetTheme.spacing.xs),
-                    ) {
-                        Text(
-                            text = block.name,
-                            style = NextSetTheme.typography.body,
-                            color = colors.text,
-                            modifier = Modifier.weight(1f),
-                        )
-                        MoveButton(
-                            icon = R.drawable.ic_keyboard_arrow_up,
-                            description = stringResource(R.string.reorder_move_up, block.name),
-                            enabled = index > 0,
-                            onClick = { actions.onMoveExercise(block.id, -1) },
-                        )
-                        MoveButton(
-                            icon = R.drawable.ic_keyboard_arrow_down,
-                            description = stringResource(R.string.reorder_move_down, block.name),
-                            enabled = index < state.exercises.lastIndex,
-                            onClick = { actions.onMoveExercise(block.id, 1) },
-                        )
-                    }
-                }
-            }
-        },
+        title = { ReorderTitle() },
+        text = { ReorderList(entries = state.exercises.map { ReorderEntry(it.id, it.name) }, onReorder = actions.onReorderExercises) },
         confirmButton = { DialogButton(stringResource(R.string.action_close), colors.accent, actions.onDismissDialog) },
     )
 }
 
 @Composable
-private fun MoveButton(icon: Int, description: String, enabled: Boolean, onClick: () -> Unit) {
-    IconButton(onClick = onClick, enabled = enabled, modifier = Modifier.size(NextSetTheme.sizes.minTouchTarget)) {
-        Icon(painter = painterResource(icon), contentDescription = description)
+internal fun ReorderTitle() {
+    Text(
+        text = stringResource(R.string.workout_reorder),
+        style = NextSetTheme.typography.heading,
+        color = NextSetTheme.colors.text,
+    )
+}
+
+/**
+ * 종목 순서 바꾸기 목록. 루틴 편집, 홈 순서 편집과 같은 [ReorderableRow]를 쓴다.
+ * 끄는 동안에는 화면에 보이는 순서만 바꾸고 손을 놓을 때 [onReorder]로 한 번 저장한다.
+ * 화면 낭독기의 "위로/아래로 옮기기"는 한 칸 옮긴 순서를 바로 [onReorder]로 저장한다.
+ */
+@Composable
+internal fun ReorderList(entries: List<ReorderEntry>, onReorder: (List<Long>) -> Unit, modifier: Modifier = Modifier) {
+    val colors = NextSetTheme.colors
+    val order = rememberDragOrder(entries)
+    val listState = rememberLazyListState()
+    val reorderState = rememberReorderableLazyListState(listState) { from, to ->
+        moveByKey(order, ReorderEntry::id, from, to)
+    }
+    val current = order.value
+    LazyColumn(state = listState, modifier = modifier.testTag(REORDER_LIST_TAG)) {
+        items(current, key = { it.id }) { entry ->
+            val index = current.indexOf(entry)
+            ReorderableItem(reorderState, key = entry.id) { isDragging ->
+                ReorderableRow(
+                    title = entry.name,
+                    caption = null,
+                    onClick = null,
+                    onClickLabel = null,
+                    canMoveUp = index > 0,
+                    canMoveDown = index < current.lastIndex,
+                    onMove = { offset -> current.map { it.id }.moved(index, offset)?.let(onReorder) },
+                    onDragStopped = { onReorder(order.value.map { it.id }) },
+                    isDragging = isDragging,
+                    // 대화상자 바탕이 `surface`라 끄는 행은 `bg`로 띄운다.
+                    containerColor = colors.surface,
+                    draggingColor = colors.bg,
+                    modifier = Modifier.testTag(reorderRowTag(entry.id)),
+                )
+            }
+        }
     }
 }
+
+internal const val REORDER_LIST_TAG = "reorderList"
+
+internal fun reorderRowTag(workoutExerciseId: Long) = "reorderRow-$workoutExerciseId"

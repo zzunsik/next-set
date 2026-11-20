@@ -28,7 +28,7 @@ data class SetRowUi(
     val previous: SetValue?,
     /** 미리 채운 값이 그대로 든 칸. 직접 고친 칸과 구분해 보여 준다(LOG-03). */
     val suggested: Set<NumberFieldKind>,
-    /** 이번 운동에서 최고 기록을 넘은 세트(LOG-14). */
+    /** 이번 운동에서 최고 기록을 넘은 세트(LOG-14). 요약(HIST-03)과 같은 규칙으로 저장된 기록에서 계산한다(#76). */
     val isRecord: Boolean,
     /** 다음 세트(LOG-06)인가. */
     val isNext: Boolean,
