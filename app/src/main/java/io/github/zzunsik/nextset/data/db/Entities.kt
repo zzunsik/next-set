@@ -166,6 +166,8 @@ internal data class AppSettingsEntity(
     @ColumnInfo(name = "builtin_seed_version", defaultValue = "0") val builtinSeedVersion: Int = 0,
     @ColumnInfo(name = "notification_prompt_declined", defaultValue = "0")
     val notificationPromptDeclined: Boolean = false,
+    /** 마지막으로 백업 파일을 내보낸 시각(UTC 밀리초). 이 기기의 상태라 백업에 넣지 않는다. */
+    @ColumnInfo(name = "last_backup_exported_at") val lastBackupExportedAt: Long? = null,
 ) {
     companion object {
         const val SINGLE_ROW_ID = 1

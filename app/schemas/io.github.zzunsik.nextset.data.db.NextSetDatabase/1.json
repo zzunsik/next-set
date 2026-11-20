@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "73d414643c5523e21f980eb3e4442b24",
+    "identityHash": "7588baa6d70a36150107af02976023fc",
     "entities": [
       {
         "tableName": "exercise",
@@ -483,7 +483,7 @@
       },
       {
         "tableName": "app_settings",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER NOT NULL, `default_rest_seconds` INTEGER NOT NULL, `theme_mode` TEXT NOT NULL, `pinned_routine_id` INTEGER, `builtin_seed_version` INTEGER NOT NULL DEFAULT 0, `notification_prompt_declined` INTEGER NOT NULL DEFAULT 0, PRIMARY KEY(`id`), FOREIGN KEY(`pinned_routine_id`) REFERENCES `routine`(`id`) ON UPDATE NO ACTION ON DELETE SET NULL )",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER NOT NULL, `default_rest_seconds` INTEGER NOT NULL, `theme_mode` TEXT NOT NULL, `pinned_routine_id` INTEGER, `builtin_seed_version` INTEGER NOT NULL DEFAULT 0, `notification_prompt_declined` INTEGER NOT NULL DEFAULT 0, `last_backup_exported_at` INTEGER, PRIMARY KEY(`id`), FOREIGN KEY(`pinned_routine_id`) REFERENCES `routine`(`id`) ON UPDATE NO ACTION ON DELETE SET NULL )",
         "fields": [
           {
             "fieldPath": "id",
@@ -521,6 +521,11 @@
             "affinity": "INTEGER",
             "notNull": true,
             "defaultValue": "0"
+          },
+          {
+            "fieldPath": "lastBackupExportedAt",
+            "columnName": "last_backup_exported_at",
+            "affinity": "INTEGER"
           }
         ],
         "primaryKey": {
@@ -557,7 +562,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '73d414643c5523e21f980eb3e4442b24')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '7588baa6d70a36150107af02976023fc')"
     ]
   }
 }

@@ -48,3 +48,7 @@ data object LicensesKey : NavKey
 /** 오픈소스 라이선스 한 건. [id]는 `assets/licenses/index.json`의 항목 id다. */
 @Serializable
 data class LicenseDetailKey(val id: String) : NavKey
+
+/** 백업 파일 내보내기와 가져오기(DATA-03, DATA-04). */
+@Serializable
+data object BackupKey : NavKey

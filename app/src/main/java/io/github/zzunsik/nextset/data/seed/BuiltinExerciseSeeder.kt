@@ -88,6 +88,9 @@ internal class BuiltinExerciseSeeder(
         }
     }
 
+    /** 앱에 든 내장 종목 파일을 읽는다. 백업을 가져올 때 트랜잭션 밖에서 미리 읽어 [seed]에 넘긴다. */
+    suspend fun readFile(): BuiltinExerciseFile = BuiltinExerciseFile.parse(loadFile())
+
     /** 판 번호가 다를 때만 반영한다. 반영했으면 참이다. */
     suspend fun seed(file: BuiltinExerciseFile): Boolean = database.withWriteTransaction {
         val settingsDao = database.settingsDao()
