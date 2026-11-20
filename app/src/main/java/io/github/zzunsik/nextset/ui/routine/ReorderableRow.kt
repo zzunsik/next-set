@@ -19,6 +19,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.CustomAccessibilityAction
@@ -32,24 +33,28 @@ import sh.calvin.reorderable.ReorderableCollectionItemScope
  * 손잡이를 끌어 순서를 바꾸는 목록 행(docs/DESIGN.md `ExerciseRow`의 루틴 편집 상태, `RoutineRow`의 순서 편집 상태).
  * 앞에 순서 바꾸기 손잡이, 이름(`body`), 보조 줄(`caption`, `text2`). 최소 높이 56dp.
  *
- * - 끄는 동안 행 바탕이 `surface`가 된다.
+ * - 행 바탕은 [containerColor], 끄는 동안에는 [draggingColor]다. 화면 위에서는 `bg`와 `surface`,
+ *   대화상자(`surface`) 위에서는 거꾸로 `surface`와 `bg`를 준다.
  * - 손잡이를 끌면 [Reorderable](https://github.com/Calvin-LL/Reorderable)이 행을 옮긴다. 놓으면 [onDragStopped]가 불린다.
  * - 화면 낭독기에는 "위로 옮기기", "아래로 옮기기" 동작을 붙인다([onMove], 끌기가 어려운 사용자를 위한 길).
- * - 행을 누르면 [onClick]. [onClickLabel]은 화면 낭독기가 읽는 동작 이름이다.
+ * - 행을 누르면 [onClick]. [onClickLabel]은 화면 낭독기가 읽는 동작 이름이다. [onClick]이 null이면 누르는 요소가 아니다
+ *   (운동 중 종목 순서 바꾸기).
  * - [trailing]은 행 끝의 버튼 자리다(홈 순서 편집의 지우기 버튼).
  */
 @Composable
 internal fun ReorderableCollectionItemScope.ReorderableRow(
     title: String,
     caption: String?,
-    onClick: () -> Unit,
-    onClickLabel: String,
+    onClick: (() -> Unit)?,
+    onClickLabel: String?,
     canMoveUp: Boolean,
     canMoveDown: Boolean,
     onMove: (offset: Int) -> Unit,
     onDragStopped: () -> Unit,
     isDragging: Boolean,
     modifier: Modifier = Modifier,
+    containerColor: Color = NextSetTheme.colors.bg,
+    draggingColor: Color = NextSetTheme.colors.surface,
     trailing: @Composable (() -> Unit)? = null,
 ) {
     val colors = NextSetTheme.colors
@@ -59,10 +64,11 @@ internal fun ReorderableCollectionItemScope.ReorderableRow(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .background(if (isDragging) colors.surface else colors.bg)
+            .background(if (isDragging) draggingColor else containerColor)
             .heightIn(min = NextSetTheme.sizes.listRowMinHeight)
-            .clickable(onClickLabel = onClickLabel, onClick = onClick)
-            .semantics {
+            .then(if (onClick != null) Modifier.clickable(onClickLabel = onClickLabel, onClick = onClick) else Modifier)
+            // 누르는 요소가 아니어도 이름과 옮기기 동작을 한 마디로 읽게 묶는다.
+            .semantics(mergeDescendants = true) {
                 customActions = buildList {
                     if (canMoveUp) add(CustomAccessibilityAction(moveUp) { onMove(-1); true })
                     if (canMoveDown) add(CustomAccessibilityAction(moveDown) { onMove(1); true })

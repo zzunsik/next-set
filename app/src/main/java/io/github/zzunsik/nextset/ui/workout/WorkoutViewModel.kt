@@ -293,6 +293,16 @@ class WorkoutViewModel(
         write { workoutRepository.reorderExercises(workoutId, ids) }
     }
 
+    /**
+     * 종목 순서 바꾸기 대화상자에서 끌어 놓은 순서([orderedIds])를 저장한다. 바로 저장한다(NF-09).
+     * 순서가 그대로이거나 지금 종목과 다른 목록(그 사이에 종목을 더하거나 뺐다)이면 쓰지 않는다.
+     */
+    fun onReorderExercises(orderedIds: List<Long>) {
+        val ids = uiState.value.exercises.map { it.id }
+        if (orderedIds == ids || orderedIds.size != ids.size || orderedIds.toSet() != ids.toSet()) return
+        write { workoutRepository.reorderExercises(workoutId, orderedIds) }
+    }
+
     // ---- 메모(LOG-11) ----
 
     fun onExerciseNoteRequest(workoutExerciseId: Long) {
