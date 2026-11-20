@@ -14,6 +14,7 @@ import io.github.zzunsik.nextset.domain.repository.SettingsRepository
 import io.github.zzunsik.nextset.domain.repository.WorkoutRepository
 import io.github.zzunsik.nextset.domain.rule.RoutineUpdatePlan
 import io.github.zzunsik.nextset.domain.rule.isFilled
+import io.github.zzunsik.nextset.domain.rule.isUntouched
 import io.github.zzunsik.nextset.domain.rule.planRoutineUpdate
 import io.github.zzunsik.nextset.domain.rule.recordSetIdsAgainst
 import io.github.zzunsik.nextset.domain.rule.suggestedValue
@@ -405,6 +406,23 @@ class WorkoutViewModel(
                 if (result == FinishResult.FINISHED) WorkoutExit.Finished(workoutId) else WorkoutExit.Home,
             ),
         )
+    }
+
+    /**
+     * 뒤로 가기(시스템 뒤로 가기와 상단 바의 뒤로 가기). 앞서 부른 쓰기를 마친 뒤 [onLeft]를 부른다.
+     * 손대지 않은 운동([isUntouched])이면 묻지 않고 버린다(docs/DESIGN.md "한 번 눌러 시작"). 손댄 운동은 그대로 남아
+     * 홈에서 이어서 한다(HOME-06, LOG-13).
+     */
+    fun onLeave(onLeft: () -> Unit) {
+        write {
+            val workout = workoutRepository.observeWorkout(workoutId).first()
+            if (workout != null && workout.isUntouched()) {
+                // 지운 뒤 "운동이 없어졌다"로 홈에 한 번 더 가지 않게 먼저 막는다.
+                exited = true
+                workoutRepository.discardWorkout(workoutId)
+            }
+            onLeft()
+        }
     }
 
     fun onDiscardRequest() = showDialog(WorkoutDialog.Discard)

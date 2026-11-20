@@ -19,6 +19,22 @@ fun Workout.nextSet(): NextSetRef? {
 }
 
 /**
+ * 손대지 않은 운동인지(docs/DESIGN.md "한 번 눌러 시작"). 손대지 않은 진행 중인 운동은 운동 중 화면을 뒤로 가기로
+ * 나갈 때 묻지 않고 버리고, 홈은 다른 운동을 시작할 때 묻지 않고 버린다.
+ *
+ * 손댄 것으로 보는 것은 아래 가운데 하나라도 있을 때다.
+ * - 완료한 세트가 있다.
+ * - 저장소가 고친 것을 적어 두었다([Workout.isEdited]): 세트 값을 미리 채운 값에서 바꿈, 세트를 완료함(뒤에 풀어도),
+ *   세트나 종목을 더하고 빼고 순서를 바꿈, 운동 메모나 종목 메모를 적음.
+ * - 운동 메모나 종목 메모가 있다.
+ *
+ * 끝난 운동은 손대지 않았다고 보지 않는다. 모두 저장된 값으로 정하므로 앱이 꺼졌다 켜져도 판단이 같다(LOG-13).
+ */
+fun Workout.isUntouched(): Boolean =
+    isInProgress && !isEdited && note == null &&
+        exercises.all { exercise -> exercise.note == null && exercise.sets.none { it.isCompleted } }
+
+/**
  * 세트 행에 제안하는 값. 미리 채우기(LOG-03, [prefillValue])가 비워 둔 칸은 바로 위 행([above])의 값으로 채운다
  * (docs/DESIGN.md `SetRow`: "새 행의 값은 바로 위 행의 값이다"). 직전 기록과 목표가 위 행보다 먼저다.
  */

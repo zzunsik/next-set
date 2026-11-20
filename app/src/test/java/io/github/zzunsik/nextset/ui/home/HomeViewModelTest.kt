@@ -9,6 +9,7 @@ import io.github.zzunsik.nextset.data.repository.TestExercises.BENCH
 import io.github.zzunsik.nextset.data.repository.TestExercises.PULL_UP
 import io.github.zzunsik.nextset.data.repository.TestExercises.SQUAT
 import io.github.zzunsik.nextset.data.repository.at
+import io.github.zzunsik.nextset.data.repository.wr
 import io.github.zzunsik.nextset.ui.ViewModelJobs
 import io.github.zzunsik.nextset.ui.exercise.MainDispatcherRule
 import java.time.LocalDate
@@ -99,6 +100,14 @@ class HomeViewModelTest {
         val set = workouts.observeWorkout(id).first()!!.exercises.first().sets.first()
         workouts.completeSet(set.id, at(minutes + 1))
         workouts.finishWorkout(id, at(minutes + 30))
+    }
+
+    /** [routineId]로 운동을 시작해 값을 하나 바꾼다. 손댄 운동이라 홈이 묻는다(#73). */
+    private suspend fun TestDb.touchedWorkout(routineId: Long): Long {
+        val id = workouts.startFromRoutine(routineId, at(0))
+        val set = workouts.observeWorkout(id).first()!!.exercises.first().sets.first()
+        workouts.updateSet(set.id, wr(77_500, 3))
+        return id
     }
 
     private fun HomeUiState.otherNames() = others.map { it.routine.name }
@@ -246,7 +255,7 @@ class HomeViewModelTest {
     fun startingAnotherRoutineWhileInProgressAsksAndCanResume() {
         val a = routine("가슴", BENCH)
         val b = routine("등", PULL_UP)
-        val workoutId = db { workouts.startFromRoutine(a, at(0)) }
+        val workoutId = db { touchedWorkout(a) }
         val vm = viewModel()
         vm.awaitState { it.inProgress != null }
 
@@ -291,7 +300,7 @@ class HomeViewModelTest {
     @Test
     fun cancelLeavesEverythingAsItWas() {
         val a = routine("가슴", BENCH)
-        val workoutId = db { workouts.startFromRoutine(a, at(0)) }
+        val workoutId = db { touchedWorkout(a) }
         val vm = viewModel()
         vm.awaitState { it.inProgress != null }
         vm.onStartEmpty()

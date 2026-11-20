@@ -106,6 +106,7 @@ internal class RoomWorkoutRepository(private val database: NextSetDatabase) : Wo
         require(setCount >= 0) { "세트 수는 0 이상이어야 한다" }
         return database.withWriteTransaction {
             val workout = requireWorkout(workoutId)
+            workoutDao.markEdited(workoutId)
             insertExercise(
                 workoutId = workoutId,
                 exerciseId = exerciseId,
@@ -122,13 +123,16 @@ internal class RoomWorkoutRepository(private val database: NextSetDatabase) : Wo
             val exercise = workoutDao.getExercise(workoutExerciseId) ?: return@withWriteTransaction
             workoutDao.deleteExercise(exercise.id) // 세트는 CASCADE로 함께 지워진다.
             renumberExercises(exercise.workoutId)
+            workoutDao.markEdited(exercise.workoutId)
         }
     }
 
     override suspend fun reorderExercises(workoutId: Long, orderedIds: List<Long>) {
         database.withWriteTransaction {
-            requireSameItems(workoutDao.getExercises(workoutId).map { it.id }, orderedIds)
+            val current = workoutDao.getExercises(workoutId).map { it.id }
+            requireSameItems(current, orderedIds)
             orderedIds.forEachIndexed { index, id -> workoutDao.setExercisePosition(id, index) }
+            if (current != orderedIds) workoutDao.markEdited(workoutId)
         }
     }
 
@@ -137,6 +141,7 @@ internal class RoomWorkoutRepository(private val database: NextSetDatabase) : Wo
         val workout = requireWorkout(exercise.workoutId)
         val position = workoutDao.getSets(workoutExerciseId).size
         val previous = workoutDao.getPreviousSets(exercise.exerciseId, exercise.recordType, workout.startedAt)
+        workoutDao.markEdited(workout.id)
         insertSet(exercise, position, previous)
     }
 
@@ -145,6 +150,7 @@ internal class RoomWorkoutRepository(private val database: NextSetDatabase) : Wo
             val set = workoutDao.getSet(setId) ?: return@withWriteTransaction
             workoutDao.deleteSet(setId)
             renumberSets(set.workoutExerciseId)
+            markEditedByExercise(set.workoutExerciseId)
         }
     }
 
@@ -159,6 +165,7 @@ internal class RoomWorkoutRepository(private val database: NextSetDatabase) : Wo
                 if (set.position != moved) workoutDao.setSetPosition(set.id, moved)
             }
             val fitted = value.fitTo(exercise.recordType)
+            workoutDao.markEdited(exercise.workoutId)
             workoutDao.insertSet(
                 WorkoutSetEntity(
                     workoutExerciseId = workoutExerciseId,
@@ -176,9 +183,12 @@ internal class RoomWorkoutRepository(private val database: NextSetDatabase) : Wo
         value.validate()
         database.withWriteTransaction {
             val set = requireSet(setId)
-            val type = checkNotNull(workoutDao.getExercise(set.workoutExerciseId)).recordType
-            val fitted = value.fitTo(type)
+            val exercise = checkNotNull(workoutDao.getExercise(set.workoutExerciseId))
+            val fitted = value.fitTo(exercise.recordType)
+            // 같은 값을 다시 쓰는 것은 고친 것으로 보지 않는다. 미리 채운 값 그대로면 손대지 않은 운동이다(#73).
+            if (fitted == set.value) return@withWriteTransaction
             workoutDao.setSetValue(setId, fitted.weight?.grams, fitted.reps, fitted.durationSeconds)
+            workoutDao.markEdited(exercise.workoutId)
         }
     }
 
@@ -186,6 +196,7 @@ internal class RoomWorkoutRepository(private val database: NextSetDatabase) : Wo
         val set = requireSet(setId)
         workoutDao.setCompletedAt(setId, now.toEpochMilli())
         val exercise = checkNotNull(workoutDao.getExercise(set.workoutExerciseId))
+        workoutDao.markEdited(exercise.workoutId)
         val workout = checkNotNull(workoutDao.getWorkout(exercise.workoutId))
         // 지난 기록을 고칠 때는 알리지 않는다. 같은 방식으로 적은 이전 운동이 없어도 알리지 않는다.
         val notify = workout.finishedAt == null &&
@@ -201,13 +212,16 @@ internal class RoomWorkoutRepository(private val database: NextSetDatabase) : Wo
 
     override suspend fun updateWorkoutNote(workoutId: Long, note: String?) {
         database.withWriteTransaction {
-            workoutDao.updateWorkout(requireWorkout(workoutId).copy(note = note?.ifBlank { null }))
+            workoutDao.updateWorkout(requireWorkout(workoutId).copy(note = note?.ifBlank { null }, isEdited = true))
         }
     }
 
     override suspend fun updateExerciseNote(workoutExerciseId: Long, note: String?) {
-        require(workoutDao.setExerciseNote(workoutExerciseId, note?.ifBlank { null }) == 1) {
-            "운동 기록 종목 $workoutExerciseId 가 없다"
+        database.withWriteTransaction {
+            require(workoutDao.setExerciseNote(workoutExerciseId, note?.ifBlank { null }) == 1) {
+                "운동 기록 종목 $workoutExerciseId 가 없다"
+            }
+            markEditedByExercise(workoutExerciseId)
         }
     }
 
@@ -320,6 +334,10 @@ internal class RoomWorkoutRepository(private val database: NextSetDatabase) : Wo
         )
     }
 
+    private suspend fun markEditedByExercise(workoutExerciseId: Long) {
+        workoutDao.getExercise(workoutExerciseId)?.let { workoutDao.markEdited(it.workoutId) }
+    }
+
     private suspend fun renumberExercises(workoutId: Long) {
         workoutDao.getExercises(workoutId).forEachIndexed { index, exercise ->
             if (exercise.position != index) workoutDao.setExercisePosition(exercise.id, index)
@@ -353,6 +371,7 @@ internal class RoomWorkoutRepository(private val database: NextSetDatabase) : Wo
             startedAt = Instant.ofEpochMilli(workout.startedAt),
             finishedAt = workout.finishedAt?.let(Instant::ofEpochMilli),
             note = workout.note,
+            isEdited = workout.isEdited,
             exercises = exercises.map { exercise ->
                 WorkoutExercise(
                     id = exercise.id,

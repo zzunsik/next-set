@@ -87,6 +87,8 @@ internal data class WorkoutEntity(
     /** 비어 있으면 진행 중이다. */
     @ColumnInfo(name = "finished_at") val finishedAt: Long?,
     val note: String? = null,
+    /** 시작한 뒤 사용자가 고친 것이 있는지. 손대지 않은 운동을 가리는 데 쓴다(#73). */
+    @ColumnInfo(name = "is_edited", defaultValue = "0") val isEdited: Boolean = false,
 )
 
 @Entity(

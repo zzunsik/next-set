@@ -8,6 +8,7 @@ import io.github.zzunsik.nextset.domain.model.WorkoutSummary
 import io.github.zzunsik.nextset.domain.repository.RoutineRepository
 import io.github.zzunsik.nextset.domain.repository.SettingsRepository
 import io.github.zzunsik.nextset.domain.repository.WorkoutRepository
+import io.github.zzunsik.nextset.domain.rule.isUntouched
 import io.github.zzunsik.nextset.ui.routine.SerialWriter
 import java.time.Instant
 import java.time.LocalDate
@@ -20,6 +21,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
@@ -33,6 +35,8 @@ data class InProgressWorkoutUi(
     val totalSets: Int,
     val completedSets: Int,
     val startedAt: Instant,
+    /** 손대지 않은 운동이다(docs/DESIGN.md "한 번 눌러 시작"). 다른 운동을 시작할 때 묻지 않고 버린다. */
+    val untouched: Boolean = false,
 )
 
 /** 홈의 루틴 하나. 카드와 행이 함께 쓴다. */
@@ -78,7 +82,9 @@ data class HomeUiState(
  *
  * - 맨 위 카드, 루틴 행, "빈 운동 시작"은 한 번 눌러 운동을 시작한다(HOME-01, HOME-04, HOME-05).
  * - 진행 중인 운동이 있으면 맨 위가 이어서 하기 카드다(HOME-06). 이때 루틴 행이나 "빈 운동 시작"을 누르면
- *   바로 시작하지 않고 묻는다(HOME-01의 예외).
+ *   바로 시작하지 않고 묻는다(HOME-01의 예외). 묻는 것은 손댄 운동일 때뿐이고, 손대지 않은 운동은 묻지 않고 버린 뒤
+ *   시작한다(docs/DESIGN.md "진행 중인 운동이 있을 때 다른 루틴을 시작하려 하면"). 손대지 않은 운동은 보통 운동 중
+ *   화면을 나갈 때 이미 버려지지만, 뒤로 가기가 아닌 길(앱 전환 뒤 프로세스 종료 등)로 남을 수 있다.
  *
  * @param newRoutineName "새 루틴"으로 만든 루틴의 이름. 문자열 리소스에서 받는다(NF-03).
  */
@@ -137,7 +143,14 @@ class HomeViewModel(
     ) { workout, routines, (topId, pinned), dialog ->
         val inProgress = workout?.let {
             val sets = it.exercises.flatMap { exercise -> exercise.sets }
-            InProgressWorkoutUi(it.id, it.routineName, sets.size, sets.count { set -> set.isCompleted }, it.startedAt)
+            InProgressWorkoutUi(
+                workoutId = it.id,
+                routineName = it.routineName,
+                totalSets = sets.size,
+                completedSets = sets.count { set -> set.isCompleted },
+                startedAt = it.startedAt,
+                untouched = it.isUntouched(),
+            )
         }
         val topRoutine = routines.firstOrNull { it.routine.id == topId }
         HomeUiState(
@@ -159,13 +172,22 @@ class HomeViewModel(
 
     fun onStartEmpty() = startOrAsk(PendingStart.Empty)
 
-    /** 진행 중인 운동이 있으면 묻고, 없으면 바로 시작한다. */
+    /** 손댄 진행 중인 운동이 있으면 묻고, 손대지 않은 운동이면 버리고 시작하고, 없으면 바로 시작한다. */
     private fun startOrAsk(pending: PendingStart) {
         val inProgress = uiState.value.inProgress
-        if (inProgress != null) {
-            dialog.value = HomeDialog.InProgress(inProgress, pending)
-        } else {
-            start(pending)
+        when {
+            inProgress == null -> start(pending)
+            inProgress.untouched -> viewModelScope.launch {
+                // 화면 상태가 늦게 따라온 사이에 손댔을 수 있어 저장된 운동으로 다시 본다.
+                val stored = workoutRepository.observeWorkout(inProgress.workoutId).first()
+                if (stored != null && stored.isInProgress && !stored.isUntouched()) {
+                    dialog.value = HomeDialog.InProgress(inProgress.copy(untouched = false), pending)
+                    return@launch
+                }
+                if (stored?.isUntouched() == true) workoutRepository.discardWorkout(stored.id)
+                start(pending)
+            }
+            else -> dialog.value = HomeDialog.InProgress(inProgress, pending)
         }
     }
 

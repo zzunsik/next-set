@@ -111,6 +111,8 @@ internal class RoomBackupRepository(
                         startedAt = workout.startedAt,
                         finishedAt = workout.finishedAt,
                         note = workout.note,
+                        // 가져온 운동은 사용자의 기록이라 손댄 것으로 본다. 뒤로 가기만으로 버려지지 않는다(#73).
+                        isEdited = true,
                     ),
                 )
                 workout.exercises.forEachIndexed { position, item ->

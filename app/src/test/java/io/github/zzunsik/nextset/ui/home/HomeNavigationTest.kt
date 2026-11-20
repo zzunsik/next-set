@@ -101,9 +101,10 @@ class HomeNavigationTest {
         assertEquals(chest, inProgress()?.routineId)
         compose.onNodeWithText(text(R.string.nav_history)).assertDoesNotExist()
 
-        // 뒤로 가면 바로 홈이다. 맨 위가 이어서 하기 카드로 바뀐다(HOME-06).
+        // 뒤로 가면 바로 홈이다. 아무것도 하지 않은 운동은 버려져 맨 위는 다시 다음 차례 카드다(#73).
+        // 손댄 운동이 이어서 하기 카드로 남는 것은 DiscardUntouchedNavigationTest가 본다(HOME-06).
         compose.runOnUiThread { app.onBackPressedDispatcher.onBackPressed() }
-        waitFor(hasText(text(R.string.home_resume_label)))
+        waitFor(hasText(text(R.string.home_next_label)))
         compose.onNodeWithText(text(R.string.nav_history)).assertExists()
     }
 
