@@ -246,7 +246,7 @@ class WorkoutViewModelTest {
         vm.onFieldClick(set.id, NumberFieldKind.WEIGHT)
         vm.onNumberPadKey(NumberPadKey.Step(Weight.STEP_2_5KG.grams))
         assertEquals(wr(62_500, 8), vm.awaitState { it.nextSet?.value?.weight == Weight(62_500) }.nextSet!!.value)
-        assertEquals("줄어든 표시와 같은 행의 칸에도 보인다", wr(62_500, 8), vm.uiState.value.exercises[0].sets[0].value)
+        assertEquals("줄어든 표시와 같은 행의 칸에도 보인다", wr(62_500, 8), vm.awaitState { it.exercises[0].sets[0].value == wr(62_500, 8) }.exercises[0].sets[0].value)
     }
 
     // ---- 세트와 종목(LOG-09, LOG-10) ----
@@ -316,7 +316,7 @@ class WorkoutViewModelTest {
         vm.onMoveExercise(added.exercises[0].id, -1) // 맨 위는 더 올라가지 않는다.
 
         vm.onRemoveExerciseRequest(first.exercises[1].id)
-        assertEquals(WorkoutDialog.RemoveExercise(first.exercises[1].id, "테스트 풀업"), vm.uiState.value.dialog)
+        assertEquals(WorkoutDialog.RemoveExercise(first.exercises[1].id, "테스트 풀업"), vm.awaitState { it.dialog == WorkoutDialog.RemoveExercise(first.exercises[1].id, "테스트 풀업") }.dialog)
         vm.onRemoveExerciseConfirm(first.exercises[1].id)
         val removed = vm.awaitState { it.exercises.size == 3 }
         assertEquals(listOf(BENCH, PLANK, SQUAT), removed.exercises.map { it.exerciseId })
@@ -346,7 +346,7 @@ class WorkoutViewModelTest {
         val vm = viewModel(workoutId)
         vm.awaitState { it.exercises.isNotEmpty() }
         vm.onFinishRequest()
-        assertEquals(WorkoutDialog.NoCompletedSets, vm.uiState.value.dialog)
+        assertEquals(WorkoutDialog.NoCompletedSets, vm.awaitState { it.dialog == WorkoutDialog.NoCompletedSets }.dialog)
 
         vm.onDiscardConfirm()
 
@@ -374,7 +374,7 @@ class WorkoutViewModelTest {
         vm.onFinishRequest()
 
         assertEquals(WorkoutEvent.Exit(WorkoutExit.Finished(workoutId)), vm.nextEvent())
-        assertNull("묻지 않았다", vm.uiState.value.dialog)
+        assertNull("묻지 않았다", vm.awaitState { it.dialog == null }.dialog)
         assertNotNull(stored(workoutId).finishedAt)
     }
 
@@ -410,7 +410,7 @@ class WorkoutViewModelTest {
         vm.awaitState { it.exercises.size == 1 }
 
         vm.onFinishRequest()
-        assertEquals(WorkoutDialog.IncompleteSets(2), vm.uiState.value.dialog)
+        assertEquals(WorkoutDialog.IncompleteSets(2), vm.awaitState { it.dialog == WorkoutDialog.IncompleteSets(2) }.dialog)
         vm.onIncompleteConfirm()
         vm.awaitState { it.dialog == WorkoutDialog.RoutineChange }
 
@@ -454,9 +454,9 @@ class WorkoutViewModelTest {
         vm.onCheck(set.id)
         vm.awaitState { it.exercises[0].sets[0].completed }
         vm.onDiscardRequest()
-        assertEquals(WorkoutDialog.Discard, vm.uiState.value.dialog)
+        assertEquals(WorkoutDialog.Discard, vm.awaitState { it.dialog == WorkoutDialog.Discard }.dialog)
         vm.dismissDialog()
-        assertNull(vm.uiState.value.dialog)
+        assertNull(vm.awaitState { it.dialog == null }.dialog)
 
         vm.onDiscardRequest()
         vm.onDiscardConfirm()
