@@ -2,6 +2,7 @@ package io.github.zzunsik.nextset.data.repository
 
 import androidx.room3.withWriteTransaction
 import io.github.zzunsik.nextset.data.db.BestSetRow
+import io.github.zzunsik.nextset.data.db.ExerciseEntity
 import io.github.zzunsik.nextset.data.db.NextSetDatabase
 import io.github.zzunsik.nextset.data.db.Tables
 import io.github.zzunsik.nextset.data.db.WorkoutDao
@@ -72,16 +73,33 @@ internal class RoomWorkoutRepository(private val database: NextSetDatabase) : Wo
         )
     }
 
-    override suspend fun addPastWorkout(startedAt: Instant, finishedAt: Instant): Long {
+    override fun observeFinishedWorkouts(): Flow<List<Workout>> = database.observe(*WORKOUT_TABLES) {
+        val exercises = workoutDao.getExercisesOfFinishedWorkouts().groupBy { it.workoutId }
+        val sets = workoutDao.getSetsOfFinishedWorkouts().groupBy { it.workoutExerciseId }
+        val definitions = exerciseDao.getByIds(exercises.values.flatten().map { it.exerciseId }.toSet()).associateBy { it.id }
+        workoutDao.getFinishedWorkouts().map { workout -> workout.toModel(exercises[workout.id].orEmpty(), sets, definitions) }
+    }
+
+    override suspend fun addPastWorkout(startedAt: Instant, finishedAt: Instant, routineId: Long?): Long {
         require(!finishedAt.isBefore(startedAt)) { "끝난 시각이 시작 시각보다 앞선다" }
-        return workoutDao.insertWorkout(
-            WorkoutEntity(
-                routineId = null,
-                routineName = null,
-                startedAt = startedAt.toEpochMilli(),
-                finishedAt = finishedAt.toEpochMilli(),
-            ),
-        )
+        return database.withWriteTransaction {
+            val routine = routineId?.let { requireNotNull(routineDao.getById(it)) { "루틴 $it 가 없다" } }
+            val workoutId = workoutDao.insertWorkout(
+                WorkoutEntity(
+                    routineId = routine?.id,
+                    routineName = routine?.name,
+                    startedAt = startedAt.toEpochMilli(),
+                    finishedAt = finishedAt.toEpochMilli(),
+                ),
+            )
+            // 루틴에서 시작할 때와 같이 복사한다. 직전 기록은 이 운동의 시작 시각보다 앞선 것을 본다.
+            routine?.let {
+                routineDao.getItems(it.id).forEachIndexed { index, item ->
+                    insertExercise(workoutId, item.exerciseId, index, item.target, item.setCount, startedAt.toEpochMilli())
+                }
+            }
+            workoutId
+        }
     }
 
     override suspend fun addExercise(workoutId: Long, exerciseId: String, setCount: Int): Long {
@@ -319,6 +337,15 @@ internal class RoomWorkoutRepository(private val database: NextSetDatabase) : Wo
         val exercises = workoutDao.getExercises(id)
         val sets = workoutDao.getSetsOfWorkout(id).groupBy { it.workoutExerciseId }
         val definitions = exerciseDao.getByIds(exercises.map { it.exerciseId }.toSet()).associateBy { it.id }
+        return workout.toModel(exercises, sets, definitions)
+    }
+
+    private fun WorkoutEntity.toModel(
+        exercises: List<WorkoutExerciseEntity>,
+        sets: Map<Long, List<WorkoutSetEntity>>,
+        definitions: Map<String, ExerciseEntity>,
+    ): Workout {
+        val workout = this
         return Workout(
             id = workout.id,
             routineId = workout.routineId,

@@ -17,6 +17,7 @@ import io.github.zzunsik.nextset.domain.repository.RoutineRepository
 import io.github.zzunsik.nextset.domain.repository.SettingsRepository
 import io.github.zzunsik.nextset.domain.repository.WorkoutRepository
 import io.github.zzunsik.nextset.ui.exercise.exerciseEntries
+import io.github.zzunsik.nextset.ui.history.historyEntries
 import io.github.zzunsik.nextset.ui.home.HomeScreen
 import io.github.zzunsik.nextset.ui.home.HomeWorkoutEntryRoute
 import io.github.zzunsik.nextset.ui.home.HomeWorkoutViewModel
@@ -56,9 +57,11 @@ fun NextSetNavDisplay(
                     HomeWorkoutEntryRoute(viewModel = viewModel, onOpenWorkout = { backStack.add(WorkoutKey(it)) })
                 },
                 onOpenRoutines = { backStack.add(RoutineListKey) },
+                onOpenHistory = { backStack.add(HistoryKey) },
             )
         }
         workoutEntries(backStack, results, workoutRepository, routineRepository)
+        historyEntries(backStack, results, workoutRepository, routineRepository)
         routineEntries(backStack, results, routineRepository, exerciseRepository, settingsRepository)
         settingsEntries(
             backStack = backStack,

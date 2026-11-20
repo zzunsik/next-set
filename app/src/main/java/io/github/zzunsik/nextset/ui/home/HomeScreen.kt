@@ -23,6 +23,7 @@ import io.github.zzunsik.nextset.ui.theme.ThemeMode
  * 설정으로 가는 글자 버튼은 홈(#23)이 하단 내비게이션을 만들 때까지 두는 임시 입구다.
  * [workoutEntry]는 운동을 시작하고 이어서 하는 임시 입구(#24, [HomeWorkoutEntry]) 자리다. 홈(#23)이 카드와 행으로 바꾼다.
  * 루틴으로 가는 글자 버튼([onOpenRoutines])도 홈(#23)이 루틴 목록과 "새 루틴"을 가질 때까지 두는 임시 입구다.
+ * 기록으로 가는 글자 버튼([onOpenHistory])은 하단 내비게이션의 "기록" 탭(#23)이 생길 때까지 두는 임시 입구다(#27).
  * null이면 그리지 않는다.
  */
 @Composable
@@ -31,6 +32,7 @@ fun HomeScreen(
     modifier: Modifier = Modifier,
     workoutEntry: @Composable () -> Unit = {},
     onOpenRoutines: (() -> Unit)? = null,
+    onOpenHistory: (() -> Unit)? = null,
 ) {
     val spacing = NextSetTheme.spacing
     Scaffold(modifier = modifier.fillMaxSize()) { innerPadding ->
@@ -64,6 +66,14 @@ fun HomeScreen(
                     modifier = Modifier.heightIn(min = NextSetTheme.sizes.minTouchTarget),
                 ) {
                     Text(text = stringResource(R.string.home_open_routines), style = NextSetTheme.typography.label)
+                }
+            }
+            if (onOpenHistory != null) {
+                TextButton(
+                    onClick = onOpenHistory,
+                    modifier = Modifier.heightIn(min = NextSetTheme.sizes.minTouchTarget),
+                ) {
+                    Text(text = stringResource(R.string.home_open_history), style = NextSetTheme.typography.label)
                 }
             }
         }
