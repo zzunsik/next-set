@@ -99,6 +99,10 @@ class HistoryNavigationTest {
         waitFor(hasText(text(R.string.history_add_past)))
         compose.waitUntil(TIMEOUT) { compose.onAllNodes(hasText(newest)).fetchSemanticsNodes().isEmpty() }
         assertEquals(1, runBlocking { db.workouts.observeHistory().first().size })
+
+        // 홈으로 돌아가 기록 화면의 화면 상태를 정리한다. 남겨 두면 데이터베이스를 닫은 뒤에도 읽으려 한다.
+        compose.onNodeWithContentDescription(text(R.string.navigate_back)).performClick()
+        waitFor(hasText(text(R.string.home_open_history)))
     }
 
     private companion object {
