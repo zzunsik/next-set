@@ -73,6 +73,17 @@ fun recordSetIds(workouts: List<Workout>): Set<Long> {
 }
 
 /**
+ * 이 운동에서 최고 기록을 세운 세트. 진행 중인 운동에도 쓴다(LOG-14 표시, #76).
+ * [others]는 다른 운동 기록이다(끝난 운동 전부를 넘겨도 된다). 규칙은 [recordSetIds]와 같아서
+ * 운동 중 화면과 요약이 같은 세트에 표시를 붙인다.
+ */
+fun Workout.recordSetIdsAgainst(others: List<Workout>): Set<Long> {
+    val earlier = others.filter { it.id != id && it.startedAt < startedAt }
+    val own = exercises.flatMap { exercise -> exercise.sets.map { it.id } }.toSet()
+    return recordSetIds(earlier + this).intersect(own)
+}
+
+/**
  * 같은 루틴으로 한 바로 앞의 기록. 요약의 "지난번보다 +120kg"에 쓴다(docs/DESIGN.md "운동 요약").
  * 빈 운동(루틴 없음)이면 null이다. 루틴 이름이 아니라 루틴 식별자로 찾는다.
  */
