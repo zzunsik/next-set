@@ -35,6 +35,10 @@ internal interface WorkoutDao {
     @Query("DELETE FROM workout WHERE id = :id")
     suspend fun deleteWorkout(id: Long): Int
 
+    /** 사용자가 운동을 고쳤다고 적는다(#73). */
+    @Query("UPDATE workout SET is_edited = 1 WHERE id = :id")
+    suspend fun markEdited(id: Long)
+
     @Query("SELECT * FROM workout_exercise WHERE workout_id = :workoutId ORDER BY position, id")
     suspend fun getExercises(workoutId: Long): List<WorkoutExerciseEntity>
 

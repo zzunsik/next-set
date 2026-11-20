@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "7588baa6d70a36150107af02976023fc",
+    "identityHash": "8b428b58db7221e21e2eacf1a120b8c2",
     "entities": [
       {
         "tableName": "exercise",
@@ -219,7 +219,7 @@
       },
       {
         "tableName": "workout",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `routine_id` INTEGER, `routine_name` TEXT, `started_at` INTEGER NOT NULL, `finished_at` INTEGER, `note` TEXT, FOREIGN KEY(`routine_id`) REFERENCES `routine`(`id`) ON UPDATE NO ACTION ON DELETE SET NULL )",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `routine_id` INTEGER, `routine_name` TEXT, `started_at` INTEGER NOT NULL, `finished_at` INTEGER, `note` TEXT, `is_edited` INTEGER NOT NULL DEFAULT 0, FOREIGN KEY(`routine_id`) REFERENCES `routine`(`id`) ON UPDATE NO ACTION ON DELETE SET NULL )",
         "fields": [
           {
             "fieldPath": "id",
@@ -252,6 +252,13 @@
             "fieldPath": "note",
             "columnName": "note",
             "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "isEdited",
+            "columnName": "is_edited",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "0"
           }
         ],
         "primaryKey": {
@@ -562,7 +569,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '7588baa6d70a36150107af02976023fc')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '8b428b58db7221e21e2eacf1a120b8c2')"
     ]
   }
 }

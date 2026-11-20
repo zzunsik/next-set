@@ -48,6 +48,12 @@ data class Workout(
     val finishedAt: Instant?,
     val note: String?,
     val exercises: List<WorkoutExercise>,
+    /**
+     * 시작한 뒤 사용자가 고친 것이 있다. 세트 값을 바꾸거나, 세트를 완료하거나, 세트·종목을 더하고 빼고 옮기거나,
+     * 메모를 적으면 참이 된다. 미리 채운 값은 저장하지 않아 나중에 견줄 수 없으므로 고칠 때 저장해 둔다.
+     * 손대지 않았는지는 [io.github.zzunsik.nextset.domain.rule.isUntouched]가 정한다.
+     */
+    val isEdited: Boolean = false,
 ) {
     val isInProgress: Boolean get() = finishedAt == null
 }
