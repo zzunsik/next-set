@@ -6,7 +6,9 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.relocation.BringIntoViewRequester
+import androidx.compose.foundation.text.TextAutoSize
 import androidx.compose.foundation.relocation.bringIntoViewRequester
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -40,6 +42,7 @@ import kotlinx.coroutines.flow.collectLatest
  * - 보이는 높이 40dp, 누르는 영역 48dp 이상(NF-10). 폭은 부르는 쪽이 정한다(무게 72dp, 횟수 64dp 등).
  * - 선택: `accentSoft` 바탕에 `accent` 2dp 테두리. 값은 `text` 색.
  * - 값 없음: `text2` 1dp 테두리.
+ * - 값은 한 줄이다. 글자 크기를 키워 칸에 들어가지 않으면 `caption` 크기까지 줄인다.
  * - [dimmed]: 아직 안 한 세트의 값처럼 `text2` 색으로 쓴다.
  * - 선택된 동안 [NumberPadScaffold]의 하단 바와 숫자판이 덮은 높이만큼 자기 아래에 자리를 두도록 스크롤을 옮긴다.
  *   그래서 숫자판이 올라와도 칸이 가려지지 않는다.
@@ -106,6 +109,13 @@ fun NumberInputField(
                 style = NextSetTheme.typography.numeralRow,
                 color = if (dimmed && !selected) colors.text2 else colors.text,
                 textAlign = TextAlign.Center,
+                modifier = Modifier.padding(horizontal = NextSetTheme.spacing.xs),
+                // 글자가 커져 칸에 들어가지 않으면 줄을 바꾸지 않고 `caption` 크기까지 줄인다. 숫자가 "62."와 "5"로 갈리지 않는다.
+                maxLines = 1,
+                autoSize = TextAutoSize.StepBased(
+                    minFontSize = NextSetTheme.typography.caption.fontSize,
+                    maxFontSize = NextSetTheme.typography.numeralRow.fontSize,
+                ),
             )
         }
     }

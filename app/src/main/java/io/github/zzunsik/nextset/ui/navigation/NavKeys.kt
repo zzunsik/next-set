@@ -49,6 +49,14 @@ data object LicensesKey : NavKey
 @Serializable
 data class LicenseDetailKey(val id: String) : NavKey
 
+/** 운동 중(docs/DESIGN.md "운동 중"). 운동은 저장돼 있어 프로세스가 죽었다 살아나도 같은 화면으로 돌아온다(LOG-13). */
+@Serializable
+data class WorkoutKey(val workoutId: Long) : NavKey
+
+/** 운동을 끝낸 뒤의 완료 화면. 운동 요약(#27)이 생기면 그 화면으로 바뀐다. */
+@Serializable
+data class WorkoutDoneKey(val workoutId: Long) : NavKey
+
 /**
  * 루틴 목록. 홈(#23)이 생기기 전까지 쓰는 임시 화면이다. 홈의 "순서 편집" 상태와 같은 일(RTN-05)을 하고
  * "새 루틴"과 행을 눌러 루틴 편집을 연다. 홈이 이 일을 맡으면 지운다.

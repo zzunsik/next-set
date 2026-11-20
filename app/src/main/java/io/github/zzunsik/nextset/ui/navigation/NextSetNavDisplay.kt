@@ -15,8 +15,13 @@ import io.github.zzunsik.nextset.domain.repository.ExerciseRepository
 import io.github.zzunsik.nextset.domain.repository.LicenseRepository
 import io.github.zzunsik.nextset.domain.repository.RoutineRepository
 import io.github.zzunsik.nextset.domain.repository.SettingsRepository
+import io.github.zzunsik.nextset.domain.repository.WorkoutRepository
 import io.github.zzunsik.nextset.ui.exercise.exerciseEntries
 import io.github.zzunsik.nextset.ui.home.HomeScreen
+import io.github.zzunsik.nextset.ui.home.HomeWorkoutEntryRoute
+import io.github.zzunsik.nextset.ui.home.HomeWorkoutViewModel
+import io.github.zzunsik.nextset.ui.workout.workoutEntries
+import androidx.lifecycle.viewmodel.compose.viewModel
 import io.github.zzunsik.nextset.ui.routine.routineEntries
 import io.github.zzunsik.nextset.ui.settings.backupEntries
 import io.github.zzunsik.nextset.ui.settings.settingsEntries
@@ -30,6 +35,7 @@ fun NextSetNavDisplay(
     settingsRepository: SettingsRepository,
     licenseRepository: LicenseRepository,
     exerciseRepository: ExerciseRepository,
+    workoutRepository: WorkoutRepository,
     routineRepository: RoutineRepository,
     backupRepository: BackupRepository,
     modifier: Modifier = Modifier,
@@ -45,9 +51,14 @@ fun NextSetNavDisplay(
         entry<HomeKey> {
             HomeScreen(
                 onOpenSettings = { backStack.add(SettingsKey) },
+                workoutEntry = {
+                    val viewModel = viewModel { HomeWorkoutViewModel(workoutRepository, routineRepository) }
+                    HomeWorkoutEntryRoute(viewModel = viewModel, onOpenWorkout = { backStack.add(WorkoutKey(it)) })
+                },
                 onOpenRoutines = { backStack.add(RoutineListKey) },
             )
         }
+        workoutEntries(backStack, results, workoutRepository, routineRepository)
         routineEntries(backStack, results, routineRepository, exerciseRepository, settingsRepository)
         settingsEntries(
             backStack = backStack,

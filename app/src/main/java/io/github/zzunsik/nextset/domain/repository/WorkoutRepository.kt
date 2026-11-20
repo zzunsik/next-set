@@ -50,6 +50,12 @@ interface WorkoutRepository {
 
     suspend fun deleteSet(setId: Long)
 
+    /**
+     * 지운 세트를 [position](0부터) 자리에 되살린다(LOG-09의 "되돌리기"). 그 자리부터 뒤의 세트는 한 칸씩 밀린다.
+     * 자리가 세트 수보다 크면 끝에 붙인다. 기록 방식에 쓰지 않는 값은 비운다. 새 세트의 식별자를 돌려준다.
+     */
+    suspend fun restoreSet(workoutExerciseId: Long, position: Int, value: SetValue, completedAt: Instant?): Long
+
     /** 세트 값을 저장한다. 기록 방식에 쓰지 않는 값은 비운다. */
     suspend fun updateSet(setId: Long, value: SetValue)
 
