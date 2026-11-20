@@ -11,6 +11,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import io.github.zzunsik.nextset.R
@@ -45,7 +46,10 @@ fun LicensesScreen(
     }
 }
 
-/** 라이선스 한 건. 제목은 이름, 그 아래 만든 곳과 라이선스 이름, 그다음 전문이다. [state]가 null이면 읽는 중이다. */
+/**
+ * 라이선스 한 건. 제목은 이름, 그 아래 만든 곳과 라이선스 이름, 그다음 전문이다. [state]가 null이면 읽는 중이다.
+ * 전문은 [reflowLicenseText]로 문단 안의 줄바꿈을 합쳐 그린다.
+ */
 @Composable
 fun LicenseDetailScreen(
     state: LicenseDetailUiState?,
@@ -70,7 +74,9 @@ fun LicenseDetailScreen(
                         style = NextSetTheme.typography.body,
                         color = NextSetTheme.colors.text2,
                     )
-                    Text(text = state.text, style = NextSetTheme.typography.caption, color = NextSetTheme.colors.text)
+                    // 원문의 70~80자 줄바꿈을 그대로 그리면 화면 폭에서 짧은 줄이 생긴다. 문단 안의 줄만 합친다(#57).
+                    val text = remember(state.text) { reflowLicenseText(state.text) }
+                    Text(text = text, style = NextSetTheme.typography.caption, color = NextSetTheme.colors.text)
                 }
             }
         }
