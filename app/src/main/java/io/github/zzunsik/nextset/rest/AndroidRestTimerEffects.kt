@@ -1,7 +1,9 @@
 package io.github.zzunsik.nextset.rest
 
+import android.app.ActivityManager
 import android.content.Context
 import android.content.Intent
+import android.os.Build
 import android.os.SystemClock
 import android.util.Log
 import androidx.core.content.ContextCompat
@@ -37,11 +39,37 @@ class AndroidRestTimerEffects(
 
     override fun cancelDone() = notifications.cancelDone()
 
-    override fun released() = signaler.release()
+    override fun released() {
+        signaler.release()
+        // 서비스가 이미 없으면 휴식 중 알림도 없어야 한다. 서비스가 아직 있으면 서비스가 멈추며 지운다(#69).
+        if (!RestTimerService.running) notifications.clearLeftoverOngoing()
+    }
 
     override fun save(state: RestTimerState?) = store.save(state, elapsed(), wall())
 
-    override fun load(): RestTimerState? = store.load(elapsed(), wall())
+    /** 프로세스가 뜬 뒤 처음 부른다. 이어 갈 휴식이 없으면 지난 프로세스가 남긴 휴식 중 알림을 지운다(#69). */
+    override fun load(): RestTimerState? {
+        logLastExit()
+        val saved = store.load(elapsed(), wall())
+        if (!RestTimerService.running && (saved == null || saved.endsAt <= elapsed())) notifications.clearLeftoverOngoing()
+        return saved
+    }
+
+    /**
+     * 지난번 프로세스가 끝난 이유를 남긴다(API 30 이상). 휴식 중에 프로세스가 죽었는지 기기에서 확인하는 데 쓴다(#69).
+     * 시각, 이유 코드, 시스템이 붙인 설명만 적는다.
+     */
+    private fun logLastExit() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) return
+        try {
+            val exit = context.getSystemService(ActivityManager::class.java)
+                ?.getHistoricalProcessExitReasons(context.packageName, 0, 1)
+                ?.firstOrNull() ?: return
+            Log.d(TAG, "지난 프로세스 종료 시각=${exit.timestamp} 이유=${exit.reason} 중요도=${exit.importance} 설명=${exit.description}")
+        } catch (e: RuntimeException) {
+            Log.w(TAG, "지난 프로세스 종료 이유를 읽지 못했다", e)
+        }
+    }
 
     private companion object {
         const val TAG = "RestTimer"
