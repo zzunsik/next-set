@@ -22,6 +22,8 @@ import io.github.zzunsik.nextset.ui.navigation.HistoryDetailKey
 import io.github.zzunsik.nextset.ui.navigation.HistoryKey
 import io.github.zzunsik.nextset.ui.navigation.NavResults
 import io.github.zzunsik.nextset.ui.navigation.ResultEffect
+import io.github.zzunsik.nextset.ui.navigation.TopLevelTab
+import io.github.zzunsik.nextset.ui.navigation.selectTab
 import io.github.zzunsik.nextset.ui.navigation.WorkoutSummaryKey
 import io.github.zzunsik.nextset.ui.navigation.pickedExercisesKey
 import java.time.LocalDate
@@ -36,8 +38,7 @@ internal fun historyPickerResultName(workoutId: Long) = "history/$workoutId/add-
  *
  * - 운동 요약: "확인"과 뒤로 가기 모두 앞 화면(홈)으로 간다. 운동 중 화면은 이미 스택에서 빠졌다.
  * - 기록 목록: 기록 행은 기록 상세를 연다. "지난 운동 적기"는 날짜와 루틴을 고른 뒤 기록 상세를 수정 상태로 연다.
- *   [historyBack]이 null이 아니면 상단 바에 뒤로 가기를 둔다. 하단 내비게이션(#23)이 생기기 전까지는 홈의 임시 버튼으로
- *   들어오므로 뒤로 가기가 있다. 탭으로 열면 null을 넘긴다.
+ *   하단 내비게이션의 "기록" 탭이라 상단 바에 뒤로 가기가 없다. "홈으로"는 홈 탭으로 간다.
  * - 기록 상세: 나갈 때(상단 바의 뒤로 가기, 시스템 뒤로 가기) 빈 세트를 정리한 뒤 닫는다. 종목 추가는 종목 고르기를 연다.
  */
 fun EntryProviderScope<NavKey>.historyEntries(
@@ -46,7 +47,6 @@ fun EntryProviderScope<NavKey>.historyEntries(
     workoutRepository: WorkoutRepository,
     routineRepository: RoutineRepository,
     zone: ZoneId = ZoneId.systemDefault(),
-    historyBack: Boolean = true,
 ) {
     /** [key] 화면이 맨 위에 있을 때만 닫는다. 두 번 불려도 한 화면만 닫힌다. */
     fun close(key: NavKey) {
@@ -73,7 +73,6 @@ fun EntryProviderScope<NavKey>.historyEntries(
         HistoryListScreen(
             state = state,
             actions = HistoryListActions(
-                onBack = if (historyBack) ({ close(HistoryKey) }) else null,
                 onOpen = { backStack.add(HistoryDetailKey(it)) },
                 onAddPast = {
                     val today = LocalDate.now(zone)
@@ -81,7 +80,7 @@ fun EntryProviderScope<NavKey>.historyEntries(
                 },
                 onAddPastChoice = viewModel::onAddPast,
                 onDismissAddPast = viewModel::dismissAddPast,
-                onGoHome = { backStack.retainAll(listOf(backStack.first())) },
+                onGoHome = { backStack.selectTab(TopLevelTab.Home) },
             ),
         )
     }

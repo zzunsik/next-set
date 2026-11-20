@@ -87,7 +87,7 @@ class HistoryListViewModel(
             today = clock().atZone(zone).toLocalDate(),
             addPast = dialog,
         )
-    }.stateIn(viewModelScope, SharingStarted.Eagerly, HistoryUiState())
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(), HistoryUiState())
 
     /** 날짜를 골랐다. 루틴이나 "빈 기록"을 고르는 대화상자를 연다. 오늘보다 뒤의 날짜는 받지 않는다. */
     fun onDatePicked(date: LocalDate) {

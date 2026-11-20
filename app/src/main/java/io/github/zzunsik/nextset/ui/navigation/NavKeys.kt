@@ -3,7 +3,9 @@ package io.github.zzunsik.nextset.ui.navigation
 import androidx.navigation3.runtime.NavKey
 import kotlinx.serialization.Serializable
 
-/** 화면 키. 프로세스가 죽었다 살아나도 뒤로 가기 스택을 복원하도록 직렬화한다. */
+// 화면 키. 프로세스가 죽었다 살아나도 뒤로 가기 스택을 복원하도록 직렬화한다.
+
+/** 홈(docs/DESIGN.md "홈"). 뒤로 가기 스택의 맨 아래에 늘 있다. 하단 내비게이션의 "홈" 탭이다. */
 @Serializable
 data object HomeKey : NavKey
 
@@ -37,7 +39,13 @@ data class ExerciseFormKey(
     val initialName: String = "",
 ) : NavKey
 
-/** 설정(docs/DESIGN.md "설정"). */
+/**
+ * 기록 목록(docs/DESIGN.md "기록 목록", HIST-01). 하단 내비게이션의 "기록" 탭이다. 화면은 `historyEntries`가 잇는다.
+ */
+@Serializable
+data object HistoryKey : NavKey
+
+/** 설정(docs/DESIGN.md "설정"). 하단 내비게이션의 "설정" 탭이다. */
 @Serializable
 data object SettingsKey : NavKey
 
@@ -57,23 +65,12 @@ data class WorkoutKey(val workoutId: Long) : NavKey
 @Serializable
 data class WorkoutSummaryKey(val workoutId: Long) : NavKey
 
-/** 기록 목록(docs/DESIGN.md "기록 목록", HIST-01). 하단 내비게이션의 "기록" 탭이 열 화면이다. */
-@Serializable
-data object HistoryKey : NavKey
-
 /**
  * 기록 상세·수정(docs/DESIGN.md "기록 상세·수정"). [editing]이면 수정 상태로 연다.
  * [isNew]면 "지난 운동 적기"로 막 만든 기록이다. 완료한 세트 없이 나가면 기록을 지운다.
  */
 @Serializable
 data class HistoryDetailKey(val workoutId: Long, val editing: Boolean = false, val isNew: Boolean = false) : NavKey
-
-/**
- * 루틴 목록. 홈(#23)이 생기기 전까지 쓰는 임시 화면이다. 홈의 "순서 편집" 상태와 같은 일(RTN-05)을 하고
- * "새 루틴"과 행을 눌러 루틴 편집을 연다. 홈이 이 일을 맡으면 지운다.
- */
-@Serializable
-data object RoutineListKey : NavKey
 
 /**
  * 루틴 편집(docs/DESIGN.md "루틴 편집"). [routineId]의 루틴은 이미 저장돼 있다.

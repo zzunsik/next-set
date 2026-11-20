@@ -25,7 +25,11 @@ import java.time.LocalDate
 import java.time.LocalTime
 import java.time.YearMonth
 import java.time.ZoneOffset
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
@@ -61,8 +65,12 @@ class HistoryViewModelTest {
     @Before
     fun setUp() = runBlocking { db = TestDb().seed(); Unit }
 
+    /** 화면이 보는 것처럼 화면 상태를 구독해 둔다. 화면 상태는 구독하는 동안에만 데이터베이스를 읽는다. */
+    private val screens = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+
     @After
     fun tearDown() {
+        screens.cancel()
         store.clear()
         db.close()
     }
@@ -72,10 +80,11 @@ class HistoryViewModelTest {
         return ViewModelProvider.create(store, factory)["vm-${created++}", T::class]
     }
 
-    private fun list() = create { HistoryListViewModel(db.workouts, db.routines, clock = { at(nowMinutes) }, zone = ZoneOffset.UTC) }
+    private fun list() = create { HistoryListViewModel(db.workouts, db.routines, clock = { at(nowMinutes) }, zone = ZoneOffset.UTC) }.also { vm -> screens.launch { vm.uiState.collect {} } }
 
     private fun report(id: Long, editing: Boolean = false, isNew: Boolean = false) =
         create { WorkoutReportViewModel(db.workouts, id, startEditing = editing, isNew = isNew, zone = ZoneOffset.UTC) }
+            .also { vm -> screens.launch { vm.uiState.collect {} } }
 
     private fun <T> await(flow: Flow<T>, predicate: (T) -> Boolean): T = runBlocking {
         withContext(Dispatchers.Default) { withTimeout(TIMEOUT) { flow.first(predicate) } }
@@ -202,7 +211,7 @@ class HistoryViewModelTest {
         val vm = report(id, editing = true)
         val pullUp = vm.await { true }.exercises[1]
         vm.onRemoveExerciseRequest(pullUp.id)
-        assertEquals(ReportDialog.RemoveExercise(pullUp.id, "테스트 풀업"), vm.uiState.value.dialog)
+        assertEquals(ReportDialog.RemoveExercise(pullUp.id, "테스트 풀업"), await(vm.uiState) { it.dialog != null }.dialog)
         vm.onRemoveExerciseConfirm(pullUp.id)
         vm.await { it.exercises.size == 1 }
 
@@ -237,9 +246,9 @@ class HistoryViewModelTest {
         val vm = report(id)
         vm.await { true }
         vm.onDeleteRequest()
-        assertEquals(ReportDialog.Delete, vm.uiState.value.dialog)
+        assertEquals(ReportDialog.Delete, await(vm.uiState) { it.dialog != null }.dialog)
         vm.dismissDialog()
-        assertNull(vm.uiState.value.dialog)
+        assertNull(await(vm.uiState) { it.dialog == null }.dialog)
         assertTrue(workout(id) != null)
 
         vm.onDeleteRequest()

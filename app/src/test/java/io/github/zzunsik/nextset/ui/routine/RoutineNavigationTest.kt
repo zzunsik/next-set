@@ -3,6 +3,7 @@ package io.github.zzunsik.nextset.ui.routine
 import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.semantics.getOrNull
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
@@ -19,6 +20,7 @@ import io.github.zzunsik.nextset.domain.model.Target
 import io.github.zzunsik.nextset.ui.exercise.EXERCISE_LIST_TAG
 import io.github.zzunsik.nextset.ui.exercise.TestExercises.benchPress
 import io.github.zzunsik.nextset.ui.exercise.TestExercises.pushUp
+import io.github.zzunsik.nextset.ui.home.HOME_LIST_TAG
 import io.github.zzunsik.nextset.ui.navigation.NextSetNavDisplay
 import io.github.zzunsik.nextset.ui.settings.FakeBackupRepository
 import io.github.zzunsik.nextset.ui.settings.FakeLicenseRepository
@@ -34,7 +36,7 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
 /**
- * 앱의 화면 이동 그대로 루틴을 만들고 고친다. 홈의 임시 "루틴" 버튼 → 루틴 목록 → 루틴 편집 → 종목 고르기 → 종목 설정.
+ * 앱의 화면 이동 그대로 루틴을 만들고 고친다. 홈("루틴 만들기", 메뉴의 "편집", "순서 편집") → 루틴 편집 → 종목 고르기 → 종목 설정.
  * 저장소는 메모리 가짜를 쓴다.
  */
 @RunWith(RobolectricTestRunner::class)
@@ -64,7 +66,8 @@ class RoutineNavigationTest {
                 )
             }
         }
-        compose.onNodeWithText(app.getString(R.string.home_open_routines)).performClick()
+        // 홈은 저장소를 읽은 뒤에 목록을 그린다(#23). 그 전에 누르지 않도록 기다린다.
+        compose.waitUntil(5_000) { compose.onAllNodes(hasTestTag(HOME_LIST_TAG)).fetchSemanticsNodes().isNotEmpty() }
     }
 
     private fun text(id: Int, vararg args: Any) = app.getString(id, *args)
@@ -100,7 +103,7 @@ class RoutineNavigationTest {
     @Test
     fun createRoutineWithExercisesAndComeBackToTheList() {
         show()
-        compose.onNodeWithText(text(R.string.routine_list_empty)).assertIsDisplayed()
+        compose.onNodeWithText(text(R.string.home_empty)).assertIsDisplayed()
         compose.onNodeWithText(text(R.string.routine_create)).performClick()
 
         // 새 루틴: 제목이 "새 루틴"이고 지우기 버튼이 없다.
@@ -126,7 +129,7 @@ class RoutineNavigationTest {
         assertEquals(1, repository.routines.value.size)
 
         back()
-        compose.onNodeWithText(text(R.string.routine_list_empty)).assertIsDisplayed()
+        compose.onNodeWithText(text(R.string.home_empty)).assertIsDisplayed()
         assertTrue(repository.routines.value.isEmpty())
     }
 
@@ -138,7 +141,7 @@ class RoutineNavigationTest {
         compose.onNodeWithText(text(R.string.routine_no_exercises)).assertIsDisplayed()
 
         compose.runOnUiThread { app.onBackPressedDispatcher.onBackPressed() }
-        compose.onNodeWithText(text(R.string.routine_list_empty)).assertIsDisplayed()
+        compose.onNodeWithText(text(R.string.home_empty)).assertIsDisplayed()
         assertTrue(repository.routines.value.isEmpty())
     }
 
@@ -151,7 +154,9 @@ class RoutineNavigationTest {
             }
         }
         show()
-        compose.onNodeWithText("가슴").performClick()
+        // 홈에서 루틴을 누르면 운동이 시작되므로 메뉴의 "편집"으로 연다(#23).
+        compose.onNodeWithContentDescription(text(R.string.home_routine_more, "가슴")).performClick()
+        compose.onNodeWithText(text(R.string.home_edit)).performClick()
         compose.onNodeWithText(benchPress.nameKo).performClick()
 
         // 종목 설정: 세트 수를 늘리고 목표 무게를 적는다.
@@ -187,12 +192,15 @@ class RoutineNavigationTest {
             repository.addRoutine("하체")
         }
         show()
+        compose.onNodeWithTag(HOME_LIST_TAG).performScrollToNode(hasText(text(R.string.home_reorder)))
+        compose.onNodeWithText(text(R.string.home_reorder)).performClick()
+        compose.onNodeWithTag(HOME_LIST_TAG).performScrollToNode(hasText("하체"))
         val node = compose.onNodeWithText("하체").fetchSemanticsNode()
         val moveUp = node.config.getOrNull(SemanticsActions.CustomActions).orEmpty()
             .single { it.label == text(R.string.move_up) }
         compose.runOnIdle { moveUp.action() }
 
         settle { repository.routines.value.map { it.name } == listOf("가슴", "하체", "등") }
-        compose.onNodeWithTag(ROUTINE_LIST_TAG).assertIsDisplayed()
+        compose.onNodeWithTag(HOME_LIST_TAG).assertIsDisplayed()
     }
 }

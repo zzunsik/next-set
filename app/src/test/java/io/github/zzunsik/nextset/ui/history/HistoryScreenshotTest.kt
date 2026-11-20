@@ -29,7 +29,7 @@ class HistoryScreenshotTest {
     val compose = createComposeRule()
 
     private fun captureList(state: HistoryUiState = HistorySamples.list()) {
-        compose.setContent { NextSetTheme { HistoryListScreen(state = state, actions = HistoryListActions(onBack = {})) } }
+        compose.setContent { NextSetTheme { HistoryListScreen(state = state, actions = HistoryListActions()) } }
         compose.assertAccessible()
         compose.onRoot().captureRoboImage()
     }

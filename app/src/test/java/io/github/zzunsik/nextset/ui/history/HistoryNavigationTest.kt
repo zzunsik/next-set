@@ -1,6 +1,7 @@
 package io.github.zzunsik.nextset.ui.history
 
 import androidx.compose.ui.test.SemanticsMatcher
+import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
@@ -11,6 +12,7 @@ import io.github.zzunsik.nextset.data.repository.TestDbRule
 import io.github.zzunsik.nextset.data.repository.TestExercises.BENCH
 import io.github.zzunsik.nextset.data.repository.finishedWorkout
 import io.github.zzunsik.nextset.data.repository.wr
+import io.github.zzunsik.nextset.ui.home.HOME_LIST_TAG
 import io.github.zzunsik.nextset.ui.navigation.NextSetNavDisplay
 import io.github.zzunsik.nextset.ui.settings.FakeBackupRepository
 import io.github.zzunsik.nextset.ui.settings.FakeLicenseRepository
@@ -26,7 +28,7 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.RuntimeEnvironment
 
-/** 홈의 임시 입구에서 기록 목록, 기록 상세, 지우기까지 앱의 화면 이동 그대로 지나간다(HIST-01, HIST-05). */
+/** 하단 내비게이션의 "기록" 탭에서 기록 목록, 기록 상세, 지우기까지 앱의 화면 이동 그대로 지나간다(HIST-01, HIST-05). */
 @RunWith(RobolectricTestRunner::class)
 class HistoryNavigationTest {
     @get:Rule(order = 1)
@@ -62,11 +64,11 @@ class HistoryNavigationTest {
     @Test
     fun emptyHistoryLeadsBackHome() {
         show()
-        waitFor(hasText(text(R.string.home_open_history)))
-        compose.onNodeWithText(text(R.string.home_open_history)).performClick()
+        waitFor(hasTestTag(HOME_LIST_TAG))
+        compose.onNodeWithText(text(R.string.nav_history)).performClick()
         waitFor(hasText(text(R.string.history_empty)))
         compose.onNodeWithText(text(R.string.history_go_home)).performClick()
-        waitFor(hasText(text(R.string.home_open_history)))
+        waitFor(hasTestTag(HOME_LIST_TAG))
     }
 
     @Test
@@ -76,8 +78,8 @@ class HistoryNavigationTest {
             db.finishedWorkout(Instant.parse("2026-03-14T09:00:00Z"), mapOf(BENCH to listOf(wr(62_500, 8), wr(62_500, 8))))
         }
         show()
-        waitFor(hasText(text(R.string.home_open_history)))
-        compose.onNodeWithText(text(R.string.home_open_history)).performClick()
+        waitFor(hasTestTag(HOME_LIST_TAG))
+        compose.onNodeWithText(text(R.string.nav_history)).performClick()
 
         // 최근 기록이 위다. 둘째 기록은 62.5 × 8 두 세트, 볼륨 1,000kg, 최고 기록 배지가 있다.
         val newest = text(R.string.history_row_detail, text(R.string.workout_duration_hours_minutes, 1, 0), 2, "1,000kg")
@@ -101,8 +103,8 @@ class HistoryNavigationTest {
         assertEquals(1, runBlocking { db.workouts.observeHistory().first().size })
 
         // 홈으로 돌아가 기록 화면의 화면 상태를 정리한다. 남겨 두면 데이터베이스를 닫은 뒤에도 읽으려 한다.
-        compose.onNodeWithContentDescription(text(R.string.navigate_back)).performClick()
-        waitFor(hasText(text(R.string.home_open_history)))
+        compose.onNodeWithText(text(R.string.nav_home)).performClick()
+        waitFor(hasTestTag(HOME_LIST_TAG))
     }
 
     private companion object {

@@ -101,10 +101,11 @@ class WorkoutReportViewModel(
 
     val events: Flow<ReportEvent> = eventChannel.receiveAsFlow()
 
-    /** 끝난 운동 전부와 최고 기록 세트. */
+    /** 끝난 운동 전부와 최고 기록 세트. 화면이 보는 동안에만 읽는다. 화면이 사라지면 바로 멈춰
+     * 데이터베이스를 닫은 뒤에 읽지 않는다(Eagerly로 두면 탭을 옮긴 뒤 남은 화면 상태가 닫힌 데이터베이스를 읽었다). */
     private val history: StateFlow<History?> = workoutRepository.observeFinishedWorkouts()
         .map { workouts -> History(workouts, recordSetIds(workouts)) }
-        .stateIn(viewModelScope, SharingStarted.Eagerly, null)
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), null)
 
     val uiState: StateFlow<ReportUiState> = combine(history, local) { history, local ->
         if (history == null) {
@@ -118,7 +119,7 @@ class WorkoutReportViewModel(
                 dialog = local.dialog,
             )
         }
-    }.stateIn(viewModelScope, SharingStarted.Eagerly, ReportUiState(editing = startEditing))
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(), ReportUiState(editing = startEditing))
 
     /** 운동 메모 칸의 글자(LOG-11). 처음 한 번만 저장소에서 채우고 그 뒤로는 친 글자를 따른다. */
     var noteText: String by mutableStateOf("")
