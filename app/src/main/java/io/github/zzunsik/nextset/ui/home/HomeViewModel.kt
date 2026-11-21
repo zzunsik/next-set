@@ -4,7 +4,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import io.github.zzunsik.nextset.domain.model.Routine
 import io.github.zzunsik.nextset.domain.model.WorkoutInProgressException
-import io.github.zzunsik.nextset.domain.model.WorkoutSummary
 import io.github.zzunsik.nextset.domain.repository.RoutineRepository
 import io.github.zzunsik.nextset.domain.repository.SettingsRepository
 import io.github.zzunsik.nextset.domain.repository.WorkoutRepository
@@ -18,11 +17,8 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.channelFlow
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
@@ -103,45 +99,13 @@ class HomeViewModel(
     /** 시작했거나 이어서 할 운동. 화면은 이 운동의 운동 중 화면으로 간다. */
     val openWorkout: Flow<Long> = started.receiveAsFlow()
 
-    /** 루틴마다 종목 이름. 루틴 목록이 바뀌면 다시 구독한다. */
-    private val exerciseNames: Flow<Map<Long, List<String>>> = channelFlow {
-        routineRepository.observeRoutines().collectLatest { routines ->
-            if (routines.isEmpty()) {
-                send(emptyMap())
-                return@collectLatest
-            }
-            combine(routines.map { routineRepository.observeRoutine(it.id) }) { details ->
-                details.filterNotNull().associate { detail ->
-                    detail.routine.id to detail.exercises.map { it.exercise.nameKo }
-                }
-            }.collect { send(it) }
-        }
-    }
-
-    /** 루틴마다 마지막으로 운동한 날. 기록은 최근 것이 앞이다(HIST-01). */
-    private val lastDone: Flow<Map<Long, LocalDate>> = workoutRepository.observeHistory().map { history ->
-        history.filter { it.routineId != null }
-            .groupBy { it.routineId!! }
-            .mapValues { (_, workouts) -> workouts.maxOf(WorkoutSummary::startedAt).atZone(zone).toLocalDate() }
-    }
-
-    private val routinesUi: Flow<List<HomeRoutineUi>> =
-        combine(routineRepository.observeRoutines(), exerciseNames, lastDone) { routines, names, last ->
-            routines.map { HomeRoutineUi(it, names[it.id].orEmpty(), last[it.id]) }
-        }
-
-    private val top: Flow<Pair<Long?, Boolean>> =
-        combine(routineRepository.observeTopRoutine(), settingsRepository.observeSettings()) { top, settings ->
-            top?.id to (top != null && top.id == settings.pinnedRoutineId)
-        }
-
-    val uiState: StateFlow<HomeUiState> = combine(
-        workoutRepository.observeInProgressWorkout(),
-        routinesUi,
-        top,
-        dialog,
-    ) { workout, routines, (topId, pinned), dialog ->
-        val inProgress = workout?.let {
+    /**
+     * 진행 중인 운동, 루틴, 맨 위 루틴을 저장소가 한 번에 읽은 값([io.github.zzunsik.nextset.domain.model.HomeSnapshot])
+     * 하나로 만든다. 흐름을 따로 합치면 운동을 끝낸 직후 맨 위 루틴은 이미 다음 차례인데 진행 중인 운동은 남아 있어
+     * 맨 위 루틴이 목록에도 보이는 중간 상태가 나왔다(#97).
+     */
+    val uiState: StateFlow<HomeUiState> = combine(routineRepository.observeHome(), dialog) { home, dialog ->
+        val inProgress = home.inProgress?.let {
             val sets = it.exercises.flatMap { exercise -> exercise.sets }
             InProgressWorkoutUi(
                 workoutId = it.id,
@@ -152,12 +116,16 @@ class HomeViewModel(
                 untouched = it.isUntouched(),
             )
         }
+        val routines = home.routines.map {
+            HomeRoutineUi(it.routine, it.exerciseNames, it.lastStartedAt?.atZone(zone)?.toLocalDate())
+        }
+        val topId = home.top?.id
         val topRoutine = routines.firstOrNull { it.routine.id == topId }
         HomeUiState(
             loading = false,
             inProgress = inProgress,
             top = topRoutine,
-            topPinned = pinned,
+            topPinned = topId != null && topId == home.pinnedRoutineId,
             others = if (inProgress != null) routines else routines.filterNot { it.routine.id == topId },
             routines = routines,
             dialog = dialog,
