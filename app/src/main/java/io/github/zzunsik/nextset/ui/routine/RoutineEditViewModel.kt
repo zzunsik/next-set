@@ -120,12 +120,13 @@ class RoutineEditViewModel(
     /**
      * 화면을 나간다. 앞서 부른 쓰기를 마친 뒤 [onLeft]를 부른다.
      * 새 루틴인데 이름도 종목도 없으면 버린다(docs/DESIGN.md "루틴 편집").
+     *
+     * 이 화면이 처음 읽은 상태가 아니라 저장소에 있는 지금 상태로 판단한다([RoutineRepository.discardIfBlank]). 같은 루틴의 편집 화면이
+     * 둘 열렸을 때(#103) 아래에 남은 예전 화면은 이름 칸이 빈 채로 남아 있어, 위 화면에서 이름을 붙인 루틴을 지울 수 있었다.
      */
     fun leave(onLeft: () -> Unit) {
         writes.enqueue {
-            if (isNew && name.value.isNullOrBlank() && detail.first()?.exercises.isNullOrEmpty()) {
-                repository.deleteRoutine(routineId)
-            }
+            if (isNew && name.value.isNullOrBlank()) repository.discardIfBlank(routineId, newRoutineName)
             onLeft()
         }
     }

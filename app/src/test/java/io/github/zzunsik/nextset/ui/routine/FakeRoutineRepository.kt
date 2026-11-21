@@ -79,6 +79,13 @@ class FakeRoutineRepository(
         routines.value = routines.value.filterNot { it.id == id }.mapIndexed { index, it -> it.copy(position = index) }
     }
 
+    override suspend fun discardIfBlank(id: Long, placeholderName: String): Boolean {
+        val routine = routines.value.find { it.id == id } ?: return false
+        val blank = routine.name == placeholderName && items.value.none { it.routineId == id }
+        if (blank) deleteRoutine(id)
+        return blank
+    }
+
     override suspend fun reorderRoutines(orderedIds: List<Long>) {
         requireSameItems(routines.value.map { it.id }, orderedIds)
         val byId = routines.value.associateBy { it.id }

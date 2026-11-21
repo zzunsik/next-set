@@ -26,6 +26,12 @@ interface RoutineRepository {
     /** 루틴과 루틴 종목을 지운다. 지난 운동 기록은 이름과 종목, 세트가 그대로 남는다. */
     suspend fun deleteRoutine(id: Long)
 
+    /**
+     * 이름이 [placeholderName] 그대로이고 종목이 없을 때만 루틴을 지운다. 지웠으면 true. 확인과 지우기를 한 번에 해서,
+     * 그 사이에 다른 곳(같은 루틴의 다른 편집 화면 등)에서 이름을 붙이거나 종목을 더했으면 지우지 않는다(#103).
+     */
+    suspend fun discardIfBlank(id: Long, placeholderName: String): Boolean
+
     /** 루틴 목록의 순서를 [orderedIds] 순서로 바꾼다(RTN-05). */
     suspend fun reorderRoutines(orderedIds: List<Long>)
 

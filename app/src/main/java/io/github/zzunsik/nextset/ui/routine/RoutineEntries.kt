@@ -1,5 +1,7 @@
 package io.github.zzunsik.nextset.ui.routine
 
+import io.github.zzunsik.nextset.ui.navigation.navigate
+import io.github.zzunsik.nextset.ui.navigation.close
 import androidx.activity.compose.BackHandler
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHostState
@@ -49,7 +51,7 @@ fun EntryProviderScope<NavKey>.routineEntries(
 ) {
     /** [key] 화면이 맨 위에 있을 때만 닫는다. 두 번 불려도 한 화면만 닫힌다. */
     fun close(key: NavKey) {
-        if (backStack.lastOrNull() == key) backStack.removeAt(backStack.lastIndex)
+        backStack.close(key)
     }
 
     entry<RoutineEditKey> { key ->
@@ -82,9 +84,9 @@ fun EntryProviderScope<NavKey>.routineEntries(
             onBack = leave,
             onNameChange = viewModel::onNameChange,
             onAddExercise = {
-                backStack.add(ExercisePickerKey(ExercisePickerMode.Pick, routinePickerResultName(key.routineId)))
+                backStack.navigate(key, ExercisePickerKey(ExercisePickerMode.Pick, routinePickerResultName(key.routineId)))
             },
-            onOpenExercise = { backStack.add(RoutineExerciseKey(key.routineId, it.id)) },
+            onOpenExercise = { backStack.navigate(key, RoutineExerciseKey(key.routineId, it.id)) },
             onReorder = viewModel::reorder,
             onDelete = { viewModel.delete { close(key) } },
             snackbarHostState = snackbarHostState,

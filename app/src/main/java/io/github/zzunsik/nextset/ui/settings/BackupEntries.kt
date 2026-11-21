@@ -1,5 +1,6 @@
 package io.github.zzunsik.nextset.ui.settings
 
+import io.github.zzunsik.nextset.ui.navigation.close
 import android.content.ActivityNotFoundException
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -44,7 +45,7 @@ fun EntryProviderScope<NavKey>.backupEntries(
         }
         BackupScreen(
             state = state,
-            onBack = { backStack.removeLastOrNull() },
+            onBack = { backStack.close(BackupKey) },
             onExport = {
                 try {
                     exportLauncher.launch(viewModel.suggestedFileName())

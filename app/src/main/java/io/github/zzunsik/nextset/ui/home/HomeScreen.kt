@@ -85,7 +85,11 @@ fun HomeRoute(
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val currentOnOpen by rememberUpdatedState(onOpenWorkout)
-    LaunchedEffect(viewModel) { viewModel.openWorkout.collect { currentOnOpen(it) } }
+    LaunchedEffect(viewModel) {
+        // 홈이 화면에 들어올 때마다(다른 화면에서 돌아올 때도) 다시 그려지며 여기를 지난다. 떠나는 동작을 다시 받는다(#103).
+        viewModel.onShown()
+        viewModel.openWorkout.collect { currentOnOpen(it) }
+    }
     HomeScreen(
         state = state,
         now = now,
