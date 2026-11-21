@@ -88,12 +88,22 @@ internal class RoomRoutineRepository(private val database: NextSetDatabase) : Ro
     }
 
     override suspend fun deleteRoutine(id: Long) {
-        database.withWriteTransaction {
-            // 루틴 종목은 CASCADE로 지워지고 운동 기록의 routine_id와 직접 고른 루틴은 SET NULL로 빈다.
-            routineDao.deleteById(id)
-            routineDao.getAll().forEachIndexed { index, routine ->
-                if (routine.position != index) routineDao.setPosition(routine.id, index)
-            }
+        database.withWriteTransaction { deleteAndRenumber(id) }
+    }
+
+    override suspend fun discardIfBlank(id: Long, placeholderName: String): Boolean = database.withWriteTransaction {
+        val routine = routineDao.getById(id)
+        val blank = routine != null && routine.name == placeholderName && routineDao.getItems(id).isEmpty()
+        if (blank) deleteAndRenumber(id)
+        blank
+    }
+
+    /** 트랜잭션 안에서 부른다. */
+    private suspend fun deleteAndRenumber(id: Long) {
+        // 루틴 종목은 CASCADE로 지워지고 운동 기록의 routine_id와 직접 고른 루틴은 SET NULL로 빈다.
+        routineDao.deleteById(id)
+        routineDao.getAll().forEachIndexed { index, routine ->
+            if (routine.position != index) routineDao.setPosition(routine.id, index)
         }
     }
 

@@ -56,8 +56,8 @@ fun NextSetNavDisplay(
             }
             HomeRoute(
                 viewModel = viewModel,
-                onOpenWorkout = { backStack.add(WorkoutKey(it)) },
-                onOpenRoutine = { id, isNew -> backStack.add(RoutineEditKey(id, isNew)) },
+                onOpenWorkout = { backStack.navigate(HomeKey, WorkoutKey(it)) },
+                onOpenRoutine = { id, isNew -> backStack.navigate(HomeKey, RoutineEditKey(id, isNew)) },
             )
         }
         workoutEntries(backStack, results, workoutRepository, routineRepository, settingsRepository, exerciseRepository, restTimer)
@@ -67,8 +67,8 @@ fun NextSetNavDisplay(
             backStack = backStack,
             settingsRepository = settingsRepository,
             licenseRepository = licenseRepository,
-            onManageExercises = { backStack.add(ExercisePickerKey(mode = ExercisePickerMode.Manage)) },
-            onBackup = { backStack.add(BackupKey) },
+            onManageExercises = { backStack.navigate(SettingsKey, ExercisePickerKey(mode = ExercisePickerMode.Manage)) },
+            onBackup = { backStack.navigate(SettingsKey, BackupKey) },
             onNotificationsAllowed = { restTimer?.onNotificationsAllowed() },
         )
         backupEntries(backStack = backStack, backupRepository = backupRepository)

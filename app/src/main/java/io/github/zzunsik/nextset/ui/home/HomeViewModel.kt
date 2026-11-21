@@ -141,12 +141,39 @@ class HomeViewModel(
         started.trySend(workoutId)
     }
 
+    /**
+     * 홈을 떠나는 동작(운동 시작, 새 루틴)을 이미 받았다. 홈이 다시 보일 때([onShown])까지 같은 동작을 더 받지 않는다(#103).
+     * 버튼을 빠르게 두 번 누르면 두 번째 누르기가 첫 번째의 저장이 끝나기 전에, 또는 화면 전환 중에 아직 보이는 홈에서 온다.
+     * 그때 루틴이나 운동을 하나 더 만들거나, 막 시작한 운동을 "손대지 않은 운동"으로 보고 버리면 안 된다.
+     * 시간으로 거르지 않고 홈이 다시 보이는 때로 푼다. 묻기만 하고 떠나지 않으면 바로 푼다.
+     */
+    private var leaving = false
+
+    /** 홈이 화면에 들어왔다(처음, 또는 다른 화면에서 돌아와서). 떠나는 동작을 다시 받는다. */
+    fun onShown() {
+        leaving = false
+    }
+
+    /** 떠나는 동작을 하나만 받는다. 이미 받았으면 false다. */
+    private fun beginLeaving(): Boolean {
+        if (leaving) return false
+        leaving = true
+        return true
+    }
+
+    /** 떠나지 않고 묻는다. 물음이 떠 있는 동안 다른 버튼은 가려진다. */
+    private fun ask(prompt: HomeDialog.InProgress) {
+        leaving = false
+        dialog.value = prompt
+    }
+
     fun onStartRoutine(routineId: Long) = startOrAsk(PendingStart.FromRoutine(routineId))
 
     fun onStartEmpty() = startOrAsk(PendingStart.Empty)
 
     /** 손댄 진행 중인 운동이 있으면 묻고, 손대지 않은 운동이면 버리고 시작하고, 없으면 바로 시작한다. */
     private fun startOrAsk(pending: PendingStart) {
+        if (!beginLeaving()) return
         val inProgress = uiState.value.inProgress
         when {
             inProgress == null -> start(pending)
@@ -154,13 +181,13 @@ class HomeViewModel(
                 // 화면 상태가 늦게 따라온 사이에 손댔을 수 있어 저장된 운동으로 다시 본다.
                 val stored = workoutRepository.observeWorkout(inProgress.workoutId).first()
                 if (stored != null && stored.isInProgress && !stored.isUntouched()) {
-                    dialog.value = HomeDialog.InProgress(inProgress.copy(untouched = false), pending)
+                    ask(HomeDialog.InProgress(inProgress.copy(untouched = false), pending))
                     return@launch
                 }
                 if (stored?.isUntouched() == true) workoutRepository.discardWorkout(stored.id)
                 start(pending)
             }
-            else -> dialog.value = HomeDialog.InProgress(inProgress, pending)
+            else -> ask(HomeDialog.InProgress(inProgress, pending))
         }
     }
 
@@ -168,6 +195,7 @@ class HomeViewModel(
     fun onPromptResume() {
         val prompt = dialog.value as? HomeDialog.InProgress ?: return
         dialog.value = null
+        leaving = true
         started.trySend(prompt.workout.workoutId)
     }
 
@@ -178,6 +206,7 @@ class HomeViewModel(
     fun onPromptFinishAndStart() {
         val prompt = dialog.value as? HomeDialog.InProgress ?: return
         dialog.value = null
+        leaving = true
         viewModelScope.launch {
             workoutRepository.finishWorkout(prompt.workout.workoutId, clock())
             start(prompt.pending)
@@ -213,6 +242,7 @@ class HomeViewModel(
      * [onCreated]로 넘긴다. 이름도 종목도 없이 루틴 편집을 나가면 루틴 편집이 이 루틴을 버린다.
      */
     fun createRoutine(onCreated: (Long) -> Unit) {
+        if (!beginLeaving()) return
         writes.enqueue { onCreated(routineRepository.addRoutine(newRoutineName)) }
     }
 

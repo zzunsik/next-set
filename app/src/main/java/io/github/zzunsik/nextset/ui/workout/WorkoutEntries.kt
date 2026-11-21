@@ -1,5 +1,8 @@
 package io.github.zzunsik.nextset.ui.workout
 
+import io.github.zzunsik.nextset.ui.navigation.replace
+import io.github.zzunsik.nextset.ui.navigation.navigate
+import io.github.zzunsik.nextset.ui.navigation.close
 import androidx.activity.compose.BackHandler
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation3.runtime.EntryProviderScope
@@ -49,13 +52,13 @@ fun EntryProviderScope<NavKey>.workoutEntries(
             )
         }
         results.ResultEffect(pickedExercisesKey(ADD_EXERCISE_RESULT)) { ids -> viewModel.onExercisesPicked(ids) }
-        val leave = { viewModel.onLeave { if (backStack.lastOrNull() == key) backStack.removeAt(backStack.lastIndex) } }
+        val leave = { viewModel.onLeave { backStack.close(key) } }
         BackHandler(onBack = leave)
         WorkoutRoute(
             viewModel = viewModel,
             onBack = leave,
             onAddExercise = {
-                backStack.add(ExercisePickerKey(mode = ExercisePickerMode.Pick, resultName = ADD_EXERCISE_RESULT))
+                backStack.navigate(key, ExercisePickerKey(mode = ExercisePickerMode.Pick, resultName = ADD_EXERCISE_RESULT))
             },
             onSetCompleted = { event ->
                 if (restTimer != null) {
@@ -72,9 +75,9 @@ fun EntryProviderScope<NavKey>.workoutEntries(
                 // 운동을 끝냈거나 버렸다. 휴식과 알림을 정리한다.
                 restTimer?.cancel()
                 // 두 번 불려도 이 화면만 바꾼다.
-                if (backStack.lastOrNull() == key) {
-                    backStack.removeAt(backStack.lastIndex)
-                    if (destination is WorkoutExit.Finished) backStack.add(WorkoutSummaryKey(destination.workoutId))
+                when (destination) {
+                    is WorkoutExit.Finished -> backStack.replace(key, WorkoutSummaryKey(destination.workoutId))
+                    else -> backStack.close(key)
                 }
             },
         )

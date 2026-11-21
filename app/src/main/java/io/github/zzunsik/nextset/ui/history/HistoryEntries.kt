@@ -1,5 +1,7 @@
 package io.github.zzunsik.nextset.ui.history
 
+import io.github.zzunsik.nextset.ui.navigation.navigate
+import io.github.zzunsik.nextset.ui.navigation.close
 import androidx.activity.compose.BackHandler
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHostState
@@ -50,7 +52,7 @@ fun EntryProviderScope<NavKey>.historyEntries(
 ) {
     /** [key] 화면이 맨 위에 있을 때만 닫는다. 두 번 불려도 한 화면만 닫힌다. */
     fun close(key: NavKey) {
-        if (backStack.lastOrNull() == key) backStack.removeAt(backStack.lastIndex)
+        backStack.close(key)
     }
 
     entry<WorkoutSummaryKey> { key ->
@@ -68,12 +70,12 @@ fun EntryProviderScope<NavKey>.historyEntries(
         val state by viewModel.uiState.collectAsStateWithLifecycle()
         val context = LocalContext.current
         LaunchedEffect(viewModel) {
-            viewModel.openCreated.collect { id -> backStack.add(HistoryDetailKey(id, editing = true, isNew = true)) }
+            viewModel.openCreated.collect { id -> backStack.navigate(HistoryKey, HistoryDetailKey(id, editing = true, isNew = true)) }
         }
         HistoryListScreen(
             state = state,
             actions = HistoryListActions(
-                onOpen = { backStack.add(HistoryDetailKey(it)) },
+                onOpen = { backStack.navigate(HistoryKey, HistoryDetailKey(it)) },
                 onAddPast = {
                     val today = LocalDate.now(zone)
                     showDatePicker(context, today, today, zone, viewModel::onDatePicked)
@@ -142,7 +144,7 @@ fun EntryProviderScope<NavKey>.historyEntries(
                 onMinutesClick = viewModel::onMinutesClick,
                 onNumberPadKey = viewModel::onNumberPadKey,
                 onAddExercise = {
-                    backStack.add(ExercisePickerKey(ExercisePickerMode.Pick, historyPickerResultName(key.workoutId)))
+                    backStack.navigate(key, ExercisePickerKey(ExercisePickerMode.Pick, historyPickerResultName(key.workoutId)))
                 },
                 onRemoveExerciseConfirm = viewModel::onRemoveExerciseConfirm,
                 onExerciseNoteChange = viewModel::onExerciseNoteChange,

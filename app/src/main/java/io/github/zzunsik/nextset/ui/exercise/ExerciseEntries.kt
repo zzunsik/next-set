@@ -9,6 +9,8 @@ import io.github.zzunsik.nextset.ui.navigation.ExercisePickerKey
 import io.github.zzunsik.nextset.ui.navigation.NavResults
 import io.github.zzunsik.nextset.ui.navigation.ResultEffect
 import io.github.zzunsik.nextset.ui.navigation.ResultKey
+import io.github.zzunsik.nextset.ui.navigation.close
+import io.github.zzunsik.nextset.ui.navigation.navigate
 import io.github.zzunsik.nextset.ui.navigation.pickedExercisesKey
 
 /** 종목 추가·수정이 새로 만든 종목의 식별자를 종목 고르기에 돌려주는 키. 종목 고르기는 한 번에 하나만 열린다. */
@@ -32,24 +34,29 @@ fun EntryProviderScope<NavKey>.exerciseEntries(
         results.ResultEffect(CreatedExerciseKey) { id -> viewModel.onExerciseCreated(id) }
         ExercisePickerRoute(
             viewModel = viewModel,
-            onBack = { backStack.removeLastOrNull() },
+            onBack = { backStack.close(key) },
             onConfirm = { ids ->
-                results.put(pickedExercisesKey(key.resultName), ids)
-                backStack.removeLastOrNull()
+                // 맨 위일 때만 값을 놓고 닫는다. "n개 추가"를 두 번 눌러도 부른 화면(루틴 편집 등)까지 닫히지 않는다(#103).
+                if (backStack.lastOrNull() == key) {
+                    results.put(pickedExercisesKey(key.resultName), ids)
+                    backStack.close(key)
+                }
             },
-            onNewExercise = { name -> backStack.add(ExerciseFormKey(initialName = name)) },
-            onEditExercise = { id -> backStack.add(ExerciseFormKey(exerciseId = id)) },
+            onNewExercise = { name -> backStack.navigate(key, ExerciseFormKey(initialName = name)) },
+            onEditExercise = { id -> backStack.navigate(key, ExerciseFormKey(exerciseId = id)) },
         )
     }
     entry<ExerciseFormKey> { key ->
         val viewModel = viewModel { ExerciseFormViewModel(exerciseRepository, key.exerciseId, key.initialName) }
         ExerciseFormRoute(
             viewModel = viewModel,
-            onBack = { backStack.removeLastOrNull() },
+            onBack = { backStack.close(key) },
             onFinished = { outcome ->
-                if (outcome is ExerciseFormOutcome.Created) results.put(CreatedExerciseKey, outcome.exerciseId)
-                // 두 번 불려도 이 화면만 닫는다.
-                if (backStack.lastOrNull() == key) backStack.removeAt(backStack.lastIndex)
+                // 두 번 불려도 이 화면만 닫고 값도 한 번만 놓는다.
+                if (backStack.lastOrNull() == key) {
+                    if (outcome is ExerciseFormOutcome.Created) results.put(CreatedExerciseKey, outcome.exerciseId)
+                    backStack.close(key)
+                }
             },
         )
     }

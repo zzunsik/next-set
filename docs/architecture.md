@@ -211,6 +211,7 @@ Room 3은 Room 2와 다음이 다르다(공식).
 - 화면별 ViewModel 범위는 `lifecycle-viewmodel-navigation3`으로 잡는다. 이 아티팩트는 의존성이 풀리는 것까지만 확인했다(탐침).
 - `NavDisplay`, `entryProvider`, `rememberNavBackStack`을 쓰는 코드가 컴파일되는 것을 확인했다(탐침). 화면 테스트에서 그려지는지는 확인하지 않았다.
 - 뒤 화면이 앞 화면에 값을 돌려주는 API는 Navigation 3에 없다. 스택을 쥔 곳에서 `ui/navigation/NavResults`를 하나 만들어 화면들에 넘긴다. 뒤 화면은 값을 놓고 스택에서 빠지고, 앞 화면은 다시 그려질 때 `ResultEffect`로 한 번 꺼낸다. 값은 메모리에만 두므로 그 사이에 프로세스가 죽으면 잃는다. 종목 고르기가 고른 종목을 루틴 편집과 운동 중 화면에 돌려줄 때 쓴다(#21).
+- 화면은 스택을 직접 `add`·`remove`하지 않고 `ui/navigation/BackStackMoves.kt`의 `navigate(from, to)`, `close(key)`, `replace(key, to)`만 쓴다. 이동을 부른 화면이 스택의 맨 위일 때만 움직이므로, 버튼을 빠르게 두 번 눌러 두 번째 누르기가 화면 전환 중인 앞 화면에서 와도 같은 화면이 두 번 쌓이거나 두 화면이 닫히지 않는다. 시간으로 거르지 않아 기기 속도와 관계없다. `BackStackMovesTest`가 화면 코드에 직접 조작이 없는지 본다(#103). 누를 때 데이터를 만드는 홈의 버튼(운동 시작, 새 루틴)은 화면 상태가 홈이 다시 보일 때까지 두 번째 누르기를 받지 않는다.
 
 ### 의존성 주입
 

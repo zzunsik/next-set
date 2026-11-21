@@ -1,5 +1,7 @@
 package io.github.zzunsik.nextset.ui.settings
 
+import io.github.zzunsik.nextset.ui.navigation.navigate
+import io.github.zzunsik.nextset.ui.navigation.close
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -53,7 +55,7 @@ fun EntryProviderScope<NavKey>.settingsEntries(
             versionName = versionName,
             onDefaultRestChange = viewModel::onDefaultRestChange,
             onThemeModeChange = viewModel::onThemeModeChange,
-            onOpenLicenses = { backStack.add(LicensesKey) },
+            onOpenLicenses = { backStack.navigate(SettingsKey, LicensesKey) },
             onOpenSourceCode = {
                 // 기기의 브라우저로 연다(ACTION_VIEW). 앱은 네트워크에 접속하지 않는다(DATA-02).
                 // 열 앱이 없으면 AndroidUriHandler가 IllegalArgumentException을 던진다.
@@ -75,13 +77,13 @@ fun EntryProviderScope<NavKey>.settingsEntries(
         val notices by viewModel.notices.collectAsStateWithLifecycle()
         LicensesScreen(
             notices = notices,
-            onOpen = { backStack.add(LicenseDetailKey(it.id)) },
-            onBack = { backStack.removeLastOrNull() },
+            onOpen = { backStack.navigate(LicensesKey, LicenseDetailKey(it.id)) },
+            onBack = { backStack.close(LicensesKey) },
         )
     }
     entry<LicenseDetailKey> { key ->
         val viewModel = viewModel { LicenseDetailViewModel(licenseRepository, key.id) }
         val state by viewModel.uiState.collectAsStateWithLifecycle()
-        LicenseDetailScreen(state = state, onBack = { backStack.removeLastOrNull() })
+        LicenseDetailScreen(state = state, onBack = { backStack.close(key) })
     }
 }
