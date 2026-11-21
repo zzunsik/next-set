@@ -110,6 +110,20 @@ jobs:
       - name: Release build (R8, unsigned)
         run: ./gradlew assembleRelease --console=plain
 
+      # 릴리스 버전 규칙(AGENTS.md "릴리스" > "버전")은 scripts/release-version.mjs와 app/build.gradle.kts 두 곳에 있다.
+      # 스크립트를 자체 테스트로 확인하고, 방금 만든 릴리스 APK의 versionName·versionCode가 스크립트 계산과 같은지 본다.
+      # 둘이 어긋나면 태그를 단 뒤가 아니라 PR에서 알 수 있다.
+      - name: Release version rule
+        run: |
+          node --version
+          node --test scripts/release-version.test.mjs
+          apk=$(ls app/build/outputs/apk/release/*.apk | head -n 1)
+          test -n "$apk" || { echo "릴리스 APK를 찾지 못했습니다."; exit 1; }
+          bt="$ANDROID_HOME/build-tools/$(ls "$ANDROID_HOME/build-tools" | sort -V | tail -n 1)"
+          "$bt/aapt2" dump badging "$apk" > "$RUNNER_TEMP/badging.txt"
+          grep '^package:' "$RUNNER_TEMP/badging.txt"
+          node scripts/release-version.mjs apk "$RUNNER_TEMP/badging.txt"
+
       - name: Lint
         run: ./gradlew lint --console=plain
 

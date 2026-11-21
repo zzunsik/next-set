@@ -10,16 +10,19 @@ plugins {
 }
 
 // 앱 버전은 여기 한 곳에서 정한다. 릴리스 태그는 `v<versionName>`이고 릴리스 워크플로가 둘이 같은지 본다.
-// versionCode는 versionName에서 계산한다: major * 1_000_000 + minor * 1_000 + patch(예: 0.1.0 → 1000).
-// 그래서 minor와 patch는 0~999만 쓴다. 자세한 규칙은 AGENTS.md "릴리스".
+// versionName은 MAJOR.MINOR.PATCH, 시험판은 MAJOR.MINOR.PATCH-rc.N이다.
+// versionCode는 versionName에서 계산한다: major * 10_000 + minor * 100 + patch(예: 0.1.0 → 100, 0.2.1 → 201).
+// 그래서 minor와 patch는 0~99만 쓴다. 시험판(-rc.N)은 정식판과 같은 versionCode를 쓴다.
+// 같은 계산이 scripts/release-version.mjs에 있고, CI가 릴리스 APK를 그 스크립트로 확인한다. 자세한 규칙은 AGENTS.md "릴리스".
 val appVersionName = "0.1.0"
-val appVersionCode = appVersionName.split(".").let { parts ->
-    require(parts.size == 3 && parts.all { it.matches(Regex("0|[1-9][0-9]*")) }) {
-        "versionName은 MAJOR.MINOR.PATCH 꼴이어야 합니다: $appVersionName"
-    }
-    val (major, minor, patch) = parts.map { it.toInt() }
-    require(minor <= 999 && patch <= 999 && major <= 2099) { "versionCode로 바꿀 수 없는 버전입니다: $appVersionName" }
-    major * 1_000_000 + minor * 1_000 + patch
+val appVersionCode = run {
+    val match = Regex("""(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)(-rc\.[1-9][0-9]*)?""").matchEntire(appVersionName)
+        ?: throw GradleException("versionName은 MAJOR.MINOR.PATCH 또는 MAJOR.MINOR.PATCH-rc.N 꼴이어야 합니다: $appVersionName")
+    val (major, minor, patch) = match.groupValues.subList(1, 4).map { it.toLong() }
+    if (minor > 99 || patch > 99) throw GradleException("MINOR와 PATCH는 0~99만 씁니다: $appVersionName")
+    val code = major * 10_000 + minor * 100 + patch
+    if (code > 2_100_000_000) throw GradleException("versionCode가 Android 최댓값을 넘습니다: $appVersionName")
+    code.toInt()
 }
 
 // 릴리스 서명 정보는 저장소에 두지 않는다(NF-11). 환경 변수나 Gradle 속성(-P, ~/.gradle/gradle.properties)으로만 받는다.
