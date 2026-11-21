@@ -12,6 +12,8 @@
 
 스토어 스크린샷은 제작사가 고른 홍보 장면이다. 앱을 설치해 확인하지는 않았다.
 
+색, 모양, 타이포, 그림, 연출 같은 시각 언어는 [`visual-references.md`](visual-references.md)(#87)에서 따로 조사했다.
+
 ## 앱별 정리
 
 | 앱 | 가져올 것 | 피할 것 | 근거 |
@@ -104,6 +106,7 @@ Any Distance는 종료되지 않았다. 개발자 글에 따르면 2023년 중�
 - 모션 스킴: `MotionScheme.expressive()`는 눈에 띄는 요소와 중요한 순간에 권하는 스킴이다. `standard()`는 실용적인 요소와 반복되는 동작에 쓰는 기본 스킴이다. 모양이나 크기가 바뀌는 애니메이션은 spatial 스펙, 색·투명도만 바뀌는 애니메이션은 effects 스펙을 쓴다(공식). 세트 완료 체크는 한 번 운동에 수십 번 반복하니 standard에 맞춘다. expressive는 최고 기록 갱신과 운동 완료에만 쓴다.
 - 모양: `MaterialShapes`는 미리 정의한 도형을 그대로 쓰거나 다른 도형으로 변형(Morph)하게 해 준다(공식). 완료 체크나 기록 갱신 배지에 쓸 수 있다.
 - API 상태: `androidx.compose.material3` 1.5.0-rc01(2026-11-04) 기준으로 MotionScheme·ButtonGroup·SplitButton·FloatingToolbar·MaterialExpressiveTheme는 안정 API다. LoadingIndicator와 MaterialShapes는 실험 API다. 안정 버전은 1.4.0이다(공식).
+- 2026-11-21 덧붙임(#87): 1.5.0이 2026-11-18에 안정판으로 나왔다. 이 저장소는 BOM `2026.09.00`으로 1.4.0을 쓰고 있고, 1.4.0에서는 위 API가 공개돼 있지 않다. 버전별로 쓸 수 있는 것과 없는 것은 [`visual-references.md`](visual-references.md)의 "플랫폼 기준"에 표로 정리했다.
 
 주의할 것
 
