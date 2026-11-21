@@ -101,8 +101,8 @@ jobs:
     # Release를 만들려면 contents: write가 필요하다. 이 job에만 준다.
     permissions:
       contents: write
-    # 시크릿은 지금 저장소 시크릿이다. GitHub 환경 release로 옮길지는 소유자가 정한다(#30 "소유자 판단이 남은 것").
-    # 옮기면 여기에 `environment: release`를 단다. 환경에 시크릿을 넣기 전에 달면 시크릿을 읽지 못해 실패한다.
+    # 서명 시크릿은 GitHub 환경 release에만 있다(배포 규칙: 태그 v*). 이 job만 그 환경을 쓴다(#98).
+    environment: release
     env:
       TAG: ${{ github.ref_name }}
       PRERELEASE: ${{ needs.verify.outputs.prerelease }}
