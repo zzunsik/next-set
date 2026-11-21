@@ -1,0 +1,4 @@
+<resources>
+    <!-- 임시 런처 아이콘 색. 디자인 작업에서 바꾼다. -->
+    <color name="ic_launcher_background">#1C1C1E</color>
+</resources>

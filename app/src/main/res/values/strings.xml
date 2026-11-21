@@ -1,0 +1,403 @@
+<resources>
+    <string name="app_name">다음 세트</string>
+    <!-- 세트 행의 완료 체크 버튼. 화면 읽기 프로그램이 읽는 이름이다. -->
+    <string name="set_done">세트 완료</string>
+
+    <!-- 여러 화면이 쓰는 문구 -->
+    <string name="navigate_back">뒤로 가기</string>
+    <string name="action_cancel">취소</string>
+    <string name="action_delete">지우기</string>
+
+    <!-- 부위와 세부 부위(docs/DESIGN.md BodyPartFilter) -->
+    <string name="body_part_all">전체</string>
+    <string name="body_part_chest">가슴</string>
+    <string name="body_part_back">등</string>
+    <string name="body_part_shoulders">어깨</string>
+    <string name="body_part_arms">팔</string>
+    <string name="body_part_legs">하체</string>
+    <string name="body_part_core">코어</string>
+    <string name="sub_part_quads">허벅지 앞</string>
+    <string name="sub_part_hamstrings">허벅지 뒤</string>
+    <string name="sub_part_glutes">엉덩이</string>
+    <string name="sub_part_calves">종아리</string>
+    <string name="sub_part_biceps">이두</string>
+    <string name="sub_part_triceps">삼두</string>
+    <string name="sub_part_forearms">전완</string>
+
+    <!-- 장비와 기록 방식(LOG-08) -->
+    <string name="equipment_barbell">바벨</string>
+    <string name="equipment_dumbbell">덤벨</string>
+    <string name="equipment_machine">머신</string>
+    <string name="equipment_cable">케이블</string>
+    <string name="equipment_bodyweight">맨몸</string>
+    <string name="equipment_kettlebell">케틀벨</string>
+    <string name="equipment_band">밴드</string>
+    <string name="equipment_other">기타</string>
+    <string name="record_type_weight_reps">무게와 횟수</string>
+    <string name="record_type_reps">횟수만</string>
+    <string name="record_type_duration">시간</string>
+
+    <!-- 종목 고르기 -->
+    <string name="exercise_picker_title">종목 고르기</string>
+    <string name="exercise_manage_title">종목 관리</string>
+    <string name="exercise_new">새 종목</string>
+    <string name="exercise_search_hint">종목 이름 검색</string>
+    <string name="exercise_search_clear">검색어 지우기</string>
+    <string name="exercise_body_part_filter">부위</string>
+    <string name="exercise_sub_part_filter">세부 부위</string>
+    <!-- 종목 목록 행의 보조 줄. %1$s 부위, %2$s 장비 -->
+    <string name="exercise_row_detail">%1$s · %2$s</string>
+    <!-- 직접 추가한 종목의 보조 줄. %1$s 부위, %2$s 장비 -->
+    <string name="exercise_row_detail_custom">%1$s · %2$s · 직접 추가</string>
+    <string name="exercise_edit_action">종목 수정</string>
+    <string name="exercise_add_selected">%1$d개 추가</string>
+    <string name="exercise_no_results">\'%1$s\'에 맞는 종목이 없어요.</string>
+    <string name="exercise_create_named">\'%1$s\' 종목 만들기</string>
+    <string name="exercise_no_results_filter">맞는 종목이 없어요.</string>
+
+    <!-- 종목 추가·수정 -->
+    <string name="exercise_form_edit_title">종목 수정</string>
+    <string name="exercise_form_name">이름</string>
+    <!-- 이름 칸이 비었을 때의 안내 글. 위의 구역 제목 "이름"과 같으면 화면 읽기 프로그램이 같은 이름을 두 번 읽는다. -->
+    <string name="exercise_form_name_hint">종목 이름</string>
+    <string name="exercise_form_body_part">부위</string>
+    <string name="exercise_form_sub_part">세부 부위</string>
+    <string name="exercise_form_equipment">장비</string>
+    <string name="exercise_form_record_type">기록 방식</string>
+    <string name="exercise_form_save">저장</string>
+    <string name="exercise_form_delete">종목 지우기</string>
+    <string name="exercise_form_name_conflict">이미 있는 종목 이름이에요. 다른 이름을 적어 주세요.</string>
+    <string name="exercise_form_missing_body_part">부위를 골라야 저장할 수 있어요.</string>
+    <string name="exercise_form_missing_equipment">장비를 골라야 저장할 수 있어요.</string>
+    <string name="exercise_form_missing_both">부위와 장비를 골라야 저장할 수 있어요.</string>
+    <string name="exercise_form_record_type_notice">기록 방식을 바꾸면 최고 기록과 지난번 기록은 새 방식으로 적은 세트만 봐요. 지난 기록은 그대로 남아요.</string>
+    <string name="exercise_delete_confirm">이 종목을 지울까요? 운동 기록은 남아요.</string>
+
+    <string name="action_close">닫기</string>
+
+    <!-- 하단 내비게이션(docs/DESIGN.md "이동 구조") -->
+    <string name="nav_home">홈</string>
+    <string name="nav_history">기록</string>
+    <string name="nav_settings">설정</string>
+
+    <!-- 설정(docs/DESIGN.md "설정") -->
+    <string name="settings_title">설정</string>
+    <string name="settings_default_rest">휴식 시간 기본값</string>
+    <string name="settings_default_rest_note">휴식 시간을 따로 정한 종목은 그 값을 따라요.</string>
+    <string name="settings_theme_mode">화면 모드</string>
+    <string name="theme_mode_system">시스템 설정 따름</string>
+    <string name="theme_mode_light">밝게</string>
+    <string name="theme_mode_dark">어둡게</string>
+    <string name="settings_manage_exercises">종목 관리</string>
+    <string name="settings_backup">백업</string>
+    <!-- 아직 만들지 않은 화면으로 가는 행의 보조 줄. 그 화면이 생기면 행을 누를 수 있게 된다. -->
+    <string name="settings_not_ready">준비 중이에요.</string>
+    <string name="settings_licenses">오픈소스 라이선스</string>
+    <string name="settings_source_code">소스 코드</string>
+    <string name="settings_source_code_url" translatable="false">https://github.com/zzunsik/next-set</string>
+    <string name="settings_source_code_caption" translatable="false">github.com/zzunsik/next-set</string>
+    <string name="settings_open_link_failed">주소를 열 브라우저를 찾지 못했어요. 브라우저 앱을 켠 뒤 다시 눌러 주세요.</string>
+    <string name="settings_version">버전 %1$s</string>
+
+    <!-- 백업(docs/DESIGN.md "백업", DATA-03, DATA-04) -->
+    <string name="backup_title">백업</string>
+    <string name="backup_description">기록은 이 기기에만 저장돼요. 파일로 내보내 두면 다른 기기로 옮길 수 있어요.</string>
+    <string name="backup_unencrypted_notice">백업 파일에는 운동 기록이 암호화되지 않은 채 들어가요. 믿을 수 있는 곳에 저장해 주세요.</string>
+    <string name="backup_export">백업 파일 내보내기</string>
+    <string name="backup_last_exported">마지막으로 내보낸 날 %1$s</string>
+    <string name="backup_import">백업 파일에서 가져오기</string>
+    <string name="backup_exported">백업 파일을 저장했어요.</string>
+    <string name="backup_imported">백업 파일의 기록으로 바꿨어요.</string>
+    <!-- 가져오기 확인. 기록 양은 "운동 기록 42건, 루틴 4개"로 적는다. -->
+    <string name="backup_confirm_title">백업 파일에서 가져오기</string>
+    <string name="backup_confirm_file">백업 파일: 운동 기록 %1$d건, 루틴 %2$d개</string>
+    <string name="backup_confirm_device">이 기기: 운동 기록 %1$d건, 루틴 %2$d개</string>
+    <string name="backup_confirm_in_progress">이 기기에서 진행 중인 운동도 지워져요.</string>
+    <string name="backup_confirm_question">지금 기록을 모두 지우고 백업 파일의 기록으로 바꿀까요? 되돌릴 수 없어요.</string>
+    <string name="backup_confirm_replace">바꾸기</string>
+    <!-- 오류. 무슨 일이 있었는지와 할 일을 적는다(docs/DESIGN.md "문구"). -->
+    <string name="backup_error_not_backup">이 앱의 백업 파일이 아니에요. 다른 파일을 골라 주세요.</string>
+    <string name="backup_error_newer_version">이 앱보다 새 버전에서 만든 백업 파일이에요. 앱을 업데이트한 뒤 다시 가져와 주세요.</string>
+    <string name="backup_error_broken">백업 파일이 손상돼 읽을 수 없어요. 다른 백업 파일을 골라 주세요.</string>
+    <string name="backup_error_read_failed">파일을 읽지 못했어요. 다시 골라 주세요.</string>
+    <string name="backup_error_write_failed">백업 파일을 저장하지 못했어요. 다른 곳을 골라 다시 내보내 주세요.</string>
+    <string name="backup_error_import_failed">기록을 바꾸지 못했어요. 지금 기록은 그대로 남아 있어요.</string>
+    <string name="backup_error_picker_unavailable">파일을 고를 화면을 열지 못했어요. 기기의 파일 앱을 켠 뒤 다시 눌러 주세요.</string>
+
+    <!-- 날짜. "11월 14일 (토)", 올해가 아니면 연도를 붙인다(docs/DESIGN.md "숫자와 단위"). -->
+    <string name="date_month_day">%1$d월 %2$d일 (%3$s)</string>
+    <string name="date_year_month_day">%1$d년 %2$d월 %3$d일 (%4$s)</string>
+    <!-- 월요일부터 일요일까지(java.time.DayOfWeek 순서) -->
+    <string-array name="weekdays_short">
+        <item>월</item>
+        <item>화</item>
+        <item>수</item>
+        <item>목</item>
+        <item>금</item>
+        <item>토</item>
+        <item>일</item>
+    </string-array>
+
+    <!-- 휴식 시간 값. 설정의 "2분"(docs/DESIGN.md "설정") -->
+    <string name="rest_minutes">%1$d분</string>
+    <string name="rest_seconds">%1$d초</string>
+    <string name="rest_minutes_seconds">%1$d분 %2$d초</string>
+
+    <!-- 휴식 타이머(#26, docs/DESIGN.md `RestTimerBar`, docs/rest-timer.md). 늘리고 줄이는 폭 %1$d는 코드의 RestTimerRules.STEP_SECONDS를 넘긴다 -->
+    <string name="rest_decrease">−%1$d초</string>
+    <string name="rest_increase">+%1$d초</string>
+    <string name="rest_skip">건너뛰기</string>
+    <string name="rest_decrease_description">휴식 %1$d초 줄이기</string>
+    <string name="rest_increase_description">휴식 %1$d초 늘리기</string>
+    <string name="rest_skip_description">휴식 건너뛰기</string>
+    <!-- %1$s 남은 시간 "1:45" -->
+    <string name="rest_remaining_description">남은 휴식 시간 %1$s</string>
+    <!-- %1$s 종목 이름과 값 "벤치 프레스 60kg × 10" -->
+    <string name="rest_next_set">다음 %1$s</string>
+    <!-- %1$s 종목 이름, %2$s 값 "60kg × 10" -->
+    <string name="rest_next_set_value">%1$s %2$s</string>
+    <!-- 종목 머리의 휴식 시간 버튼. %1$s "2:00" -->
+    <string name="rest_time_button">휴식 %1$s</string>
+    <!-- %1$s 종목 이름, %2$s "2:00" -->
+    <string name="rest_time_button_description">%1$s 휴식 시간 %2$s, 바꾸기</string>
+    <!-- %1$s 종목 이름 -->
+    <string name="rest_time_dialog_title">%1$s 휴식 시간</string>
+    <string name="rest_channel_ongoing">휴식 타이머</string>
+    <string name="rest_channel_done">휴식 끝</string>
+    <string name="rest_notification_title">휴식 중</string>
+    <string name="rest_done_title">휴식 끝</string>
+    <string name="notifications_enable">알림 켜기</string>
+    <string name="settings_notifications_off">알림 꺼짐</string>
+    <string name="settings_notifications_caption">켜면 다른 앱을 쓰는 동안에도 남은 휴식 시간이 보여요.</string>
+
+    <!-- 오픈소스 라이선스(SET-03) -->
+    <string name="licenses_title">오픈소스 라이선스</string>
+    <!-- 라이선스 목록 행의 보조 줄. 만든 곳 · 라이선스 이름 -->
+    <string name="license_row_caption">%1$s · %2$s</string>
+
+    <!-- 자체 숫자판(docs/DESIGN.md NumberPad). 증감 키는 값을 적고 화면 읽기 프로그램에는 "1 더하기"처럼 읽힌다. -->
+    <string name="number_pad_step_plus">+%1$s</string>
+    <string name="number_pad_step_minus">−%1$s</string>
+    <string name="number_pad_step_plus_seconds">+%1$d초</string>
+    <string name="number_pad_step_minus_seconds">−%1$d초</string>
+    <string name="number_pad_step_add_description">%1$s 더하기</string>
+    <string name="number_pad_step_subtract_description">%1$s 빼기</string>
+    <string name="number_pad_step_add_seconds_description">%1$d초 더하기</string>
+    <string name="number_pad_step_subtract_seconds_description">%1$d초 빼기</string>
+    <string name="number_pad_decimal_point_description">소수점</string>
+    <string name="number_pad_backspace">지우기</string>
+    <string name="number_pad_clear_all">전부 지우기</string>
+    <string name="number_pad_next">다음</string>
+    <string name="number_pad_done">완료</string>
+    <string name="number_pad_close">숫자판 닫기</string>
+    <!-- 입력 칸. 화면 읽기 프로그램이 "무게, 60"처럼 칸 이름과 값을 함께 읽는다. -->
+    <string name="number_field_description">%1$s, %2$s</string>
+    <string name="number_field_empty">비어 있음</string>
+    <string name="number_field_weight">무게</string>
+    <string name="number_field_reps">횟수</string>
+    <string name="number_field_duration">시간</string>
+
+    <!-- 운동 중(docs/DESIGN.md "운동 중", #24) -->
+    <string name="workout_empty_title">빈 운동</string>
+    <!-- 상단 바의 경과 시간. 한 시간을 넘으면 시간과 분(docs/DESIGN.md "숫자와 단위") -->
+    <string name="workout_elapsed_minutes">%1$d분째</string>
+    <string name="workout_elapsed_hours_minutes">%1$d시간 %2$d분째</string>
+    <string name="workout_finish">끝내기</string>
+    <string name="workout_more">운동 메뉴</string>
+    <string name="workout_note">운동 메모</string>
+    <string name="workout_reorder">종목 순서 바꾸기</string>
+    <string name="workout_discard">운동 버리기</string>
+    <string name="workout_add_exercise">종목 추가</string>
+    <string name="workout_empty">종목을 추가해 주세요.</string>
+    <!-- 다음 세트 표시(NextSetDisplay). %1$d 종목의 세트 수, %2$d 몇 번째 -->
+    <string name="next_set_label">다음 세트 · %1$d세트 중 %2$d번째</string>
+    <string name="next_set_previous">지난번 %1$s</string>
+    <string name="next_set_enter_value">직접 입력</string>
+    <string name="next_set_all_done">모든 세트를 끝냈어요.</string>
+    <string name="next_set_finish">운동 끝내기</string>
+    <!-- 줄어든 다음 세트 표시. %1$s 종목 이름, %2$s 값 -->
+    <string name="next_set_collapsed">%1$s · %2$s</string>
+    <string name="unit_times">×</string>
+    <!-- 세트 값. 직전 기록처럼 좁은 자리에서는 횟수 단위를 뗀다(60kg × 10) -->
+    <string name="set_value_weight_reps">%1$skg × %2$s</string>
+    <string name="set_value_reps">%1$s회</string>
+    <!-- 화면 읽기 프로그램이 읽는 다음 세트. %1$s 라벨(다음 세트 · 4세트 중 2번째), %2$s 종목, %3$s 값 -->
+    <string name="next_set_description">%1$s, %2$s, %3$s</string>
+    <!-- 종목 머리(ExerciseHeader) -->
+    <string name="exercise_header_more">%1$s 메뉴</string>
+    <string name="exercise_header_all_done">모두 완료</string>
+    <string name="exercise_note">메모</string>
+    <string name="exercise_move_up">위로 옮기기</string>
+    <string name="exercise_move_down">아래로 옮기기</string>
+    <string name="exercise_delete_last_set">마지막 세트 지우기</string>
+    <string name="exercise_remove">종목 빼기</string>
+    <string name="set_table_set">세트</string>
+    <string name="set_table_previous">지난번</string>
+    <string name="set_table_kg">kg</string>
+    <string name="set_table_reps">회</string>
+    <!-- 목표 횟수 범위(LOG-05). 회 8~12 -->
+    <string name="set_table_reps_range">회 %1$s</string>
+    <string name="set_table_duration">시간</string>
+    <string name="target_range">%1$d~%2$d</string>
+    <!-- 세트 행(SetRow). 순번 "1"이 숫자판의 "1" 키와 같게 읽히지 않도록 "1세트"로 읽힌다 -->
+    <string name="set_number_description">%1$d세트</string>
+    <!-- 칸과 체크 버튼의 이름. 종목과 순번을 붙여 행마다 다르게 읽힌다. %1$s 종목, %2$d 순번, %3$s 칸 이름 -->
+    <string name="set_field_label">%1$s %2$d세트 %3$s</string>
+    <string name="set_done_label">%1$s %2$d세트 완료</string>
+    <string name="set_delete">이 세트 지우기</string>
+    <string name="set_add">세트 추가</string>
+    <string name="set_add_description">%1$s 세트 추가</string>
+    <string name="set_deleted">세트를 지웠어요.</string>
+    <!-- 최고 기록 표시(RecordBadge, LOG-14) -->
+    <string name="record_badge">최고 기록</string>
+    <string name="record_new">%1$s 최고 기록이에요.</string>
+    <!-- 끝내기의 순서(docs/DESIGN.md "운동 중") -->
+    <string name="finish_no_completed">완료한 세트가 없어요. 운동을 버릴까요?</string>
+    <string name="finish_incomplete">완료하지 않은 세트 %1$d개는 기록에 남지 않아요.</string>
+    <string name="finish_routine_change">바뀐 종목 구성을 루틴에 반영할까요?</string>
+    <string name="finish_keep_going">계속 운동</string>
+    <string name="finish_discard">버리기</string>
+    <string name="finish_this_time">이번만</string>
+    <string name="finish_apply_routine">루틴에 반영</string>
+    <string name="finish_routine_update_failed">루틴에 반영하지 못했어요. 운동 기록과 루틴은 그대로예요. 다시 시도하거나 이번만 끝내 주세요.</string>
+    <string name="finish_retry">다시 시도</string>
+    <string name="finish_without_routine">이번만 끝내기</string>
+    <string name="discard_confirm">이 운동을 버릴까요? 완료한 세트도 지워져요.</string>
+    <string name="remove_exercise_confirm">%1$s 종목을 뺄까요? 적은 세트도 함께 지워져요.</string>
+    <string name="remove_exercise_action">빼기</string>
+    <string name="note_hint">메모</string>
+    <!-- 빈 운동을 끝낸 뒤 운동 요약의 결론 문장 -->
+    <string name="workout_done_title">운동을 끝냈어요.</string>
+    <string name="workout_duration_minutes">%1$d분</string>
+    <string name="workout_duration_hours_minutes">%1$d시간 %2$d분</string>
+    <string name="action_confirm">확인</string>
+    <!-- 홈(docs/DESIGN.md "홈", NextRoutineCard, RoutineRow) -->
+    <string name="home_resume_label">진행 중</string>
+    <!-- %1$d 전체 세트 수, %2$d 완료한 세트 수 -->
+    <string name="home_resume_progress">%1$d세트 중 %2$d세트 완료</string>
+    <string name="home_resume">이어서 하기</string>
+    <string name="home_start_empty">빈 운동 시작</string>
+    <string name="home_next_label">다음 차례</string>
+    <string name="home_pinned_label">직접 고름</string>
+    <string name="home_unpin">자동 순서로</string>
+    <string name="home_start">운동 시작</string>
+    <!-- 카드의 "운동 시작" 버튼. 화면 읽기 프로그램에는 "가슴 루틴 시작"으로 읽힌다 -->
+    <string name="home_start_routine_description">%1$s 시작</string>
+    <!-- 종목 미리보기. 종목이 셋 이상이면 앞의 둘과 남은 수. %1$s 앞 종목 이름들, %2$d 남은 종목 수 -->
+    <string name="home_exercises_more">%1$s 외 %2$d개</string>
+    <!-- %1$s 날짜("11월 14일 (토)") -->
+    <string name="home_last_done">지난번 %1$s</string>
+    <string name="home_exercise_count">종목 %1$d개</string>
+    <!-- 루틴 행의 보조 줄. %1$s 종목 수, %2$s 지난번 -->
+    <string name="home_row_detail">%1$s · %2$s</string>
+    <string name="home_other_routines">다른 루틴</string>
+    <string name="home_reorder">순서 편집</string>
+    <string name="home_reorder_done">완료</string>
+    <string name="home_pin">맨 위에 올리기</string>
+    <string name="home_edit">편집</string>
+    <!-- 더보기 버튼. 화면 읽기 프로그램에는 "가슴 루틴 메뉴"로 읽힌다 -->
+    <string name="home_routine_more">%1$s 메뉴</string>
+    <!-- 순서 편집 상태의 지우기 버튼. %1$s 루틴 이름 -->
+    <string name="home_routine_delete">%1$s 지우기</string>
+    <string name="home_empty">아직 루틴이 없어요.</string>
+    <!-- 진행 중인 운동이 있을 때 다른 루틴을 시작하려 하면(docs/DESIGN.md) -->
+    <string name="home_in_progress_title">진행 중인 운동이 있어요.</string>
+    <!-- %1$s 루틴 이름(빈 운동이면 "빈 운동"), %2$d 완료한 세트 수 -->
+    <string name="home_in_progress_detail">%1$s · %2$d세트 완료</string>
+    <string name="home_finish_and_start">끝내고 새로 시작</string>
+    <string name="routine_create">루틴 만들기</string>
+    <!-- "새 루틴" 버튼, 새 루틴의 제목, 이름을 비웠을 때 저장하는 이름 -->
+    <string name="routine_new">새 루틴</string>
+    <string name="routine_edit_action">루틴 편집</string>
+    <!-- 화면 낭독기의 순서 바꾸기 동작(docs/DESIGN.md "UI 라이브러리 선택"의 덧붙임) -->
+    <string name="move_up">위로 옮기기</string>
+    <string name="move_down">아래로 옮기기</string>
+
+    <!-- 루틴 편집(docs/DESIGN.md "루틴 편집") -->
+    <string name="routine_edit_title">루틴 편집</string>
+    <string name="routine_name">이름</string>
+    <string name="routine_name_hint">루틴 이름</string>
+    <string name="routine_exercises">종목</string>
+    <string name="routine_no_exercises">종목을 추가해 주세요.</string>
+    <string name="routine_add_exercise">종목 추가</string>
+    <string name="routine_delete">루틴 지우기</string>
+    <string name="routine_delete_confirm">이 루틴을 지울까요? 운동 기록은 남아요.</string>
+    <string name="routine_exercise_settings_action">종목 설정</string>
+    <!-- 루틴에서 종목을 뺀 뒤의 알림 줄. %1$s 종목 이름 -->
+    <string name="routine_exercise_removed">루틴에서 %1$s 종목을 뺐어요.</string>
+    <string name="action_undo">되돌리기</string>
+    <!-- 종목 행의 보조 줄 "3세트 · 60kg × 8~12회". %1$s 세트 수, %2$s 목표 -->
+    <string name="routine_row_detail">%1$s · %2$s</string>
+    <string name="routine_set_count">%1$d세트</string>
+    <string name="routine_target_weight">%1$skg</string>
+    <!-- 무게와 횟수 목표. %1$s 무게("60kg"), %2$s 횟수("8~12회") -->
+    <string name="routine_target_weight_reps">%1$s × %2$s</string>
+    <string name="routine_target_reps">%1$d회</string>
+    <string name="routine_target_reps_range">%1$d~%2$d회</string>
+    <string name="routine_target_reps_at_least">%1$d회 이상</string>
+    <string name="routine_target_reps_at_most">%1$d회 이하</string>
+
+    <!-- 종목 설정(루틴 편집에서 종목 행을 누르면 열린다) -->
+    <string name="routine_exercise_sets">세트 수</string>
+    <string name="routine_exercise_sets_decrease">세트 수 줄이기</string>
+    <string name="routine_exercise_sets_increase">세트 수 늘리기</string>
+    <string name="routine_exercise_target">목표</string>
+    <string name="routine_exercise_target_note">비워 둬도 돼요.</string>
+    <string name="routine_target_weight_label">목표 무게</string>
+    <string name="routine_target_reps_label">목표 횟수</string>
+    <string name="routine_target_duration_label">목표 시간</string>
+    <string name="routine_target_reps_min">최소 횟수</string>
+    <string name="routine_target_reps_max">최대 횟수</string>
+    <string name="unit_kg">kg</string>
+    <string name="unit_reps">회</string>
+    <string name="range_separator">~</string>
+    <string name="routine_target_reps_invalid">최소 횟수가 최대 횟수보다 커요. 값을 고쳐 주세요.</string>
+    <string name="routine_exercise_rest">휴식 시간</string>
+    <!-- 휴식 시간을 따로 정하지 않은 종목. %1$s 설정의 기본값("2분") -->
+    <string name="routine_exercise_rest_default">기본값 따름(%1$s)</string>
+    <string name="routine_exercise_rest_note">휴식 시간은 종목마다 하나예요. 여기서 바꾸면 다른 루틴과 운동 중에도 같아요.</string>
+    <string name="routine_exercise_remove">루틴에서 빼기</string>
+
+    <!-- 기록 목록(docs/DESIGN.md "기록 목록", HIST-01, HIST-06) -->
+    <string name="history_title">기록</string>
+    <string name="history_add_past">지난 운동 적기</string>
+    <!-- 달 머리 "2026년 11월" -->
+    <string name="history_month">%1$d년 %2$d월</string>
+    <string name="history_empty">아직 기록이 없어요. 운동을 마치면 여기에 쌓여요.</string>
+    <string name="history_go_home">홈으로</string>
+    <!-- 기록 행의 보조 줄 "48분 · 15세트 · 4,250kg". 볼륨이 없는 기록(횟수만, 시간 종목뿐)은 볼륨을 뺀다 -->
+    <string name="history_row_detail">%1$s · %2$d세트 · %3$s</string>
+    <string name="history_row_detail_no_volume">%1$s · %2$d세트</string>
+    <!-- 지난 운동 적기에서 날짜를 고른 뒤 묻는 것. %1$s 날짜 -->
+    <string name="history_add_past_question">%1$s에 한 운동을 골라 주세요.</string>
+    <string name="history_add_past_blank">빈 기록</string>
+
+    <!-- 운동 요약과 기록 상세(docs/DESIGN.md "운동 요약", "기록 상세·수정", HIST-02, HIST-03, HIST-05) -->
+    <!-- 결론 문장. %1$s 루틴 이름과 끝소리에 맞는 조사("가슴 루틴을", "Push Day A를") -->
+    <string name="summary_done_routine">%1$s 끝냈어요.</string>
+    <!-- 끝소리를 정할 수 없는 루틴 이름(영어 낱말, 기호 등)의 결론 문장. %1$s 루틴 이름("Push Day") -->
+    <string name="summary_done_routine_unknown_final">%1$s 루틴을 끝냈어요.</string>
+    <string name="summary_records">최고 기록 %1$d개를 세웠어요.</string>
+    <string name="report_duration">운동 시간</string>
+    <string name="report_sets">세트</string>
+    <string name="report_volume">볼륨</string>
+    <!-- 볼륨 "4,250kg" -->
+    <string name="report_volume_value">%1$skg</string>
+    <!-- 같은 루틴의 지난 기록과 견준 볼륨. %1$s "+120kg", "−50kg" -->
+    <string name="report_volume_delta">지난번보다 %1$s</string>
+    <string name="report_volume_same">지난번과 볼륨이 같아요.</string>
+    <string name="report_records_title">최고 기록</string>
+    <string name="report_note_title">운동 메모</string>
+    <!-- 기록 상세의 시작 시각 "오후 6:30 시작" -->
+    <string name="report_started_at">%1$s 시작</string>
+    <string name="report_edit">수정</string>
+    <string name="report_edit_done">완료</string>
+    <string name="report_more">기록 메뉴</string>
+    <string name="report_delete_confirm">이 기록을 지울까요? 되돌릴 수 없어요.</string>
+    <string name="report_date">날짜</string>
+    <string name="report_start_time">시작 시각</string>
+    <string name="report_minutes">운동 시간(분)</string>
+    <string name="unit_minutes">분</string>
+    <!-- 세트 값을 단위까지 적는다(docs/DESIGN.md "숫자와 단위": 60kg × 10회) -->
+    <string name="set_value_weight_reps_full">%1$skg × %2$s회</string>
+</resources>

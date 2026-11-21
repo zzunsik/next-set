@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 휴식 타이머 알림의 작은 아이콘. 이 저장소에서 직접 그린 초시계 모양이다. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+  <path
+      android:fillColor="@android:color/transparent"
+      android:strokeColor="@android:color/white"
+      android:strokeWidth="2"
+      android:pathData="M12,5.5a7.5,7.5 0,1 1,0 15a7.5,7.5 0,1 1,0 -15z"/>
+  <path
+      android:fillColor="@android:color/white"
+      android:pathData="M9,1.5h6v2h-6z"/>
+  <path
+      android:fillColor="@android:color/white"
+      android:pathData="M11,8.5h2v5h-2z"/>
+</vector>
