@@ -5,6 +5,9 @@ import io.github.zzunsik.nextset.data.db.NextSetDatabase
 import io.github.zzunsik.nextset.data.db.RoutineEntity
 import io.github.zzunsik.nextset.data.db.RoutineExerciseEntity
 import io.github.zzunsik.nextset.data.db.Tables
+import io.github.zzunsik.nextset.data.db.WorkoutEntity
+import io.github.zzunsik.nextset.domain.model.HomeRoutine
+import io.github.zzunsik.nextset.domain.model.HomeSnapshot
 import io.github.zzunsik.nextset.domain.model.Routine
 import io.github.zzunsik.nextset.domain.model.RoutineDetail
 import io.github.zzunsik.nextset.domain.model.RoutineExercise
@@ -15,12 +18,14 @@ import io.github.zzunsik.nextset.domain.rule.fitTo
 import io.github.zzunsik.nextset.domain.rule.requireSameItems
 import io.github.zzunsik.nextset.domain.rule.topRoutine
 import io.github.zzunsik.nextset.domain.rule.validateRoutineExercise
+import java.time.Instant
 import kotlinx.coroutines.flow.Flow
 
 internal class RoomRoutineRepository(private val database: NextSetDatabase) : RoutineRepository {
     private val routineDao = database.routineDao()
     private val exerciseDao = database.exerciseDao()
     private val settingsDao = database.settingsDao()
+    private val workoutDao = database.workoutDao()
 
     override fun observeRoutines(): Flow<List<Routine>> =
         database.observe(Tables.ROUTINE) { routineDao.getAll().map { it.toModel() } }
@@ -36,6 +41,37 @@ internal class RoomRoutineRepository(private val database: NextSetDatabase) : Ro
                 lastRoutineId = routineDao.lastFinishedRoutineId(),
             )
         }
+
+    override fun observeHome(): Flow<HomeSnapshot> = database.observe(
+        Tables.ROUTINE,
+        Tables.ROUTINE_EXERCISE,
+        Tables.EXERCISE,
+        Tables.WORKOUT,
+        Tables.WORKOUT_EXERCISE,
+        Tables.WORKOUT_SET,
+        Tables.APP_SETTINGS,
+    ) {
+        val routines = routineDao.getAll().map { it.toModel() }
+        val items = routines.associate { it.id to routineDao.getItems(it.id) }
+        val names = exerciseDao.getByIds(items.values.flatten().map { it.exerciseId }.toSet()).associate { it.id to it.nameKo }
+        val lastStarted = workoutDao.getFinishedWorkouts()
+            .filter { it.routineId != null }
+            .groupBy { it.routineId!! }
+            .mapValues { (_, workouts) -> Instant.ofEpochMilli(workouts.maxOf(WorkoutEntity::startedAt)) }
+        val pinnedRoutineId = settingsDao.get()?.pinnedRoutineId
+        HomeSnapshot(
+            inProgress = workoutDao.getInProgressId()?.let { database.readWorkout(it) },
+            routines = routines.map { routine ->
+                HomeRoutine(
+                    routine = routine,
+                    exerciseNames = items.getValue(routine.id).map { names.getValue(it.exerciseId) },
+                    lastStartedAt = lastStarted[routine.id],
+                )
+            },
+            top = topRoutine(routines, pinnedRoutineId, routineDao.lastFinishedRoutineId()),
+            pinnedRoutineId = pinnedRoutineId,
+        )
+    }
 
     override suspend fun addRoutine(name: String): Long {
         val clean = name.trim()

@@ -44,7 +44,7 @@ import org.robolectric.RobolectricTestRunner
  * - [doubleTap]: 같은 프레임 안에서 버튼의 클릭 동작을 두 번 부른다. 첫 번째 누르기의 결과(화면 이동, 저장)가 반영되기 전이다.
  * - [staleTap]: 첫 번째 누르기로 다음 화면이 열린 뒤, 화면 전환 동안 아직 보이는 앞 화면의 버튼이 한 번 더 눌린다.
  *
- * 저장소는 루틴과 종목이 메모리 가짜, 운동이 메모리 데이터베이스다.
+ * 저장소는 루틴과 종목이 메모리 가짜, 운동이 메모리 데이터베이스다. 운동 시작을 보는 테스트는 모두 메모리 데이터베이스다([show]).
  */
 @RunWith(RobolectricTestRunner::class)
 class DoubleTapNavigationTest {
@@ -59,15 +59,20 @@ class DoubleTapNavigationTest {
     private val routines = FakeRoutineRepository()
     private val db get() = dbRule.db
 
-    private fun show() {
+    /**
+     * [realHome]이면 루틴·종목·설정도 메모리 데이터베이스의 진짜 구현을 쓴다. 홈은 진행 중인 운동을 루틴 저장소의 한 번 읽기
+     * (`observeHome`, #97)로 받는데, 가짜 루틴 저장소는 운동을 모르므로 진행 중인 운동이 늘 없다. 운동 시작을 보는 테스트는
+     * 홈이 막 시작한 운동을 실제로 받아야 하므로 진짜 구현을 쓴다.
+     */
+    private fun show(realHome: Boolean = false) {
         compose.setContent {
             NextSetTheme {
                 NextSetNavDisplay(
-                    settingsRepository = FakeSettingsRepository(),
+                    settingsRepository = if (realHome) db.settings else FakeSettingsRepository(),
                     licenseRepository = FakeLicenseRepository(),
-                    exerciseRepository = routines.exercises,
+                    exerciseRepository = if (realHome) db.exercises else routines.exercises,
                     workoutRepository = db.workouts,
-                    routineRepository = routines,
+                    routineRepository = if (realHome) db.routines else routines,
                     backupRepository = FakeBackupRepository(),
                 )
             }
@@ -209,7 +214,7 @@ class DoubleTapNavigationTest {
 
     @Test
     fun doubleTapOnStartEmptyStartsOneWorkoutAndOneBackReturnsHome() {
-        show()
+        show(realHome = true)
         doubleTap(button(R.string.home_start_empty))
         waitFor(workoutScreen)
         compose.waitForIdle()
@@ -227,7 +232,7 @@ class DoubleTapNavigationTest {
     /** 운동 중 화면이 열린 뒤 홈의 "빈 운동 시작"이 한 번 더 눌려도 막 만든 운동을 버리고 새로 만들지 않는다. */
     @Test
     fun tapOnStartEmptyWhileTheWorkoutOpensKeepsTheSameWorkout() {
-        show()
+        show(realHome = true)
         // 두 번째 누르기 전에 홈이 막 시작한 운동(손대지 않은 운동)의 이어서 하기 카드를 그릴 때까지 기다린다.
         staleTap(button(R.string.home_start_empty), opened = workoutScreen, beforeSecondTap = hasText(text(R.string.home_resume)))
         waitFor(workoutScreen)

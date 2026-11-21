@@ -1,5 +1,7 @@
 package io.github.zzunsik.nextset.ui.routine
 
+import io.github.zzunsik.nextset.domain.model.HomeRoutine
+import io.github.zzunsik.nextset.domain.model.HomeSnapshot
 import io.github.zzunsik.nextset.domain.model.Routine
 import io.github.zzunsik.nextset.domain.model.RoutineDetail
 import io.github.zzunsik.nextset.domain.model.RoutineExercise
@@ -60,6 +62,24 @@ class FakeRoutineRepository(
         }
 
     override fun observeTopRoutine(): Flow<Routine?> = routines.map { it.firstOrNull() }
+
+    /** 운동 기록과 설정을 모르는 가짜라 진행 중인 운동, 마지막 운동, 직접 고른 루틴은 늘 비어 있다. 맨 위는 첫 루틴이다. */
+    override fun observeHome(): Flow<HomeSnapshot> =
+        combine(routines, items, exercises.exercises) { routines, items, exercises ->
+            HomeSnapshot(
+                inProgress = null,
+                routines = routines.map { routine ->
+                    HomeRoutine(
+                        routine = routine,
+                        exerciseNames = items.filter { it.routineId == routine.id }.sortedBy { it.position }
+                            .map { item -> exercises.first { it.id == item.exerciseId }.nameKo },
+                        lastStartedAt = null,
+                    )
+                },
+                top = routines.firstOrNull(),
+                pinnedRoutineId = null,
+            )
+        }
 
     override suspend fun addRoutine(name: String): Long {
         require(name.isNotBlank()) { "루틴 이름이 비어 있다" }
