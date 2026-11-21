@@ -76,6 +76,14 @@ class WorkoutReportTest {
         assertEquals("하체 데이를", withObjectParticle("하체 데이"))
         assertEquals("루틴 3을", withObjectParticle("루틴 3"))
         assertEquals("루틴 2를", withObjectParticle("루틴 2"))
-        assertEquals("Push을(를)", withObjectParticle("Push"))
+        assertNull(withObjectParticle("Push"))
+    }
+
+    /** #93: "Push Day A을(를) 끝냈어요."로 나왔다. 홀로 선 영어 글자는 글자 이름(에이)으로 읽는다. */
+    @Test
+    fun objectParticleReadsStandaloneLatinLetters() {
+        assertEquals("Push Day A를", withObjectParticle("Push Day A"))
+        assertEquals("Leg Day L을", withObjectParticle("Leg Day L"))
+        assertEquals("가슴 (B)를", withObjectParticle("가슴 (B)"))
     }
 }
