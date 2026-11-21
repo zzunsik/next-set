@@ -409,7 +409,7 @@ Live Updates 문서에는 끝내는 절차가 따로 없다. 아래 문장을 �
 | 제조사의 자체 절전 기능 | 공식 Android 문서에 내용이 없다. 제조사별 사례를 모아 둔 사이트가 있다 | v1은 따로 대응하지 않는다. 신호가 오지 않는다는 제보가 오면 기기별 안내를 검토한다 | 제3자: [Don't kill my app!][dkma] |
 | 제조사의 Live Updates 조건 | 제조사가 승격 조건을 더 붙이기도 한다 | 승격되지 않으면 일반 알림으로 보인다 | 문서: [Live Updates][live] |
 
-삼성 One UI 8이 Android 16의 Live Updates를 Now Bar에 연결한다는 보도와, 베타에서는 개발자 옵션을 켜야 모든 앱의 Live Update가 보였다는 보도가 있다(제3자: [SamMobile][sammobile], [Android Authority][aa-oneui8]). 정식 버전의 동작은 확인하지 못했다.
+삼성 One UI 8이 Android 16의 Live Updates를 Now Bar에 연결한다는 보도와, 베타에서는 개발자 옵션을 켜야 모든 앱의 Live Update가 보였다는 보도가 있다(제3자: [SamMobile][sammobile], [Android Authority][aa-oneui8]). 정식 버전의 동작은 확인하지 못했다. 삼성 기기(Android 17)에서 승격은 됐지만 상태바 칩이 보이지 않았다. 아래 "삼성 기기에서 상태바 칩이 보이지 않은 문제"에 적었다(#70).
 
 ## 버전별 차이
 
@@ -625,6 +625,43 @@ API 26 에뮬레이터
 - 권한 없이 쓰는 `OnAlarmListener`의 `setExact()`는 Doze에서 미뤄지고 프로세스가 죽으면 함께 사라진다. 프로세스가 얼거나 죽는 경우를 막지 못한다.
 - 정확한 알람이 프로세스를 깨워도 Android 17에서는 포그라운드 서비스 없이 백그라운드 소리가 막힌다(위 "방식 비교" B). 알람만으로는 끝 알림은 띄워도 신호음은 보장하지 못한다(추론).
 
+### 삼성 기기에서 상태바 칩이 보이지 않은 문제(#70, 2026-11-21)
+
+삼성 기기(Android 17, One UI)에서 휴식 중 알림이 시스템 목록에 `ONGOING_EVENT|ONLY_ALERT_ONCE|NO_CLEAR|FOREGROUND_SERVICE|PROMOTED_ONGOING|SILENT`, `category=stopwatch`, 버튼 3개로 올라왔다. 크로노미터 카운트다운(`setUsesChronometer`, `setChronometerCountDown`, `setShowWhen`)도 켜져 있었다. 그런데 상태 표시줄에는 남은 시간 칩이 없고 알림이 있다는 점 표시만 있었다.
+
+결론: 앱 쪽 승격 조건은 모두 맞는다. 칩이 없는 것은 One UI가 승격된 알림을 AOSP 방식의 상태바 칩으로 그리지 않고, 자기 "실시간 알림"(Now bar와 상태 표시줄의 알약 모양 표시)으로 보여 주는 앱을 따로 고르기 때문으로 본다(추론, 아래 근거). 앱 코드로 고칠 것은 찾지 못했다.
+
+근거
+
+- `FLAG_PROMOTED_ONGOING`은 "`hasPromotableCharacteristics()`를 만족하고 사용자가 그 앱의 기능을 끄지 않았을 때" 시스템이 세우는 표시다(문서: [Notification][ref-notif], 2026-11-21 읽음). 기기가 이 표시를 붙였으므로 Android 플랫폼은 이 알림을 승격했고 `canPostPromotedNotifications()`도 true였다고 본다(추론).
+- Live Updates 문서의 승격 조건(표준·`BigTextStyle`·`CallStyle`·`ProgressStyle`·`MetricStyle`, `POST_PROMOTED_NOTIFICATIONS` 선언, 승격 요청, ongoing, `contentTitle`, 커스텀 뷰 없음, 그룹 요약 아님, 색 채움 아님, 채널 중요도가 `IMPORTANCE_MIN` 아님)을 휴식 중 알림이 모두 지킨다. `RestNotificationsTest`가 조건을 하나씩 보고, 플랫폼의 판정 `hasPromotableCharacteristics()`도 SDK 37에서 true인지 본다(문서: [Live Updates][live], 2026-11-21 읽음).
+- 같은 문서는 "제조사(OEM)가 Live Update 자격에 기준을 더 둘 수 있으니 각 제조사 문서를 보라"고 적는다(문서: [Live Updates][live]).
+- 칩 내용은 문서대로다. `setShortCriticalText()`가 없으면 `when`을 쓰고, 크로노미터를 켜면 양수인 동안 칩에 타이머가 보인다. 남은 시간이 0보다 크므로 AOSP 칩이라면 글자가 보여야 한다(문서: [Live Updates][live]).
+- 삼성 공식 도움말은 "실시간 알림"을 스톱워치나 녹음처럼 바로 볼 일이 있는 알림으로 소개하고, 앱마다 켜는 곳을 `Settings > Lock screen and AOD > Now bar > View more`의 앱별 스위치로 적는다(영문 도움말의 메뉴 이름. 한국어 메뉴 이름은 기기에서 확인한다). 상태 표시줄의 새 알림 표시 방식(점, 아이콘, 카드)은 `Settings > Lock screen and AOD > Notification style`에서 고른다(삼성: [Galaxy 알림 설정][samsung-notif], 2026-11-21 읽음). 기기에서 본 "점 표시"는 이 설정의 "점"으로 보인다(추론).
+- 삼성 개발자 문서는 찾지 못했다. 제3자 글은 One UI 7까지 실시간 알림이 삼성 허용 목록(패키지 이름 기준)에 든 앱과 미디어 재생 앱에만 열려 있었고, One UI 8 이후에도 Android Live Updates는 삼성 앱에만 열려 있어 다른 앱은 개발자 옵션을 켜야 보인다고 적는다(제3자: [akexorcist][akex-now-bar], 2026-06-16 갱신, 2026-11-21 읽음). One UI 8 베타에서 개발자 옵션 "모든 앱의 실시간 알림"(Live notifications for all apps)을 켜자 다른 앱의 Live Update가 상태 표시줄과 Now bar에 나왔다는 보도가 있다(제3자: [Android Authority][aa-oneui8], 2025-07-03, 2026-11-21 읽음). 정식판에서 이 옵션이 어디로 갔는지는 보도마다 다르다.
+
+앱이 할 수 있는 일
+
+- 승격 조건은 이미 다 맞으므로 알림을 바꿔 얻을 것이 없다. `ProgressStyle`로 바꾸거나 `setShortCriticalText()`를 넣어도 플랫폼 판정은 같다(추론). `setShortCriticalText()`는 크로노미터보다 우선하므로 넣지 않는다(위 "상태바 칩에 카운트다운 띄우기").
+- 삼성 고유의 알림 extras(`android.ongoingActivityNoti.*`)와 매니페스트 메타데이터로 실시간 알림을 만드는 방법이 제3자 글에 있으나, 삼성 허용 목록에 들어야 동작한다고 한다(제3자: [akexorcist][akex-now-bar]). 공식 문서가 없고 삼성에 신청해야 하므로 쓰지 않는다.
+- 새 권한은 필요 없다. `INTERNET`도 필요 없다.
+
+설정 화면 안내
+
+- 넣지 않는다. Android 쪽 승격 허용(`canPostPromotedNotifications()`)은 기기에서 이미 켜져 있었다(`PROMOTED_ONGOING` 표시). 삼성의 앱별 실시간 알림 스위치는 앱이 바로 열 수 있는 공식 화면 액션이 없고, 이 앱이 그 목록에 나오는지도 아직 모른다. 실기기에서 목록에 나오고 켜면 칩이 보인다는 것을 확인한 뒤 다시 정한다.
+- 사용자가 Android 승격을 끈 기기(`canPostPromotedNotifications()`가 false)를 안내할지도 같은 때 정한다. 끄는 것은 사용자의 선택이고 알림 자체는 일반 알림으로 그대로 보인다(REST-08).
+
+Robolectric에서 알게 된 것
+
+- Robolectric 4.18의 SDK 36 이미지에서는 `hasPromotableCharacteristics()`가 이 알림에 false를 돌려준다. 그 이미지의 구현은 색 채움(`isColorizedRequested()`)을 요구하는 Android 16 초기 판정이다. SDK 37 이미지의 구현은 문서의 조건(승격 요청, ongoing, 제목, 허용 스타일, 그룹 요약 아님, 커스텀 뷰 없음, 색 채움 아님)과 같다. 그래서 이 판정을 보는 테스트 하나만 `@Config(sdk = [37])`로 돌린다(`javap`로 두 이미지의 `Notification` 바이트코드를 읽어 확인).
+
+실기기에서 볼 것
+
+- `dumpsys notification`에서 이 앱의 휴식 중 알림에 `PROMOTED_ONGOING`이 붙는지(붙었다, 2026-11-21).
+- `Settings > Lock screen and AOD > Now bar > View more`(잠금 화면 설정의 Now bar)의 앱 목록에 이 앱이 있는지, 있으면 켰을 때 상태 표시줄이나 Now bar에 남은 시간이 보이는지.
+- `설정 > 애플리케이션 > (이 앱) > 알림`에 실시간 알림이나 승격 관련 스위치가 있는지.
+- 개발자 옵션에 "모든 앱의 실시간 알림"과 비슷한 항목이 있는지, 켰을 때 칩이 보이는지(개발자 옵션은 일반 사용자 안내에 쓰지 않는다. 원인을 가르는 데만 쓴다).
+
 ## 확인하지 못한 것
 
 #26에서 기기나 에뮬레이터로 확인할 것
@@ -657,7 +694,7 @@ API 26 에뮬레이터
 - 승격된 알림 카드에 버튼 3개가 다 보이는지, 잠금 화면에서 눌리는지, 칩을 눌렀을 때 무엇이 열리는지.
 - 카운트다운이 0에 닿은 순간과 서비스를 멈춘 직후의 칩과 알림 모습.
 - Android 16의 어느 빌드부터 칩이 나오는지. 36.0 기기에서 `NotificationCompat`의 승격 요청이 어떻게 처리되는지.
-- 삼성 등 제조사 기기에서 승격이 되는지, 어떤 모양으로 보이는지.
+- 삼성 등 제조사 기기에서 승격이 되는지, 어떤 모양으로 보이는지. 삼성 기기(Android 17)에서는 승격 표시가 붙었으나 칩이 없었다. 삼성의 실시간 알림 설정에서 보이는지는 아직 보지 않았다(#70).
 - 앱이 화면에 보이는 동안 칩과 알림이 어떻게 보이는지. 앱 안의 휴식 바와 겹쳐 보이는지.
 - 중요도 `IMPORTANCE_LOW` 채널의 종료 알림이 사용자 눈에 충분히 띄는지. 화면 위로 잠깐 뜨는 알림이 필요한지.
 
@@ -680,7 +717,7 @@ API 26 에뮬레이터
 
 출처가 약한 것
 
-- 삼성 One UI의 Live Updates 지원은 보도 두 건의 검색 요약으로만 읽었다. 기사 본문과 삼성 공식 개발자 문서는 확인하지 못했다.
+- 삼성 One UI의 Live Updates 지원은 삼성 도움말(앱별 켜는 곳)과 제3자 글로만 읽었다. 삼성 공식 개발자 문서는 찾지 못했다. 허용 목록과 개발자 옵션은 제3자 글에만 있다(#70).
 
 ## 출처
 
@@ -726,6 +763,8 @@ API 레퍼런스
 
 - [SamMobile: One UI 8 Now Bar integrates Android 16 Live Updates][sammobile]
 - [Android Authority: One UI 8 Live Updates support][aa-oneui8]
+- [Samsung: Control notifications on your Galaxy phone or tablet][samsung-notif](삼성 도움말, 2026-11-21 읽음)
+- [akexorcist: Live Notifications and Now Bar in Samsung One UI 7 as developer][akex-now-bar](제3자, 2026-11-21 읽음)
 - [Don't kill my app!][dkma]
 
 [live]: https://developer.android.com/develop/ui/views/notifications/live-update
@@ -783,4 +822,6 @@ API 레퍼런스
 [core-rel]: https://developer.android.com/jetpack/androidx/releases/core
 [sammobile]: https://www.sammobile.com/news/one-ui-8-now-bar-integrates-android-16-live-updates/
 [aa-oneui8]: https://www.androidauthority.com/one-ui-8-live-updates-support-3573794
+[akex-now-bar]: https://akexorcist.dev/live-notifications-and-now-bar-in-samsung-one-ui-7-as-developer-en/
+[samsung-notif]: https://www.samsung.com/us/support/answer/ANS10002524/
 [dkma]: https://dontkillmyapp.com/
