@@ -18,6 +18,8 @@
   - `feat/<이슈번호>-<요약>`: 기능
   - `fix/<이슈번호>-<요약>`: 버그
   - `chore/<이슈번호>-<요약>`: 빌드·설정·문서
+  - `hotfix/<이슈번호>-<요약>`: `develop`을 거칠 수 없는 핫픽스만. `main`에서 갈라지고 `main`으로 PR을 보낸다("릴리스" > "브랜치와 태그").
+  - 릴리스 전용 브랜치(`release/*`)는 만들지 않는다.
 - 작업은 이슈마다 worktree를 따로 만들어 한다. 원본 클론에서는 브랜치를 바꾸지 않는다. 여러 세션이 클론 하나를 같이 쓰면 한쪽이 브랜치를 바꿀 때 다른 쪽의 작업 파일이 바뀐다.
 
   ```bash
@@ -105,13 +107,20 @@
 
 ## 릴리스
 
-v1은 GitHub Releases에 서명한 APK를 올려 배포한다(REL-01). 태그를 올리면 CI(`.github/workflows/release.yml`)가 빌드하고 서명하고 올린다. 손으로 빌드하거나 서명하지 않는다.
+v1은 GitHub Releases에 서명한 APK를 올려 배포한다(REL-01). 태그를 올리면 CI(`.github/workflows/release.yml`)가 빌드하고 서명하고 올린다. 손으로 빌드하거나 서명하지 않는다. 아래 규칙은 저장소 소유자가 정했다(#30, 2026-11-21. zzunsik/sun-seat#118과 같은 규칙).
+
+### 브랜치와 태그
+
+- 작업은 `develop`에 모으고, 릴리스할 때만 `develop` → `main` PR을 머지 커밋으로 합친다.
+- 릴리스 전용 브랜치(`release/*`)는 만들지 않는다. **`main`의 머지 커밋에 단 태그**로 버전을 관리한다.
+- 태그 `v*`는 ruleset `protect-release-tags`로 이동·삭제를 막는다(우회 없음, #81). 시험용 태그는 `v`로 시작하지 않는 이름을 쓴다.
+- 핫픽스: 기본은 `develop`에서 고쳐 다음 끝번호로 릴리스한다. `develop`에 내보내면 안 되는 변경이 쌓여 있을 때만 `main`에서 `hotfix/<이슈번호>-<요약>`을 만들어 `main`으로 PR → 태그 → 같은 수정을 `develop`에도 PR로 반영한다.
 
 ### 절차
 
 1. `develop`에서 `app/build.gradle.kts`의 `appVersionName`을 이번 버전으로 올리는 PR을 보내 합친다(아래 "버전").
 2. `develop`에서 `main`으로 릴리스 PR을 보내 머지 커밋으로 합친다. `ci-passed`가 통과해야 한다.
-3. 그 머지 커밋에 태그를 달아 올린다. 태그는 `v` + `appVersionName`이다.
+3. 그 머지 커밋에 태그를 달아 올린다. 태그는 `v` + `appVersionName`이다. 머지하면 `main` push로 CI가 다시 도는데, 그 머지 커밋의 `ci-passed`가 성공해야 릴리스가 만들어진다(아래 "워크플로가 하는 일").
 
    ```bash
    git fetch origin
@@ -119,22 +128,43 @@ v1은 GitHub Releases에 서명한 APK를 올려 배포한다(REL-01). 태그를
    git push origin v0.1.0
    ```
 
-4. Actions의 Release 실행이 끝나면 Releases에 APK와 체크섬이 올라와 있는지 본다.
+4. Actions의 Release 실행이 끝나면 Releases에 APK와 체크섬이 올라와 있는지 본다. 시험판이면 Pre-release로 표시돼 있는지도 본다.
 
 ### 워크플로가 하는 일
 
-- `v*` 태그 push에서만 돈다. PR에서는 돌지 않으므로 포크에서 온 PR은 서명 시크릿에 닿지 않는다. `contents: write` 권한은 이 워크플로에만 있다. 액션은 커밋 SHA로 고정한다.
-- 서명 시크릿이 없으면 무엇이 빠졌는지 적고 바로 실패한다. 태그가 `vMAJOR.MINOR.PATCH` 꼴이 아니거나 태그의 커밋이 `main`에 없어도 실패한다.
+- `v*` 태그 push에서만 돈다. PR에서는 돌지 않으므로 포크에서 온 PR은 서명 시크릿에 닿지 않는다. 액션은 커밋 SHA로 고정한다.
+- job이 둘이다. 워크플로 기본 권한은 없음(`permissions: {}`)이고 job마다 필요한 것만 준다.
+  - `verify`(`contents: read`, `checks: read`): 빌드 전에 태그를 확인한다. 다음 중 하나라도 어긋나면 실패하고 `release`는 돌지 않는다.
+    - 태그가 `vX.Y.Z` 또는 `vX.Y.Z-rc.N` 꼴이고 아래 "버전" 규칙(중간·끝 99까지)에 맞는다(`scripts/release-version.mjs`).
+    - 태그의 커밋이 `main`에 있다.
+    - 그 커밋의 `ci-passed` 검사(GitHub Actions가 만든 것, 여럿이면 가장 나중 것)가 `success`다. 커밋 check run API(`repos/{repo}/commits/{sha}/check-runs?check_name=ci-passed`)로 본다. 머지 직후 태그를 달면 CI가 아직 돌고 있을 수 있어서 끝날 때까지 최대 40분 기다린다. 실패·취소로 끝났으면 바로 실패하고, 40분 안에 끝나지 않거나 검사가 없으면 그때 실패한다. 이때는 `main`의 CI가 성공한 뒤 Release 실행을 다시 돌린다(Re-run jobs).
+  - `release`(`contents: write`): Release를 만드는 job에만 쓰기 권한을 준다.
+- 서명 시크릿이 없으면 무엇이 빠졌는지 적고 바로 실패한다.
 - 키스토어를 시크릿에서 풀어 작업 폴더 밖(`RUNNER_TEMP`)에 두고, 환경 변수로 Gradle `signingConfigs`에 넘겨 `assembleRelease`로 서명한다. 비밀번호를 출력하지 않고, 설정 캐시와 Gradle 캐시를 쓰지 않으며, 마지막에 키스토어를 지운다(실패해도 지운다). 아티팩트는 올리지 않는다.
-- 릴리스 매니페스트와 APK에 `android.permission.INTERNET`이 없는지, APK의 `versionName`이 태그와 같은지 보고 `apksigner verify --print-certs`로 서명을 확인한다.
-- APK(`next-set-vX.Y.Z.apk`)와 SHA-256 체크섬(`next-set-vX.Y.Z.apk.sha256`)을 올려 Release를 만든다. 릴리스 노트는 GitHub이 앞 태그 뒤에 합친 PR 목록으로 만든다(`--generate-notes`). 고칠 것이 있으면 Release 화면에서 손으로 고친다.
+- 릴리스 매니페스트와 APK에 `android.permission.INTERNET`이 없는지 보고, 만든 APK를 `aapt2 dump badging`으로 읽어 `versionName`이 태그에서 `v`를 뺀 값인지, `versionCode`가 아래 규칙으로 계산한 값인지 본다. 서명은 `apksigner verify --print-certs`로 확인한다.
+- APK(`next-set-<태그>.apk`)와 SHA-256 체크섬(`next-set-<태그>.apk.sha256`)을 올려 Release를 만든다. 시험판(`-rc.N`)은 Pre-release로 표시한다(`--prerelease`). 릴리스 노트는 GitHub이 앞 태그 뒤에 합친 PR 목록으로 만든다(`--generate-notes`). 고칠 것이 있으면 Release 화면에서 손으로 고친다.
 - 시크릿이 빠졌거나 일시적인 오류로 실패했으면 고친 뒤 그 실행을 다시 돌린다(Re-run jobs). 코드를 고쳐야 하면 태그를 옮기지 말고 고친 뒤 다음 버전으로 새 태그를 단다. 실패한 태그는 Release 없이 남는다.
+- PR CI(`ci.yml`의 "Release version rule")도 서명 없이 만든 릴리스 APK의 버전이 규칙에 맞는지 보고 `scripts/release-version.test.mjs`를 돌린다. 버전 계산은 `app/build.gradle.kts`와 이 스크립트 두 곳에 있어서, 둘이 어긋나면 PR에서 실패한다.
 
 ### 버전
 
-- `versionName`은 `app/build.gradle.kts`의 `appVersionName` 한 곳에서 정한다. `MAJOR.MINOR.PATCH` 꼴이고 태그는 `v`를 붙인 같은 값이다. 워크플로가 다르면 실패한다.
-- `versionCode`는 `versionName`에서 계산한다: `MAJOR * 1_000_000 + MINOR * 1_000 + PATCH`(0.1.0 → 1000, 1.2.3 → 1002003). 버전을 올리면 `versionCode`도 늘어나므로 따로 고치지 않는다. 그래서 MINOR와 PATCH는 0~999만 쓰고, 버전을 낮추지 않는다(Android는 `versionCode`가 작은 APK로 업데이트하지 않는다).
-- 미리보기 판(`-beta` 등)은 쓰지 않는다.
+SemVer `v주.중간.끝`(`vMAJOR.MINOR.PATCH`)을 쓴다.
+
+- 끝번호: 버그 수정만 있는 릴리스(`0.1.0` → `0.1.1`).
+- 중간번호: 기능·화면 변경이 하나라도 있는 릴리스(`0.1.1` → `0.2.0`, 끝번호는 0으로).
+- 앞번호: 완성판 선언이나 저장 데이터·설정 비호환 변경(`1.0.0`). 당분간은 `0.x`로 운영한다.
+- 각 자리는 독립된 정수다. `0.9.0` 다음은 `0.10.0`이고 `0.10.0` > `0.1.0`이다. 앞자리에 0을 붙이지 않는다(`0.01.0`은 틀림).
+- 시험판이 필요하면 `v0.2.0-rc.1` 형식을 쓰고 Releases에서 Pre-release로 표시한다(워크플로가 한다). `N`은 1부터 센다. 다른 꼴(`-beta`, `-rc` 등)은 워크플로가 거부한다.
+- `versionName`은 `app/build.gradle.kts`의 `appVersionName` 한 곳에서 정하고, 태그에서 `v`를 뺀 값과 같아야 한다. 시험판이면 `appVersionName`도 `0.2.0-rc.1`처럼 쓴다.
+- `versionCode = 주 × 10000 + 중간 × 100 + 끝`(예: `v0.1.0` → 100, `v0.2.1` → 201, `v1.0.0` → 10000). `appVersionName`에서 계산하므로 따로 고치지 않는다. 중간·끝은 각각 99까지이고, 넘으면 빌드가 실패한다.
+- 시험판은 `-rc.N`을 뗀 버전과 같은 `versionCode`를 쓴다(`v0.2.0-rc.1`, `v0.2.0-rc.2`, `v0.2.0` 모두 200). 규칙의 계산식이 주·중간·끝만 쓰고 중간·끝 자리에 남는 칸이 없기 때문이다. Android는 `versionCode`가 같으면 업데이트로 설치하므로 시험판 위에 정식판을 그대로 올릴 수 있다. 반대로 정식판 `0.2.0`을 낸 뒤 `0.2.0-rc.N`을 다시 내지 않는다.
+- 버전을 낮추지 않는다. Android는 `versionCode`가 작은 APK로 업데이트하지 않는다.
+- 릴리스 워크플로는 태그와 `versionName`·`versionCode`가 이 규칙과 다르면 실패한다.
+
+### 첫 릴리스
+
+- `v0.1.0`. 마일스톤 `v0.1.0`의 이슈를 모두 끝낸 뒤 진행한다. `versionName`은 0.1.0이고 `versionCode`는 100이다(#68의 계산식으로는 1000이었다).
+- 기기에 있는 디버그 서명 앱은 첫 서명 APK를 설치할 때 한 번 지워야 한다. 서명 키가 다르고(디버그 빌드의 `versionCode`가 #68 계산식의 1000일 수도 있다) 업데이트로 설치되지 않는다. 지우면 기록도 지워지므로 먼저 설정 > 백업에서 백업 파일을 내보내고, 새로 설치한 뒤 가져온다.
 
 ### 서명 키와 시크릿
 
@@ -147,6 +177,7 @@ v1은 GitHub Releases에 서명한 APK를 올려 배포한다(REL-01). 태그를
   | `RELEASE_KEYSTORE_PASSWORD` | 키스토어 비밀번호. PKCS12라 키 비밀번호도 같다 |
   | `RELEASE_KEY_ALIAS` | 키 별칭 |
 
+- 지금은 저장소 시크릿(Settings > Secrets and variables > Actions > Repository secrets)이다. sun-seat처럼 GitHub 환경 `release`(배포 규칙 `v*` 태그)로 옮길지는 소유자 판단으로 남아 있다(#30). 옮기려면 소유자가 같은 이름으로 `gh secret set --env release`로 다시 넣은 뒤 `release.yml`의 `release` job에 `environment: release`를 단다. 환경에 시크릿을 넣기 전에 달면 시크릿을 읽지 못해 릴리스가 실패한다.
 - 로컬에서 서명한 릴리스 APK를 만들 때는 환경 변수 `NEXTSET_RELEASE_STORE_FILE`, `NEXTSET_RELEASE_STORE_PASSWORD`, `NEXTSET_RELEASE_KEY_ALIAS`(키 비밀번호가 다르면 `NEXTSET_RELEASE_KEY_PASSWORD`)를 주거나 같은 이름의 Gradle 속성을 `~/.gradle/gradle.properties`에 둔다. 저장소 안의 `gradle.properties`에는 넣지 않는다. 키스토어 경로가 없으면 서명하지 않은 APK가 나오고 디버그 빌드와 CI 검사는 영향을 받지 않는다.
 - **키를 잃으면 되돌릴 수 없다.** Android는 처음 설치한 APK와 같은 키로 서명한 APK만 업데이트로 받는다. 첫 APK를 배포한 뒤 키를 잃거나 바꾸면 기존 사용자는 앱을 지우고(기록도 함께 지워진다) 다시 설치해야 한다. 키가 새면 다른 사람이 업데이트로 위장한 APK를 만들 수 있다. 키스토어와 비밀번호는 저장소 밖 두 곳 이상(예: 비밀번호 관리자와 오프라인 저장 장치)에 나눠 보관한다. Android 개발자 인증(`docs/requirements.md` "Android 개발자 인증(11번)")에도 이 키의 인증서 지문을 등록하므로 키를 잃으면 등록도 할 수 없다.
 - 릴리스 태그는 옮기거나 지울 수 없다(ruleset `protect-release-tags`, "저장소 설정"). 잘못 단 태그는 고치지 말고 다음 버전으로 새 태그를 단다. 워크플로나 설정을 시험할 때는 `v`로 시작하지 않는 태그 이름을 쓴다.
