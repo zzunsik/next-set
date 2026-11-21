@@ -103,6 +103,11 @@ class HomeViewModel(
      * 진행 중인 운동, 루틴, 맨 위 루틴을 저장소가 한 번에 읽은 값([io.github.zzunsik.nextset.domain.model.HomeSnapshot])
      * 하나로 만든다. 흐름을 따로 합치면 운동을 끝낸 직후 맨 위 루틴은 이미 다음 차례인데 진행 중인 운동은 남아 있어
      * 맨 위 루틴이 목록에도 보이는 중간 상태가 나왔다(#97).
+     *
+     * 홈이 뒤로 가기 스택에 남아 있는 동안(이 화면 상태가 살아 있는 동안) 화면에 없어도 계속 읽는다([SharingStarted.Eagerly]).
+     * 운동 중 화면과 운동 요약이 위에 있으면 홈이 그려지지 않아 구독이 없다. 구독이 없어진 뒤 멈추게 두면(`WhileSubscribed`)
+     * 그동안 끝낸 운동을 따라가지 못하고, 돌아왔을 때 화면이 지금 값(떠날 때의 이어서 하기 카드)으로 첫 프레임을 그린 뒤에야
+     * 다시 읽은 값으로 바뀌었다(#101).
      */
     val uiState: StateFlow<HomeUiState> = combine(routineRepository.observeHome(), dialog) { home, dialog ->
         val inProgress = home.inProgress?.let {
@@ -130,7 +135,7 @@ class HomeViewModel(
             routines = routines,
             dialog = dialog,
         )
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MS), HomeUiState())
+    }.stateIn(viewModelScope, SharingStarted.Eagerly, HomeUiState())
 
     fun onResume(workoutId: Long) {
         started.trySend(workoutId)
@@ -230,9 +235,5 @@ class HomeViewModel(
             }
             started.send(id)
         }
-    }
-
-    private companion object {
-        const val STOP_TIMEOUT_MS = 5_000L
     }
 }
