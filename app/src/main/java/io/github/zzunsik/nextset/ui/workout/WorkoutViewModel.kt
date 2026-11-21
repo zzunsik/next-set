@@ -1,5 +1,6 @@
 package io.github.zzunsik.nextset.ui.workout
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import io.github.zzunsik.nextset.domain.model.FinishResult
@@ -25,6 +26,7 @@ import io.github.zzunsik.nextset.ui.component.NumberPadKey
 import io.github.zzunsik.nextset.ui.component.NumberPadSession
 import io.github.zzunsik.nextset.ui.component.numberFieldKinds
 import java.time.Instant
+import kotlin.coroutines.cancellation.CancellationException
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
@@ -397,8 +399,16 @@ class WorkoutViewModel(
         return planRoutineUpdate(workout, routine)
     }
 
+    /**
+     * 운동을 끝낸다. [applyToRoutine]이면 먼저 루틴에 반영한다(LOG-10).
+     * 반영이 실패하면 끝내지 않고 "루틴에 반영하지 못했어요." 대화상자를 띄운다(#80). 반영은 한 트랜잭션이라(#72) 루틴은
+     * 반영 전 그대로이고 운동도 진행 중인 채 저장돼 있어 기록을 잃지 않는다. "다시 시도"나 "이번만 끝내기"를 고른다.
+     */
     private suspend fun finish(applyToRoutine: Boolean) {
-        if (applyToRoutine) routinePlan()?.let { routineRepository.applyRoutineUpdate(it) }
+        if (applyToRoutine && !applyRoutineUpdate()) {
+            showDialog(WorkoutDialog.RoutineUpdateFailed)
+            return
+        }
         exited = true
         val result = workoutRepository.finishWorkout(workoutId, clock())
         eventChannel.send(
@@ -406,6 +416,17 @@ class WorkoutViewModel(
                 if (result == FinishResult.FINISHED) WorkoutExit.Finished(workoutId) else WorkoutExit.Home,
             ),
         )
+    }
+
+    /** 루틴에 반영한다. 실패하면 거짓이다. 취소는 그대로 넘긴다. */
+    private suspend fun applyRoutineUpdate(): Boolean = try {
+        routinePlan()?.let { routineRepository.applyRoutineUpdate(it) }
+        true
+    } catch (e: CancellationException) {
+        throw e
+    } catch (e: Exception) {
+        Log.w(TAG, "루틴에 반영하지 못했다", e)
+        false
     }
 
     /**
@@ -460,6 +481,10 @@ class WorkoutViewModel(
         val numberPad: NumberPadSession<SetFieldId>? = null,
         val dialog: WorkoutDialog? = null,
     )
+
+    private companion object {
+        const val TAG = "WorkoutViewModel"
+    }
 
     private data class DeletedSet(
         val workoutExerciseId: Long,
