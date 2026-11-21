@@ -99,7 +99,7 @@
 
 코드, 이슈, PR, 커밋 메시지, CI 로그가 모두 공개됩니다.
 
-- 서명 키, 토큰, SDK 경로 같은 비밀 정보는 `local.properties`나 저장소 Secrets에만 둔다. `local.properties`, `*.jks`, `*.keystore`는 커밋하지 않는다.
+- 서명 키, 토큰, SDK 경로 같은 비밀 정보는 `local.properties`나 GitHub Secrets(서명 키는 환경 `release`)에만 둔다. `local.properties`, `*.jks`, `*.keystore`는 커밋하지 않는다.
 - 테스트 예시 데이터는 지어낸 값만 쓴다. 실제 사람의 운동·신체 기록을 넣지 않는다.
 - 이슈·PR·커밋 메시지에 개인 정보나 다른 조직의 내부 정보를 적지 않는다. 화면 캡처도 같다.
 - 외부 코드·데이터·글꼴·이미지를 넣을 때는 라이선스를 확인하고 출처를 적는다.
@@ -177,7 +177,7 @@ SemVer `v주.중간.끝`(`vMAJOR.MINOR.PATCH`)을 쓴다.
   | `RELEASE_KEYSTORE_PASSWORD` | 키스토어 비밀번호. PKCS12라 키 비밀번호도 같다 |
   | `RELEASE_KEY_ALIAS` | 키 별칭 |
 
-- 지금은 저장소 시크릿(Settings > Secrets and variables > Actions > Repository secrets)이다. sun-seat처럼 GitHub 환경 `release`(배포 규칙 `v*` 태그)로 옮길지는 소유자 판단으로 남아 있다(#30). 옮기려면 소유자가 같은 이름으로 `gh secret set --env release`로 다시 넣은 뒤 `release.yml`의 `release` job에 `environment: release`를 단다. 환경에 시크릿을 넣기 전에 달면 시크릿을 읽지 못해 릴리스가 실패한다.
+- 시크릿은 GitHub 환경 `release`에만 둔다(Settings > Environments > release, #98). 환경의 배포 규칙이 태그 `v*`라서 `release.yml`의 `release` job(`environment: release`)만 시크릿을 받는다. PR CI와 다른 워크플로는 서명 키에 닿지 않는다. 저장소 시크릿(Repository secrets)에는 서명 시크릿을 두지 않는다. 새 워크플로나 job에 `environment: release`를 달지 않는다.
 - 로컬에서 서명한 릴리스 APK를 만들 때는 환경 변수 `NEXTSET_RELEASE_STORE_FILE`, `NEXTSET_RELEASE_STORE_PASSWORD`, `NEXTSET_RELEASE_KEY_ALIAS`(키 비밀번호가 다르면 `NEXTSET_RELEASE_KEY_PASSWORD`)를 주거나 같은 이름의 Gradle 속성을 `~/.gradle/gradle.properties`에 둔다. 저장소 안의 `gradle.properties`에는 넣지 않는다. 키스토어 경로가 없으면 서명하지 않은 APK가 나오고 디버그 빌드와 CI 검사는 영향을 받지 않는다.
 - **키를 잃으면 되돌릴 수 없다.** Android는 처음 설치한 APK와 같은 키로 서명한 APK만 업데이트로 받는다. 첫 APK를 배포한 뒤 키를 잃거나 바꾸면 기존 사용자는 앱을 지우고(기록도 함께 지워진다) 다시 설치해야 한다. 키가 새면 다른 사람이 업데이트로 위장한 APK를 만들 수 있다. 키스토어와 비밀번호는 저장소 밖 두 곳 이상(예: 비밀번호 관리자와 오프라인 저장 장치)에 나눠 보관한다. Android 개발자 인증(`docs/requirements.md` "Android 개발자 인증(11번)")에도 이 키의 인증서 지문을 등록하므로 키를 잃으면 등록도 할 수 없다.
 - 릴리스 태그는 옮기거나 지울 수 없다(ruleset `protect-release-tags`, "저장소 설정"). 잘못 단 태그는 고치지 말고 다음 버전으로 새 태그를 단다. 워크플로나 설정을 시험할 때는 `v`로 시작하지 않는 태그 이름을 쓴다.
@@ -193,6 +193,7 @@ GitHub 설정으로 강제하는 것들입니다. 설정을 바꾸면 이 절도
   - `main` 대상 PR은 머지 커밋으로만 합쳐진다. 릴리스 머지 커밋은 `develop`에 없으므로 최신 반영 조건은 두지 않는다.
   - 우회 목록이 비어 있어 저장소 소유자도 같은 규칙을 따른다.
 - `v*` 태그는 ruleset `protect-release-tags`로 보호한다. 태그를 옮기거나(update) 지우는(deletion) push는 거부된다. 새 태그를 다는 것은 막지 않는다. 우회 목록이 비어 있다(#81).
+- GitHub 환경 `release`는 배포 규칙을 태그 `v*`로 제한한다. 릴리스 서명 시크릿 셋은 이 환경에만 있다(#98).
 - 머지된 작업 브랜치는 자동으로 지워진다.
 - 시크릿 스캐닝과 푸시 차단이 켜져 있다.
 - Dependabot이 보안 알림과 보안 업데이트 PR을 보내고, 주 1회 의존성 업데이트 PR을 보낸다(`.github/dependabot.yml`). Dependabot PR은 이슈 없이 받고 다른 PR과 같은 검사를 거친다.
