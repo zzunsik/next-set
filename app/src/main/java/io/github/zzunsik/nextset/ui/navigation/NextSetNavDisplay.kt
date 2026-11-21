@@ -101,6 +101,8 @@ fun NextSetNavHost(
     modifier: Modifier = Modifier,
     entries: EntryProviderScope<NavKey>.() -> Unit,
 ) {
+    // Android 8.x에서 화면이 바뀔 때 입력 칸이 저절로 포커스를 잡아 키보드가 뜨지 않게 한다(#105).
+    KeepWindowRefocusOffTextFields()
     NavDisplay(
         backStack = backStack,
         modifier = modifier,
