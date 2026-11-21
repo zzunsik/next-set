@@ -14,6 +14,7 @@ import io.github.zzunsik.nextset.ui.ViewModelJobs
 import io.github.zzunsik.nextset.ui.exercise.MainDispatcherRule
 import java.time.LocalDate
 import java.time.ZoneOffset
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
@@ -140,7 +141,8 @@ class HomeViewModelTest {
         assertEquals("한 적이 없으면 첫 루틴", a, vm.awaitState { it.top != null }.top?.routine?.id)
 
         finishWith(a, 0)
-        val afterA = vm.awaitState { it.top?.routine?.id == b }
+        // 진행 중인 운동과 맨 위 루틴은 따로 흐르므로, 맨 위가 먼저 바뀌고 운동은 아직 진행 중으로 보이는 중간 상태가 있다(#94).
+        val afterA = vm.awaitState { it.top?.routine?.id == b && it.inProgress == null }
         assertEquals("맨 위 카드의 루틴은 목록에서 뺀다(HOME-04)", listOf("가슴", "하체"), afterA.otherNames())
 
         finishWith(c, 100)
@@ -204,6 +206,8 @@ class HomeViewModelTest {
         vm.awaitState { it.others.isNotEmpty() }
 
         vm.onStartRoutine(b)
+        // 아래 줄은 데이터베이스를 먼저 읽는다. 운동이 저장되기 전에 읽지 않도록 화면 상태에 들어올 때까지 기다린다(#94).
+        vm.awaitState { it.inProgress != null }
         assertEquals(inProgress()?.id, vm.nextOpened())
         assertEquals(b, inProgress()?.routineId)
     }
@@ -319,9 +323,12 @@ class HomeViewModelTest {
         val vm = viewModel()
         vm.awaitState { it.routines.isNotEmpty() }
         var opened: Long? = null
-        vm.createRoutine { opened = it }
+        // 목록이 먼저 갱신되고 [onCreated]가 늦게 불릴 수 있어 불릴 때까지 기다린다(#94).
+        val created = CompletableDeferred<Long>()
+        vm.createRoutine { opened = it; created.complete(it) }
 
         val state = vm.awaitState { it.routines.size == 2 }
+        runBlocking { withTimeout(TIMEOUT) { created.await() } }
         assertEquals(listOf("가슴", NEW_NAME), state.routines.map { it.routine.name })
         assertEquals(state.routines.last().routine.id, opened)
     }
