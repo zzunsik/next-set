@@ -2,7 +2,6 @@ package io.github.zzunsik.nextset.data.repository
 
 import androidx.room3.withWriteTransaction
 import io.github.zzunsik.nextset.data.db.BestSetRow
-import io.github.zzunsik.nextset.data.db.ExerciseEntity
 import io.github.zzunsik.nextset.data.db.NextSetDatabase
 import io.github.zzunsik.nextset.data.db.Tables
 import io.github.zzunsik.nextset.data.db.WorkoutDao
@@ -16,7 +15,6 @@ import io.github.zzunsik.nextset.domain.model.SetCompletion
 import io.github.zzunsik.nextset.domain.model.SetValue
 import io.github.zzunsik.nextset.domain.model.Target
 import io.github.zzunsik.nextset.domain.model.Workout
-import io.github.zzunsik.nextset.domain.model.WorkoutExercise
 import io.github.zzunsik.nextset.domain.model.WorkoutInProgressException
 import io.github.zzunsik.nextset.domain.model.WorkoutSummary
 import io.github.zzunsik.nextset.domain.repository.WorkoutRepository
@@ -36,9 +34,9 @@ internal class RoomWorkoutRepository(private val database: NextSetDatabase) : Wo
     private val settingsDao = database.settingsDao()
 
     override fun observeInProgressWorkout(): Flow<Workout?> =
-        database.observe(*WORKOUT_TABLES) { workoutDao.getInProgressId()?.let { readWorkout(it) } }
+        database.observe(*WORKOUT_TABLES) { workoutDao.getInProgressId()?.let { database.readWorkout(it) } }
 
-    override fun observeWorkout(id: Long): Flow<Workout?> = database.observe(*WORKOUT_TABLES) { readWorkout(id) }
+    override fun observeWorkout(id: Long): Flow<Workout?> = database.observe(*WORKOUT_TABLES) { database.readWorkout(id) }
 
     override fun observeHistory(): Flow<List<WorkoutSummary>> = database.observe(Tables.WORKOUT) {
         workoutDao.getFinishedWorkouts().map { workout ->
@@ -348,43 +346,6 @@ internal class RoomWorkoutRepository(private val database: NextSetDatabase) : Wo
         workoutDao.getSets(workoutExerciseId).forEachIndexed { index, set ->
             if (set.position != index) workoutDao.setSetPosition(set.id, index)
         }
-    }
-
-    private suspend fun readWorkout(id: Long): Workout? {
-        val workout = workoutDao.getWorkout(id) ?: return null
-        val exercises = workoutDao.getExercises(id)
-        val sets = workoutDao.getSetsOfWorkout(id).groupBy { it.workoutExerciseId }
-        val definitions = exerciseDao.getByIds(exercises.map { it.exerciseId }.toSet()).associateBy { it.id }
-        return workout.toModel(exercises, sets, definitions)
-    }
-
-    private fun WorkoutEntity.toModel(
-        exercises: List<WorkoutExerciseEntity>,
-        sets: Map<Long, List<WorkoutSetEntity>>,
-        definitions: Map<String, ExerciseEntity>,
-    ): Workout {
-        val workout = this
-        return Workout(
-            id = workout.id,
-            routineId = workout.routineId,
-            routineName = workout.routineName,
-            startedAt = Instant.ofEpochMilli(workout.startedAt),
-            finishedAt = workout.finishedAt?.let(Instant::ofEpochMilli),
-            note = workout.note,
-            isEdited = workout.isEdited,
-            exercises = exercises.map { exercise ->
-                WorkoutExercise(
-                    id = exercise.id,
-                    workoutId = exercise.workoutId,
-                    exercise = definitions.getValue(exercise.exerciseId).toModel(),
-                    position = exercise.position,
-                    recordType = exercise.recordType,
-                    note = exercise.note,
-                    target = exercise.target,
-                    sets = sets[exercise.id].orEmpty().map { it.toModel() },
-                )
-            },
-        )
     }
 
     private companion object {
