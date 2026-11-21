@@ -17,6 +17,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.Shadows.shadowOf
+import org.robolectric.annotation.Config
 
 /** 휴식 알림의 내용(REST-07, REST-08)과 Android 버전에 따른 분기. 종목과 값은 지어낸 것이다. */
 @RunWith(RobolectricTestRunner::class)
@@ -61,6 +62,23 @@ class RestNotificationsTest {
         assertNull(NotificationCompat.getShortCriticalText(notification))
         assertEquals(NotificationCompat.VISIBILITY_PUBLIC, notification.visibility)
         assertEquals(RestNotifications.CHANNEL_ONGOING, notification.channelId)
+    }
+
+    @Test
+    @Config(sdk = [37])
+    fun ongoingHasPromotableCharacteristicsByPlatformCheck() {
+        // #70: 조건 목록을 따로 검사하는 위 테스트와 달리 플랫폼 자체의 판정을 본다. 사용자 설정과 제조사 조건은 보지 않는다.
+        // SDK 37로 돈다. Robolectric 4.18의 SDK 36 이미지는 Android 16 초기 판정(색 채움을 요구함)이라 문서와 다르다(docs/rest-timer.md #70).
+        val notification = notifications.ongoing(state, nowElapsed = 10_000, nowWall = 1_000_000)
+        assertTrue("휴식 중 알림은 승격 조건을 모두 갖춰야 한다", notification.hasPromotableCharacteristics())
+
+        // 판정이 실제로 조건을 보는지 확인한다. 같은 알림에서 ongoing만 빼면 승격 대상이 아니다.
+        val notOngoing = NotificationCompat.Builder(context, RestNotifications.CHANNEL_ONGOING)
+            .setSmallIcon(io.github.zzunsik.nextset.R.drawable.ic_rest_timer)
+            .setContentTitle("휴식 중")
+            .setRequestPromotedOngoing(true)
+            .build()
+        assertFalse(notOngoing.hasPromotableCharacteristics())
     }
 
     @Test
