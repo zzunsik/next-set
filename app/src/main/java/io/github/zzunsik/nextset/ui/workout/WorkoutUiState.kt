@@ -76,6 +76,12 @@ sealed interface WorkoutDialog {
     /** 끝내기 3: 종목 구성이나 세트 수가 루틴과 다르다(LOG-10). "이번만", "루틴에 반영". */
     data object RoutineChange : WorkoutDialog
 
+    /**
+     * 끝내기 3에서 "루틴에 반영"했는데 반영이 실패했다(#80). 운동은 끝내지 않고 진행 중인 채 남는다.
+     * "이번만 끝내기"(반영하지 않고 끝낸다), "다시 시도".
+     */
+    data object RoutineUpdateFailed : WorkoutDialog
+
     /** 운동 버리기 확인. */
     data object Discard : WorkoutDialog
 

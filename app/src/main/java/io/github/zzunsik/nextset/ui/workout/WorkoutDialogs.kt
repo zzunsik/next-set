@@ -56,6 +56,15 @@ internal fun WorkoutDialogs(dialog: WorkoutDialog, state: WorkoutUiState, action
             onDismiss = actions.onDismissDialog,
             onDismissButton = { actions.onRoutineChangeAnswer(false) },
         )
+        // 반영이 실패했다(#80). 운동은 진행 중인 채 남아 있다. 바깥을 눌러 닫아도 운동 중 화면에 남는다.
+        WorkoutDialog.RoutineUpdateFailed -> Confirm(
+            text = stringResource(R.string.finish_routine_update_failed),
+            confirm = stringResource(R.string.finish_retry),
+            dismiss = stringResource(R.string.finish_without_routine),
+            onConfirm = { actions.onRoutineChangeAnswer(true) },
+            onDismiss = actions.onDismissDialog,
+            onDismissButton = { actions.onRoutineChangeAnswer(false) },
+        )
         WorkoutDialog.Discard -> Confirm(
             text = stringResource(R.string.discard_confirm),
             confirm = stringResource(R.string.finish_discard),
@@ -117,7 +126,7 @@ internal fun Confirm(
     AlertDialog(
         onDismissRequest = onDismiss,
         containerColor = colors.surface,
-        text = { Text(text = text, style = NextSetTheme.typography.body, color = colors.text) },
+        text = { ConfirmText(text) },
         confirmButton = {
             DialogButton(confirm, if (destructive) colors.error else colors.accent, onConfirm)
         },
@@ -125,8 +134,14 @@ internal fun Confirm(
     )
 }
 
+/** [Confirm]의 글. 대화상자는 창이 따로 떠서 접근성 검사가 닿지 않아 테스트가 이것만 따로 그려 검사한다. */
 @Composable
-private fun DialogButton(text: String, color: Color, onClick: () -> Unit) {
+internal fun ConfirmText(text: String) {
+    Text(text = text, style = NextSetTheme.typography.body, color = NextSetTheme.colors.text)
+}
+
+@Composable
+internal fun DialogButton(text: String, color: Color, onClick: () -> Unit) {
     TextButton(
         onClick = onClick,
         modifier = Modifier.heightIn(min = NextSetTheme.sizes.buttonHeight),
