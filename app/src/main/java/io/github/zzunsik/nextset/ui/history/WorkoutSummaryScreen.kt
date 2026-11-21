@@ -68,7 +68,7 @@ fun WorkoutSummaryScreen(
 }
 
 /**
- * 결론 문장(`headline`). "가슴 루틴을 끝냈어요." 최고 기록이 있으면 "최고 기록 2개를 세웠어요."(원칙 5)와 그 아래에 루틴 이름.
+ * 결론 문장(`headline`). "가슴 루틴을 끝냈어요." 조사를 정할 수 없는 이름은 "Push Day 루틴을 끝냈어요."(#93). 최고 기록이 있으면 "최고 기록 2개를 세웠어요."(원칙 5)와 그 아래에 루틴 이름.
  */
 @Composable
 private fun SummaryConclusion(report: WorkoutReportUi) {
@@ -80,7 +80,8 @@ private fun SummaryConclusion(report: WorkoutReportUi) {
     ) {
         val conclusion = when {
             report.records.isNotEmpty() -> stringResource(R.string.summary_records, report.records.size)
-            routine != null -> stringResource(R.string.summary_done_routine, withObjectParticle(routine))
+            routine != null -> withObjectParticle(routine)?.let { stringResource(R.string.summary_done_routine, it) }
+                ?: stringResource(R.string.summary_done_routine_unknown_final, routine.trimEnd())
             else -> stringResource(R.string.workout_done_title)
         }
         Text(

@@ -5,6 +5,8 @@ import androidx.compose.ui.res.stringResource
 import io.github.zzunsik.nextset.R
 import io.github.zzunsik.nextset.domain.model.RecordType
 import io.github.zzunsik.nextset.domain.model.SetValue
+import io.github.zzunsik.nextset.domain.rule.KoreanParticle
+import io.github.zzunsik.nextset.domain.rule.withParticle
 import io.github.zzunsik.nextset.ui.workout.durationText
 import java.time.Instant
 import java.time.ZoneId
@@ -50,32 +52,14 @@ fun fullSetText(type: RecordType, value: SetValue): String = when (type) {
 fun clockText(instant: Instant, zone: ZoneId): String = CLOCK_FORMAT.format(instant.atZone(zone))
 
 /**
- * 이름 뒤에 목적격 조사를 붙인다. 마지막 글자에 받침이 있으면 "을", 없으면 "를"이다("가슴 루틴을", "하체 데이를").
- * 숫자는 읽는 소리로 가린다. 한글과 숫자가 아닌 글자로 끝나면 "을(를)"을 붙인다.
+ * 이름 뒤에 목적격 조사를 붙인다. 끝소리에 받침이 있으면 "을", 없으면 "를"이다("가슴 루틴을", "하체 데이를", "Push Day A를").
+ * 끝소리를 정할 수 없으면(영어 낱말, 기호 등) null이다. 규칙은 [io.github.zzunsik.nextset.domain.rule.finalSoundOf].
  */
-fun withObjectParticle(name: String): String {
-    val last = name.trimEnd().lastOrNull() ?: return name
-    val hasFinal = when (last) {
-        in '가'..'힣' -> (last - '가') % FINAL_CONSONANTS != 0
-        in '0'..'9' -> last in DIGITS_WITH_FINAL
-        else -> null
-    }
-    return name.trimEnd() + when (hasFinal) {
-        true -> "을"
-        false -> "를"
-        null -> "을(를)"
-    }
-}
+fun withObjectParticle(name: String): String? = withParticle(name, KoreanParticle.OBJECT)
 
 private const val GRAMS_PER_KG = 1000L
 
 /** 숫자판의 증감 키와 같은 빼기 표(U+2212). */
 private const val MINUS = "−"
-
-/** 한글 음절 하나에 들어가는 받침의 가짓수(받침 없음 포함). */
-private const val FINAL_CONSONANTS = 28
-
-/** 영, 일, 삼, 육, 칠, 팔은 받침이 있다. */
-private const val DIGITS_WITH_FINAL = "013678"
 
 private val CLOCK_FORMAT: DateTimeFormatter = DateTimeFormatter.ofPattern("a h:mm", Locale.KOREAN)

@@ -373,8 +373,10 @@
     <string name="history_add_past_blank">빈 기록</string>
 
     <!-- 운동 요약과 기록 상세(docs/DESIGN.md "운동 요약", "기록 상세·수정", HIST-02, HIST-03, HIST-05) -->
-    <!-- 결론 문장. %1$s 루틴 이름과 조사("가슴 루틴을") -->
+    <!-- 결론 문장. %1$s 루틴 이름과 끝소리에 맞는 조사("가슴 루틴을", "Push Day A를") -->
     <string name="summary_done_routine">%1$s 끝냈어요.</string>
+    <!-- 끝소리를 정할 수 없는 루틴 이름(영어 낱말, 기호 등)의 결론 문장. %1$s 루틴 이름("Push Day") -->
+    <string name="summary_done_routine_unknown_final">%1$s 루틴을 끝냈어요.</string>
     <string name="summary_records">최고 기록 %1$d개를 세웠어요.</string>
     <string name="report_duration">운동 시간</string>
     <string name="report_sets">세트</string>
