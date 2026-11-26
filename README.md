@@ -54,7 +54,7 @@ JDK 17 이상과 Android SDK(platform 37)가 필요합니다. Android Studio는 
 | 항목 | 값 | 근거 |
 |---|---|---|
 | Java | 25 | 현재 최신 LTS. 빌드 JDK와 바이트코드 대상을 같은 버전으로 맞춘다 |
-| compileSdk, targetSdk | 37 | 최신 안정 플랫폼 |
+| compileSdk / targetSdk | 37.1 / 37 | Compose가 요구하는 컴파일 플랫폼 / 실행 동작 기준 |
 | minSdk | 26 (Android 8.0) | 적응형 아이콘과 알림 채널을 기본으로 쓸 수 있는 가장 낮은 버전. 요구사항을 정할 때 다시 본다([#6](https://github.com/zzunsik/next-set/issues/6)) |
 | 애플리케이션 ID | `io.github.zzunsik.nextset` | 소유한 도메인이 없어 GitHub 계정 기반 이름을 쓴다 |
 

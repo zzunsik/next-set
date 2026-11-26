@@ -39,7 +39,9 @@ val releaseKeyPassword = releaseSigningValue("NEXTSET_RELEASE_KEY_PASSWORD") ?: 
 
 android {
     namespace = "io.github.zzunsik.nextset"
-    compileSdk = 37
+    compileSdk {
+        version = release(37) { minorApiLevel = 1 }
+    }
 
     defaultConfig {
         applicationId = "io.github.zzunsik.nextset"

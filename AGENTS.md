@@ -202,7 +202,7 @@ GitHub 설정으로 강제하는 것들입니다. 설정을 바꾸면 이 절도
 ## 빌드 환경
 
 - `./gradlew`는 JDK 17 이상에서 실행한다. 빌드 자체는 JDK 25로 돌고(`gradle/gradle-daemon-jvm.properties`), 없으면 Gradle이 내려받는다.
-- Android SDK platform 37이 필요하다. Android Studio 없이 명령줄로 빌드한다.
+- Android SDK platform 37.1이 필요하다. Android Studio 없이 명령줄로 빌드한다.
 - 의존성 버전은 `gradle/libs.versions.toml`에서만 관리하고, 작업 시점의 최신 안정 버전을 쓴다.
 - 라이브러리와 패키지 구조는 `docs/architecture.md`가 정한다. 그 문서에 없는 라이브러리를 더하려면 문서를 먼저 고친다.
   - 주석 처리기는 KSP만 쓴다. AGP 9의 내장 Kotlin에서는 `kotlin-kapt`를 쓸 수 없다.
