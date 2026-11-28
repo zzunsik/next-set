@@ -140,7 +140,7 @@ private fun DetailTopActions(editing: Boolean, actions: HistoryDetailActions) {
     TextButton(
         onClick = actions.onEditToggle,
         modifier = Modifier.heightIn(min = NextSetTheme.sizes.buttonHeight),
-        shape = NextSetTheme.radius.md,
+        shape = NextSetTheme.radius.full,
     ) {
         Text(
             text = stringResource(if (editing) R.string.report_edit_done else R.string.report_edit),
@@ -245,7 +245,7 @@ private fun ValueButton(text: String, label: String, onClick: () -> Unit) {
         modifier = Modifier
             .heightIn(min = NextSetTheme.sizes.buttonHeight)
             .semantics { contentDescription = description },
-        shape = NextSetTheme.radius.md,
+        shape = NextSetTheme.radius.full,
     ) {
         Text(text = text, style = NextSetTheme.typography.label)
     }
@@ -276,7 +276,7 @@ private fun LazyListScope.addExercise(empty: Boolean, onAddExercise: () -> Unit)
                 modifier = Modifier
                     .padding(horizontal = spacing.sm, vertical = spacing.sm)
                     .heightIn(min = NextSetTheme.sizes.buttonHeight),
-                shape = NextSetTheme.radius.md,
+                shape = NextSetTheme.radius.full,
             ) {
                 Text(text = stringResource(R.string.workout_add_exercise), style = NextSetTheme.typography.label)
             }

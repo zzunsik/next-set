@@ -128,9 +128,9 @@ internal fun Confirm(
         containerColor = colors.surface,
         text = { ConfirmText(text) },
         confirmButton = {
-            DialogButton(confirm, if (destructive) colors.error else colors.accent, onConfirm)
+            DialogButton(confirm, if (destructive) colors.error else colors.accentText, onConfirm)
         },
-        dismissButton = { DialogButton(dismiss, colors.accent, onDismissButton) },
+        dismissButton = { DialogButton(dismiss, colors.accentText, onDismissButton) },
     )
 }
 
@@ -145,7 +145,7 @@ internal fun DialogButton(text: String, color: Color, onClick: () -> Unit) {
     TextButton(
         onClick = onClick,
         modifier = Modifier.heightIn(min = NextSetTheme.sizes.buttonHeight),
-        shape = NextSetTheme.radius.md,
+        shape = NextSetTheme.radius.full,
     ) {
         Text(text = text, style = NextSetTheme.typography.label, color = color)
     }
@@ -161,7 +161,7 @@ internal fun NoteDialog(title: String, note: String, onNoteChange: (String) -> U
         text = {
             TextInputField(value = note, onValueChange = onNoteChange, placeholder = stringResource(R.string.note_hint))
         },
-        confirmButton = { DialogButton(stringResource(R.string.action_close), colors.accent, onDismiss) },
+        confirmButton = { DialogButton(stringResource(R.string.action_close), colors.accentText, onDismiss) },
     )
 }
 
@@ -181,7 +181,7 @@ private fun ReorderDialog(state: WorkoutUiState, actions: WorkoutActions) {
         containerColor = colors.surface,
         title = { ReorderTitle() },
         text = { ReorderList(entries = state.exercises.map { ReorderEntry(it.id, it.name) }, onReorder = actions.onReorderExercises) },
-        confirmButton = { DialogButton(stringResource(R.string.action_close), colors.accent, actions.onDismissDialog) },
+        confirmButton = { DialogButton(stringResource(R.string.action_close), colors.accentText, actions.onDismissDialog) },
     )
 }
 

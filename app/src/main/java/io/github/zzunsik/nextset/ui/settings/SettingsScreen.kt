@@ -18,6 +18,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import io.github.zzunsik.nextset.ui.component.GroupedCard
 import io.github.zzunsik.nextset.R
 import io.github.zzunsik.nextset.domain.model.ThemeMode
 import io.github.zzunsik.nextset.domain.rule.defaultRestChoices
@@ -61,41 +62,43 @@ fun SettingsScreen(
                 .verticalScroll(rememberScrollState()),
         ) {
             ScreenTitleBar(title = stringResource(R.string.settings_title))
-            SettingsRow(
-                title = stringResource(R.string.settings_default_rest),
-                caption = state?.let { restDurationText(it.defaultRestSeconds) },
-                onClick = { dialog = SettingsDialog.DefaultRest },
-            )
-            RowDivider()
-            SettingsRow(
-                title = stringResource(R.string.settings_theme_mode),
-                caption = state?.let { themeModeLabel(it.themeMode) },
-                onClick = { dialog = SettingsDialog.Theme },
-            )
-            RowDivider()
-            if (notificationsOff) {
-                NotificationsOffRow(onEnable = onEnableNotifications)
+            GroupedCard(Modifier.padding(horizontal = NextSetTheme.spacing.lg)) {
+                SettingsRow(
+                    title = stringResource(R.string.settings_default_rest),
+                    caption = state?.let { restDurationText(it.defaultRestSeconds) },
+                    onClick = { dialog = SettingsDialog.DefaultRest },
+                )
                 RowDivider()
+                SettingsRow(
+                    title = stringResource(R.string.settings_theme_mode),
+                    caption = state?.let { themeModeLabel(it.themeMode) },
+                    onClick = { dialog = SettingsDialog.Theme },
+                )
+                RowDivider()
+                if (notificationsOff) {
+                    NotificationsOffRow(onEnable = onEnableNotifications)
+                    RowDivider()
+                }
+                SettingsRow(
+                    title = stringResource(R.string.settings_manage_exercises),
+                    caption = if (onManageExercises == null) notReady else null,
+                    onClick = onManageExercises,
+                )
+                RowDivider()
+                SettingsRow(
+                    title = stringResource(R.string.settings_backup),
+                    caption = if (onBackup == null) notReady else null,
+                    onClick = onBackup,
+                )
+                RowDivider()
+                SettingsRow(title = stringResource(R.string.settings_licenses), onClick = onOpenLicenses)
+                RowDivider()
+                SettingsRow(
+                    title = stringResource(R.string.settings_source_code),
+                    caption = stringResource(R.string.settings_source_code_caption),
+                    onClick = onOpenSourceCode,
+                )
             }
-            SettingsRow(
-                title = stringResource(R.string.settings_manage_exercises),
-                caption = if (onManageExercises == null) notReady else null,
-                onClick = onManageExercises,
-            )
-            RowDivider()
-            SettingsRow(
-                title = stringResource(R.string.settings_backup),
-                caption = if (onBackup == null) notReady else null,
-                onClick = onBackup,
-            )
-            RowDivider()
-            SettingsRow(title = stringResource(R.string.settings_licenses), onClick = onOpenLicenses)
-            RowDivider()
-            SettingsRow(
-                title = stringResource(R.string.settings_source_code),
-                caption = stringResource(R.string.settings_source_code_caption),
-                onClick = onOpenSourceCode,
-            )
             Text(
                 text = stringResource(R.string.settings_version, versionName),
                 style = NextSetTheme.typography.caption,

@@ -24,7 +24,9 @@ class DesignTokenSyncTest {
     private fun NextSetColors.byToken(): Map<String, Color> = mapOf(
         "bg" to bg, "surface" to surface, "text" to text, "text2" to text2, "line" to line,
         "accent" to accent, "onAccent" to onAccent, "accentSoft" to accentSoft,
-        "done" to done, "onDone" to onDone, "doneSoft" to doneSoft, "error" to error,
+        "surface2" to surface2, "text3" to text3, "accentDim" to accentDim,
+        "accentText" to accentText, "go" to go, "onGo" to onGo, "goMark" to goMark,
+        "record" to record, "recordText" to recordText, "ink" to ink, "error" to error,
     )
 
     private fun Color.hex() = "#%06X".format(toArgb() and 0xFFFFFF)
@@ -96,8 +98,11 @@ class DesignTokenSyncTest {
             .mapValues { it.value.value }
         assertEquals("간격 토큰", documented, code)
 
-        val radius = design.firstNotNullOf { Regex("""^\| `radius\.md` \| (\d+)dp \|""").find(it) }
-        assertEquals("radius.md", radius.groupValues[1].toFloat(), NextSetRadius().mdSize.value)
+        val radius = Regex("""^\| `radius\.(\w+)` \| (\d+)dp \|""")
+        val documentedRadius = design.mapNotNull { radius.find(it)?.groupValues }
+            .associate { it[1] to it[2].toFloat() }
+        val r = NextSetRadius()
+        assertEquals("모서리 토큰", documentedRadius, mapOf("row" to r.rowSize.value, "card" to r.cardSize.value, "hero" to r.heroSize.value))
     }
 
     /** WCAG 2.2 상대 휘도 대비. DESIGN.md "대비"와 같은 식이다. */

@@ -15,6 +15,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import io.github.zzunsik.nextset.R
+import io.github.zzunsik.nextset.ui.component.GroupedCard
 import io.github.zzunsik.nextset.domain.model.OpenSourceNotice
 import io.github.zzunsik.nextset.ui.theme.NextSetTheme
 
@@ -34,13 +35,17 @@ fun LicensesScreen(
             item {
                 ScreenTitleBar(title = stringResource(R.string.licenses_title), onBack = onBack)
             }
-            itemsIndexed(notices.orEmpty(), key = { _, notice -> notice.id }) { index, notice ->
+            item {
+              GroupedCard(Modifier.padding(horizontal = NextSetTheme.spacing.lg)) {
+               notices.orEmpty().forEachIndexed { index, notice ->
                 if (index > 0) RowDivider()
                 SettingsRow(
                     title = notice.name,
                     caption = stringResource(R.string.license_row_caption, notice.author, notice.licenseName),
                     onClick = { onOpen(notice) },
                 )
+               }
+              }
             }
         }
     }

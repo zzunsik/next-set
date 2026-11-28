@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -12,7 +13,7 @@ import io.github.zzunsik.nextset.ui.theme.NextSetTheme
 
 /**
  * 주요 버튼(docs/DESIGN.md "크기": 운동 시작, 이어서 하기).
- * 채운 강조색, 화면 폭을 채우고 높이는 56dp 이상, 모서리는 `radius.md`, 글자는 `label`이다.
+ * `accent` 바탕에 `onAccent` 글자, 높이 56dp 이상, 모서리는 `radius.full`, 글자는 `heading`이다.
  * 높이를 고정하지 않아 글자가 커지면 버튼이 늘어난다(NF-10).
  */
 @Composable
@@ -29,9 +30,13 @@ fun PrimaryButton(
             .fillMaxWidth()
             .heightIn(min = NextSetTheme.sizes.primaryButtonHeight),
         enabled = enabled,
-        shape = NextSetTheme.radius.md,
+        shape = NextSetTheme.radius.full,
+        colors = ButtonDefaults.buttonColors(
+            containerColor = NextSetTheme.colors.accent,
+            contentColor = NextSetTheme.colors.onAccent,
+        ),
         contentPadding = PaddingValues(horizontal = spacing.lg, vertical = spacing.sm),
     ) {
-        Text(text = text, style = NextSetTheme.typography.label, textAlign = TextAlign.Center)
+        Text(text = text, style = NextSetTheme.typography.heading, textAlign = TextAlign.Center)
     }
 }

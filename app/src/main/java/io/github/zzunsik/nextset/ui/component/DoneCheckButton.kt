@@ -22,9 +22,9 @@ import io.github.zzunsik.nextset.ui.theme.NextSetTheme
 /**
  * 세트 행의 완료 체크 버튼(docs/DESIGN.md `SetRow`).
  *
- * - 보이는 상자는 40dp, 누르는 영역은 48dp다(NF-10).
- * - 완료는 색과 체크 모양을 함께 쓴다(NF-06). 안 했으면 `text2` 2dp 테두리 상자,
- *   했으면 `done` 바탕에 `onDone` 체크 모양이다.
+ * - 보이는 동그라미는 32dp, 누르는 영역은 48dp다(NF-10).
+ * - 완료는 색과 체크 모양을 함께 쓴다(NF-06). 안 했으면 `text3` 2dp 테두리 동그라미,
+ *   했으면 `go` 바탕에 `goMark` 체크 모양이다.
  * - 화면 읽기 프로그램에는 체크 상자로 알리고 이름은 [label]이다. 기본값은 "세트 완료"이고, 세트 행이 여럿인 화면은
  *   "벤치 프레스 1세트 완료"처럼 행마다 다른 이름을 넘긴다(같은 이름의 누르는 요소가 여럿이면 ATF가 잡는다).
  */
@@ -37,7 +37,7 @@ fun DoneCheckButton(
 ) {
     val colors = NextSetTheme.colors
     val sizes = NextSetTheme.sizes
-    val shape = NextSetTheme.radius.md
+    val shape = NextSetTheme.radius.full
     Box(
         modifier = modifier
             .size(sizes.minTouchTarget)
@@ -49,16 +49,16 @@ fun DoneCheckButton(
             .size(sizes.checkButtonVisible)
             .clip(shape)
         if (done) {
-            Box(box.background(colors.done), contentAlignment = Alignment.Center) {
+            Box(box.background(colors.go), contentAlignment = Alignment.Center) {
                 Icon(
                     painter = painterResource(R.drawable.ic_check),
                     contentDescription = null,
-                    tint = colors.onDone,
+                    tint = colors.goMark,
                     modifier = Modifier.size(sizes.icon),
                 )
             }
         } else {
-            Box(box.border(2.dp, colors.text2, shape))
+            Box(box.border(2.dp, colors.text3, shape))
         }
     }
 }

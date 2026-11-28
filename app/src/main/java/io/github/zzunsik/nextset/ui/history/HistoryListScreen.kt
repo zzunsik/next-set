@@ -129,7 +129,7 @@ private fun HistoryTopBar(actions: HistoryListActions) {
         TextButton(
             onClick = actions.onAddPast,
             modifier = Modifier.heightIn(min = NextSetTheme.sizes.buttonHeight),
-            shape = NextSetTheme.radius.md,
+            shape = NextSetTheme.radius.full,
         ) {
             Text(text = stringResource(R.string.history_add_past), style = NextSetTheme.typography.label)
         }
@@ -223,7 +223,7 @@ private fun AddPastChooser(dialog: AddPastDialog, state: HistoryUiState, actions
             TextButton(
                 onClick = actions.onDismissAddPast,
                 modifier = Modifier.heightIn(min = NextSetTheme.sizes.buttonHeight),
-                shape = NextSetTheme.radius.md,
+                shape = NextSetTheme.radius.full,
             ) {
                 Text(text = stringResource(R.string.action_cancel), style = NextSetTheme.typography.label)
             }
@@ -236,7 +236,7 @@ private fun ChoiceButton(text: String, onClick: () -> Unit) {
     TextButton(
         onClick = onClick,
         modifier = Modifier.fillMaxWidth().heightIn(min = NextSetTheme.sizes.buttonHeight),
-        shape = NextSetTheme.radius.md,
+        shape = NextSetTheme.radius.full,
     ) {
         Text(
             text = text,

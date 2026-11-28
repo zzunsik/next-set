@@ -322,7 +322,7 @@ private fun HomeTextButton(text: String, onClick: () -> Unit) {
     TextButton(
         onClick = onClick,
         modifier = Modifier.heightIn(min = NextSetTheme.sizes.buttonHeight),
-        shape = NextSetTheme.radius.md,
+        shape = NextSetTheme.radius.full,
     ) {
         Text(text = text, style = NextSetTheme.typography.label)
     }
@@ -410,7 +410,7 @@ private fun DialogTextButton(text: String, onClick: () -> Unit) {
         modifier = Modifier
             .fillMaxWidth()
             .heightIn(min = NextSetTheme.sizes.buttonHeight),
-        shape = NextSetTheme.radius.md,
+        shape = NextSetTheme.radius.full,
     ) {
         Text(text = text, style = NextSetTheme.typography.label, textAlign = TextAlign.Center)
     }
