@@ -90,7 +90,7 @@ internal fun SettingsRow(
             .padding(horizontal = spacing.lg, vertical = spacing.sm),
         verticalArrangement = Arrangement.spacedBy(spacing.xs, Alignment.CenterVertically),
     ) {
-        Text(text = title, style = NextSetTheme.typography.body, color = NextSetTheme.colors.text)
+        Text(text = title, style = NextSetTheme.typography.bodyStrong, color = NextSetTheme.colors.text)
         if (caption != null) {
             Text(text = caption, style = NextSetTheme.typography.caption, color = NextSetTheme.colors.text2)
         }
@@ -204,12 +204,12 @@ internal fun NotificationsOffRow(onEnable: () -> Unit, modifier: Modifier = Modi
         TextButton(
             onClick = onEnable,
             modifier = Modifier.heightIn(min = NextSetTheme.sizes.minTouchTarget),
-            shape = NextSetTheme.radius.md,
+            shape = NextSetTheme.radius.full,
         ) {
             Text(
                 text = stringResource(R.string.notifications_enable),
                 style = NextSetTheme.typography.label,
-                color = NextSetTheme.colors.accent,
+                color = NextSetTheme.colors.accentText,
             )
         }
     }

@@ -212,7 +212,7 @@ fun ExerciseFormScreen(
                     onClick = { confirmingDelete = true },
                     modifier = Modifier.heightIn(min = NextSetTheme.sizes.buttonHeight),
                     enabled = !state.busy,
-                    shape = NextSetTheme.radius.md,
+                    shape = NextSetTheme.radius.full,
                     colors = ButtonDefaults.textButtonColors(contentColor = colors.error),
                 ) {
                     Text(text = stringResource(R.string.exercise_form_delete), style = NextSetTheme.typography.label)

@@ -1,5 +1,13 @@
 package io.github.zzunsik.nextset.ui.navigation
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.width
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.consumeWindowInsets
@@ -69,27 +77,35 @@ fun TopLevelScaffold(
 }
 
 /**
- * 하단 내비게이션. 바탕은 `surface`, 고른 탭은 `accentSoft` 표시 위에 `text` 색 아이콘과 글자, 고르지 않은 탭은 `text2`.
+ * 하단 내비게이션. `bg` 바탕, 고른 탭은 `text`와 위쪽 `go` 표시, 고르지 않은 탭은 `text3`다.
  * 강조색은 누르는 요소에만 쓰므로 현재 위치 표시에 쓰지 않는다(docs/DESIGN.md "쓰임새 규칙").
  */
 @Composable
 fun NextSetBottomBar(selected: TopLevelTab, onSelect: (TopLevelTab) -> Unit, modifier: Modifier = Modifier) {
     val colors = NextSetTheme.colors
-    NavigationBar(modifier = modifier, containerColor = colors.surface) {
-        TopLevelTab.entries.forEach { tab ->
-            NavigationBarItem(
-                selected = tab == selected,
-                onClick = { if (tab != selected) onSelect(tab) },
-                icon = { Icon(painter = painterResource(tab.icon), contentDescription = null) },
-                label = { Text(text = stringResource(tab.label), style = NextSetTheme.typography.label) },
-                colors = NavigationBarItemDefaults.colors(
-                    selectedIconColor = colors.text,
-                    selectedTextColor = colors.text,
-                    indicatorColor = colors.accentSoft,
-                    unselectedIconColor = colors.text2,
-                    unselectedTextColor = colors.text2,
-                ),
-            )
+    Column(modifier) {
+        HorizontalDivider(color = colors.line)
+        NavigationBar(containerColor = colors.bg) {
+            TopLevelTab.entries.forEach { tab ->
+                NavigationBarItem(
+                    selected = tab == selected,
+                    onClick = { if (tab != selected) onSelect(tab) },
+                    icon = {
+                        Column(horizontalAlignment = androidx.compose.ui.Alignment.CenterHorizontally) {
+                            Box(Modifier.width(36.dp).height(3.dp).background(if (tab == selected) colors.go else Color.Transparent))
+                            Icon(painter = painterResource(tab.icon), contentDescription = null)
+                        }
+                    },
+                    label = { Text(text = stringResource(tab.label), style = NextSetTheme.typography.caption) },
+                    colors = NavigationBarItemDefaults.colors(
+                        selectedIconColor = colors.text,
+                        selectedTextColor = colors.text,
+                        indicatorColor = Color.Transparent,
+                        unselectedIconColor = colors.text3,
+                        unselectedTextColor = colors.text3,
+                    ),
+                )
+            }
         }
     }
 }

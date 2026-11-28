@@ -84,8 +84,8 @@ fun RoutineExerciseScreen(
         ) { padPadding ->
             Column(
                 modifier = Modifier
-                    .verticalScroll(rememberScrollState())
                     .padding(padPadding)
+                    .verticalScroll(rememberScrollState())
                     .navigationBarsPadding()
                     .padding(horizontal = spacing.lg, vertical = spacing.sm),
                 verticalArrangement = Arrangement.spacedBy(spacing.xl),
@@ -121,7 +121,7 @@ fun RoutineExerciseScreen(
                             restDurationText(rest)
                         },
                         style = NextSetTheme.typography.body,
-                        color = colors.accent,
+                        color = colors.accentText,
                         modifier = Modifier
                             .fillMaxWidth()
                             .heightIn(min = NextSetTheme.sizes.minTouchTarget)
@@ -132,7 +132,7 @@ fun RoutineExerciseScreen(
                 TextButton(
                     onClick = onRemove,
                     modifier = Modifier.heightIn(min = NextSetTheme.sizes.buttonHeight),
-                    shape = NextSetTheme.radius.md,
+                    shape = NextSetTheme.radius.full,
                     colors = ButtonDefaults.textButtonColors(contentColor = colors.error),
                 ) {
                     Text(text = stringResource(R.string.routine_exercise_remove), style = NextSetTheme.typography.label)
@@ -201,7 +201,7 @@ private fun StepButton(text: String, description: String, enabled: Boolean, onCl
         modifier = Modifier
             .size(NextSetTheme.sizes.minTouchTarget)
             .semantics { contentDescription = description },
-        shape = NextSetTheme.radius.md,
+        shape = NextSetTheme.radius.full,
         border = BorderStroke(1.dp, if (enabled) NextSetTheme.colors.text2 else NextSetTheme.colors.line),
         contentPadding = ButtonDefaults.TextButtonContentPadding,
     ) {

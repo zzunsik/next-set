@@ -1,7 +1,6 @@
 package io.github.zzunsik.nextset.ui.component
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.indication
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
@@ -30,8 +29,8 @@ import io.github.zzunsik.nextset.ui.theme.NextSetTheme
 /**
  * 하나를 고르는 칩(docs/DESIGN.md `BodyPartFilter`). 부위 필터와 종목 추가·수정의 선택 칸이 쓴다.
  *
- * - 기본: `text2` 1dp 테두리, 글자 `text`(`label`)를 가운데에. 보이는 높이 32dp, 누르는 영역 48dp.
- * - 선택됨: `accentSoft` 바탕, 글자 `accent`, 앞에 체크 아이콘. 색만으로 알리지 않도록 체크를 둔다.
+ * - 기본: `surface` 바탕, 글자 `text2`(`bodyStrong`)를 가운데에. 보이는 높이 36dp, 누르는 영역 48dp.
+ * - 선택됨: `accentSoft` 바탕, 글자 `accentText`, 앞에 체크 아이콘. 색만으로 알리지 않도록 체크를 둔다.
  * - 칩 폭은 고르기 전후로 같다. 늘 체크 아이콘이 들어갈 폭을 잡아 두고, 고르지 않았을 때는 글자를
  *   그 폭의 가운데에 놓는다. 고를 때 폭이 늘면 여러 줄로 놓인 칩이 다른 줄로 밀린다(#56).
  * - 모서리는 `radius.full`.
@@ -70,24 +69,24 @@ fun SelectChip(
                 Icon(
                     painter = painterResource(R.drawable.ic_check),
                     contentDescription = null,
-                    tint = colors.accent,
+                    tint = colors.accentText,
                     modifier = Modifier.size(FilterChipDefaults.IconSize),
                 )
                 Text(
                     text = text,
-                    style = NextSetTheme.typography.label,
-                    color = if (selected) colors.accent else colors.text,
+                    style = NextSetTheme.typography.bodyStrong,
+                    color = if (selected) colors.accentText else colors.text2,
                     modifier = Modifier.padding(vertical = spacing.xs),
                 )
             },
             modifier = Modifier
-                .heightIn(min = FilterChipDefaults.Height)
+                .heightIn(min = 36.dp)
                 .clip(shape)
                 .then(
                     if (selected) {
                         Modifier.background(colors.accentSoft, shape)
                     } else {
-                        Modifier.border(1.dp, colors.text2, shape)
+                        Modifier.background(colors.surface, shape)
                     },
                 )
                 .indication(interaction, ripple()),

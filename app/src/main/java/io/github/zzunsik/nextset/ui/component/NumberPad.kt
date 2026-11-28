@@ -68,7 +68,7 @@ fun NumberPad(
 ) {
     val colors = NextSetTheme.colors
     val spacing = NextSetTheme.spacing
-    Column(modifier = modifier.fillMaxWidth().background(colors.surface)) {
+    Column(modifier = modifier.fillMaxWidth().background(colors.bg)) {
         HorizontalDivider(color = colors.line)
         BoxWithConstraints(
             modifier = Modifier
@@ -125,7 +125,7 @@ private fun KeyRow(gap: Dp, content: @Composable () -> Unit) {
 }
 
 /**
- * 키 하나. 높이는 52dp 이상이고 글자가 커지면 늘어난다(NF-10). 모서리는 `radius.md`다.
+ * 키 하나. 높이는 52dp 이상이고 글자가 커지면 늘어난다(NF-10). 모서리는 `radius.row`다.
  * [description]이 있으면 화면 읽기 프로그램에 안의 글자 대신 이 이름을 알린다.
  */
 @Composable
@@ -149,7 +149,7 @@ private fun PadKey(
     Box(
         modifier = modifier
             .heightIn(min = NextSetTheme.sizes.numberPadKeyHeight)
-            .clip(NextSetTheme.radius.md)
+            .clip(NextSetTheme.radius.row)
             .background(background)
             .combinedClickable(
                 role = Role.Button,
@@ -166,7 +166,7 @@ private fun PadKey(
 private fun DigitKey(digit: Int, onKey: (NumberPadKey) -> Unit, width: Dp) {
     PadKey(
         onClick = { onKey(NumberPadKey.Digit(digit)) },
-        background = NextSetTheme.colors.bg,
+        background = NextSetTheme.colors.surface,
         modifier = Modifier.width(width).fillMaxHeight(),
     ) {
         Text(text = "$digit", style = NextSetTheme.typography.title, color = NextSetTheme.colors.text)
@@ -177,7 +177,7 @@ private fun DigitKey(digit: Int, onKey: (NumberPadKey) -> Unit, width: Dp) {
 private fun DecimalPointKey(onKey: (NumberPadKey) -> Unit, modifier: Modifier) {
     PadKey(
         onClick = { onKey(NumberPadKey.DecimalPoint) },
-        background = NextSetTheme.colors.bg,
+        background = NextSetTheme.colors.surface,
         modifier = modifier,
         description = stringResource(R.string.number_pad_decimal_point_description),
     ) {
@@ -206,14 +206,14 @@ private fun StepKey(kind: NumberFieldKind, amount: Int, onKey: (NumberPadKey) ->
     }
     PadKey(
         onClick = { onKey(NumberPadKey.Step(amount)) },
-        background = NextSetTheme.colors.bg,
+        background = NextSetTheme.colors.surface,
         modifier = modifier,
         description = description,
     ) {
         Text(
             text = text,
             style = NextSetTheme.typography.label,
-            color = NextSetTheme.colors.accent,
+            color = NextSetTheme.colors.accentText,
             textAlign = TextAlign.Center,
         )
     }
@@ -224,7 +224,7 @@ private fun StepKey(kind: NumberFieldKind, amount: Int, onKey: (NumberPadKey) ->
 private fun BackspaceKey(onKey: (NumberPadKey) -> Unit, modifier: Modifier) {
     PadKey(
         onClick = { onKey(NumberPadKey.Backspace) },
-        background = NextSetTheme.colors.bg,
+        background = NextSetTheme.colors.surface,
         modifier = modifier,
         description = stringResource(R.string.number_pad_backspace),
         onLongClick = { onKey(NumberPadKey.ClearAll) },
@@ -243,7 +243,7 @@ private fun BackspaceKey(onKey: (NumberPadKey) -> Unit, modifier: Modifier) {
 private fun CloseKey(onKey: (NumberPadKey) -> Unit, modifier: Modifier) {
     PadKey(
         onClick = { onKey(NumberPadKey.Close) },
-        background = NextSetTheme.colors.bg,
+        background = NextSetTheme.colors.surface,
         modifier = modifier,
         description = stringResource(R.string.number_pad_close),
     ) {

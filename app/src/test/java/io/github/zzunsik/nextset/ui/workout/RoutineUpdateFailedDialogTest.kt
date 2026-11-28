@@ -75,8 +75,8 @@ class RoutineUpdateFailedDialogTest {
                     Surface(color = colors.surface) {
                         Column {
                             ConfirmText(stringResource(R.string.finish_routine_update_failed))
-                            DialogButton(stringResource(R.string.finish_without_routine), colors.accent) {}
-                            DialogButton(stringResource(R.string.finish_retry), colors.accent) {}
+                            DialogButton(stringResource(R.string.finish_without_routine), colors.accentText) {}
+                            DialogButton(stringResource(R.string.finish_retry), colors.accentText) {}
                         }
                     }
                 }

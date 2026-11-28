@@ -105,6 +105,7 @@ AGP, Gradle, Kotlin, Compose는 작업 시점의 최신 안정 버전을 쓰고,
 | 파일 | 출처 |
 |---|---|
 | `app/src/main/res/font/pretendard_regular.otf`, `pretendard_semibold.otf`, `pretendard_bold.otf` | [v1.3.9 릴리스](https://github.com/orioncactus/pretendard/releases/tag/v1.3.9)의 `Pretendard-1.3.9.zip` 안 `public/static/`의 `Pretendard-Regular.otf`, `Pretendard-SemiBold.otf`, `Pretendard-Bold.otf`. 이름만 바꿨고 내용은 그대로입니다 |
+| `app/src/main/res/font/pretendard_extrabold.otf` | [v1.3.9 정적 ExtraBold](https://github.com/orioncactus/pretendard/blob/v1.3.9/packages/pretendard/dist/public/static/Pretendard-ExtraBold.otf). 파일 이름만 바꾸고 글꼴 데이터는 그대로 넣었습니다 |
 | `app/src/main/assets/licenses/pretendard.txt` | 저장소 커밋 [`0189074`](https://github.com/orioncactus/pretendard/blob/0189074fdad117a5e360aad00a59b47225429c31/LICENSE)의 `LICENSE`. 바탕 글꼴(Source, Inter, M PLUS 1)의 저작권 표시까지 담긴 판입니다. 고치지 않았습니다 |
 
 앱의 설정 화면 "오픈소스 라이선스"에서 이 라이선스 전문을 보여 줍니다.

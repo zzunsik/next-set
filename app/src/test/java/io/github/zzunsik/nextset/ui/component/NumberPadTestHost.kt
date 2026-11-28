@@ -89,7 +89,7 @@ fun NumberPadTestHost(
                         .padding(horizontal = NextSetTheme.spacing.lg),
                     contentAlignment = Alignment.CenterStart,
                 ) {
-                    Text("1:45", style = NextSetTheme.typography.numeralMedium, color = NextSetTheme.colors.text)
+                    Text("1:45", style = NextSetTheme.typography.headline, color = NextSetTheme.colors.text)
                 }
             }
         },

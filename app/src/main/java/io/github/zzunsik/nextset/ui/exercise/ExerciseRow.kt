@@ -1,5 +1,13 @@
 package io.github.zzunsik.nextset.ui.exercise
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.Icon
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -64,20 +72,20 @@ fun ExerciseRow(
             modifier = Modifier.weight(1f),
             verticalArrangement = Arrangement.spacedBy(spacing.xs),
         ) {
-            Text(text = exercise.nameKo, style = NextSetTheme.typography.body, color = colors.text)
+            Text(text = exercise.nameKo, style = NextSetTheme.typography.bodyStrong, color = colors.text)
             Text(text = exercise.detailText(), style = NextSetTheme.typography.caption, color = colors.text2)
         }
         if (mode is ExerciseRowMode.Pick) {
             // 누르는 것은 행 전체다. 체크 상자는 모양만 그린다.
-            Checkbox(
-                checked = mode.selected,
-                onCheckedChange = null,
-                colors = CheckboxDefaults.colors(
-                    checkedColor = colors.accent,
-                    uncheckedColor = colors.text2,
-                    checkmarkColor = colors.onAccent,
+            Box(
+                modifier = Modifier.size(32.dp).then(
+                    if (mode.selected) Modifier.background(colors.go, CircleShape)
+                    else Modifier.border(2.dp, colors.text3, CircleShape),
                 ),
-            )
+                contentAlignment = Alignment.Center,
+            ) {
+                if (mode.selected) Icon(painterResource(R.drawable.ic_check), contentDescription = null, tint = colors.goMark, modifier = Modifier.size(24.dp))
+            }
         }
     }
 }

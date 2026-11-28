@@ -60,7 +60,7 @@ fun NumberInputField(
     dimmed: Boolean = false,
 ) {
     val colors = NextSetTheme.colors
-    val shape = NextSetTheme.radius.md
+    val shape = NextSetTheme.radius.row
     val description = stringResource(
         R.string.number_field_description,
         label,
@@ -77,8 +77,8 @@ fun NumberInputField(
         }
     }
     val border = when {
-        selected -> Modifier.border(2.dp, colors.accent, shape)
-        value.isEmpty() -> Modifier.border(1.dp, colors.text2, shape)
+        selected -> Modifier.border(2.dp, colors.accentText, shape)
+        value.isEmpty() -> Modifier.border(1.5.dp, colors.text3, shape)
         else -> Modifier
     }
     Box(

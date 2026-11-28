@@ -13,7 +13,9 @@ import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.ui.draw.clip
+import io.github.zzunsik.nextset.ui.component.groupedRowShape
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Scaffold
@@ -94,7 +96,7 @@ fun ExercisePickerScreen(
                 TextButton(
                     onClick = { onNewExercise("") },
                     modifier = Modifier.heightIn(min = NextSetTheme.sizes.buttonHeight),
-                    shape = NextSetTheme.radius.md,
+                    shape = NextSetTheme.radius.full,
                 ) {
                     Text(text = stringResource(R.string.exercise_new), style = NextSetTheme.typography.label)
                 }
@@ -198,17 +200,19 @@ private fun ExerciseList(
         modifier = Modifier
             .fillMaxSize()
             .testTag(EXERCISE_LIST_TAG),
-        contentPadding = PaddingValues(bottom = NextSetTheme.spacing.lg),
+        contentPadding = PaddingValues(horizontal = NextSetTheme.spacing.lg, vertical = NextSetTheme.spacing.sm),
     ) {
-        items(state.exercises, key = { it.id }) { exercise ->
+        itemsIndexed(state.exercises, key = { _, it -> it.id }) { index, exercise ->
             val mode = if (picking) {
                 ExerciseRowMode.Pick(selected = exercise.id in state.selectedIds, onToggle = { onToggle(exercise.id) })
             } else {
                 // 내장 종목은 고치거나 지우지 않는다. 행이 누르는 요소가 아니다.
                 ExerciseRowMode.Manage(onEdit = if (exercise.isBuiltin) null else ({ onEditExercise(exercise.id) }))
             }
-            ExerciseRow(exercise = exercise, mode = mode)
-            HorizontalDivider(color = NextSetTheme.colors.line)
+            Column(Modifier.clip(groupedRowShape(index == 0, index == state.exercises.lastIndex)).background(NextSetTheme.colors.surface)) {
+                ExerciseRow(exercise = exercise, mode = mode)
+                if (index < state.exercises.lastIndex) HorizontalDivider(color = NextSetTheme.colors.line)
+            }
         }
     }
 }

@@ -23,10 +23,13 @@ data class NextSetSpacing(
  */
 @Immutable
 data class NextSetRadius(
-    /** `radius.md`의 반지름. 카드, 버튼, 입력 칸, 체크 버튼, 숫자판 키, 검색 칸. */
-    val mdSize: Dp = 8.dp,
+    val rowSize: Dp = 20.dp,
+    val cardSize: Dp = 28.dp,
+    val heroSize: Dp = 32.dp,
 ) {
-    val md: RoundedCornerShape = RoundedCornerShape(mdSize)
+    val row = RoundedCornerShape(rowSize)
+    val card = RoundedCornerShape(cardSize)
+    val hero = RoundedCornerShape(heroSize)
 
     /** `radius.full`. 칩, 최고 기록 배지. */
     val full: RoundedCornerShape = RoundedCornerShape(percent = 50)
@@ -37,10 +40,10 @@ data class NextSetRadius(
 data class NextSetSizes(
     /** 누르는 요소의 최소 영역(NF-10). 보이는 모양이 작아도 영역은 이 크기를 채운다. */
     val minTouchTarget: Dp = 48.dp,
-    val setRowMinHeight: Dp = 48.dp,
+    val setRowMinHeight: Dp = 52.dp,
     val listRowMinHeight: Dp = 56.dp,
     val inputVisibleHeight: Dp = 40.dp,
-    val checkButtonVisible: Dp = 40.dp,
+    val checkButtonVisible: Dp = 32.dp,
     val numberPadKeyHeight: Dp = 52.dp,
     val primaryButtonHeight: Dp = 56.dp,
     val buttonHeight: Dp = 48.dp,
@@ -48,12 +51,12 @@ data class NextSetSizes(
 )
 
 /**
- * M3 컴포넌트의 모양. 카드, 입력 칸처럼 작은 요소가 쓰는 역할을 `radius.md`로 둔다.
+ * M3 컴포넌트의 모양. 카드, 입력 칸처럼 작은 요소가 쓰는 역할을 `radius.row`로 둔다.
  * 하단 시트와 대화상자가 쓰는 `large`, `extraLarge`는 M3 기본 모양을 그대로 둔다(DESIGN.md).
- * M3 버튼은 이 값이 아니라 완전히 둥근 모양을 쓰므로 버튼을 만들 때 `radius.md`를 직접 넘긴다.
+ * M3 버튼은 이 값이 아니라 완전히 둥근 모양을 쓰므로 버튼을 만들 때 `radius.row`를 직접 넘긴다.
  */
 internal fun NextSetRadius.toMaterialShapes() = Shapes(
-    extraSmall = md,
-    small = md,
-    medium = md,
+    extraSmall = row,
+    small = row,
+    medium = row,
 )

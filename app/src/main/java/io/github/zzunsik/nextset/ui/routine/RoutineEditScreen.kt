@@ -1,5 +1,9 @@
 package io.github.zzunsik.nextset.ui.routine
 
+import androidx.compose.ui.draw.clip
+import androidx.compose.material3.HorizontalDivider
+import io.github.zzunsik.nextset.ui.component.groupedRowShape
+
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -123,6 +127,7 @@ fun RoutineEditScreen(
             items(exercises, key = RoutineExercise::id) { item ->
                 val index = exercises.indexOf(item)
                 ReorderableItem(reorderState, key = item.id) { isDragging ->
+                  Column(Modifier.padding(horizontal = spacing.lg).clip(groupedRowShape(index == 0, index == exercises.lastIndex))) {
                     ReorderableRow(
                         title = item.exercise.nameKo,
                         caption = item.summaryText(),
@@ -133,7 +138,11 @@ fun RoutineEditScreen(
                         onMove = { offset -> exercises.map { it.id }.moved(index, offset)?.let(onReorder) },
                         onDragStopped = { onReorder(order.value.map { it.id }) },
                         isDragging = isDragging,
+                        containerColor = colors.surface,
+                        draggingColor = colors.surface2,
                     )
+                    if (index < exercises.lastIndex) HorizontalDivider(color = colors.line)
+                  }
                 }
             }
             item(key = "add") {
@@ -143,7 +152,7 @@ fun RoutineEditScreen(
                         .fillMaxWidth()
                         .padding(horizontal = spacing.lg, vertical = spacing.sm)
                         .heightIn(min = NextSetTheme.sizes.buttonHeight),
-                    shape = NextSetTheme.radius.md,
+                    shape = NextSetTheme.radius.full,
                     border = BorderStroke(1.dp, colors.text2),
                 ) {
                     Text(text = stringResource(R.string.routine_add_exercise), style = NextSetTheme.typography.label)
@@ -156,7 +165,7 @@ fun RoutineEditScreen(
                         modifier = Modifier
                             .padding(horizontal = spacing.sm, vertical = spacing.xl)
                             .heightIn(min = NextSetTheme.sizes.buttonHeight),
-                        shape = NextSetTheme.radius.md,
+                        shape = NextSetTheme.radius.full,
                         colors = ButtonDefaults.textButtonColors(contentColor = colors.error),
                     ) {
                         Text(text = stringResource(R.string.routine_delete), style = NextSetTheme.typography.label)

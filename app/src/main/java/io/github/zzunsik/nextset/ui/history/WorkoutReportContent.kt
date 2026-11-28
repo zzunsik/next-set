@@ -90,7 +90,16 @@ internal fun LazyListScope.reportNumbers(report: WorkoutReportUi) {
 @Composable
 private fun NumberCell(label: String, value: String, modifier: Modifier) {
     Column(modifier = modifier.semantics(mergeDescendants = true) {}) {
-        Text(text = value, style = NextSetTheme.typography.title, color = NextSetTheme.colors.text)
+        Text(
+            text = value,
+            style = NextSetTheme.typography.title,
+            color = NextSetTheme.colors.text,
+            maxLines = 1,
+            autoSize = TextAutoSize.StepBased(
+                minFontSize = NextSetTheme.typography.caption.fontSize,
+                maxFontSize = NextSetTheme.typography.title.fontSize,
+            ),
+        )
         Text(text = label, style = NextSetTheme.typography.caption, color = NextSetTheme.colors.text2)
     }
 }
@@ -171,7 +180,7 @@ internal fun LazyListScope.reportExercises(
                         .padding(horizontal = NextSetTheme.spacing.sm)
                         .heightIn(min = NextSetTheme.sizes.buttonHeight)
                         .semantics { contentDescription = description },
-                    shape = NextSetTheme.radius.md,
+                    shape = NextSetTheme.radius.full,
                 ) {
                     Text(text = stringResource(R.string.set_add), style = NextSetTheme.typography.label)
                 }

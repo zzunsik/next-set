@@ -35,7 +35,7 @@ import io.github.zzunsik.nextset.ui.theme.NextSetTheme
 /**
  * 시스템 키보드로 적는 한 줄 입력 칸(docs/DESIGN.md `SearchField`). 검색 칸과 종목 이름 칸이 쓴다.
  *
- * - `surface` 바탕, 높이 48dp 이상, 모서리 `radius.md`. 입력 중에는 `accent` 2dp 테두리.
+ * - `surface` 바탕, 높이 48dp 이상, 모서리 `radius.row`. 입력 중에는 `accent` 2dp 테두리.
  * - [leadingIcon]이 있으면 앞에 `text2` 색으로 그린다(검색 칸의 돋보기).
  * - 글자가 있으면 끝에 지우기 버튼이 생긴다. [clearLabel]이 그 버튼의 접근성 이름이다.
  * - 비어 있을 때 [placeholder]를 `text2` 색으로 보인다.
@@ -52,67 +52,71 @@ fun TextInputField(
 ) {
     val colors = NextSetTheme.colors
     val spacing = NextSetTheme.spacing
-    val shape = NextSetTheme.radius.md
+    val shape = if (leadingIcon != null) NextSetTheme.radius.full else NextSetTheme.radius.row
     val interaction = remember { MutableInteractionSource() }
     val focused by interaction.collectIsFocusedAsState()
     val focusManager = LocalFocusManager.current
-    BasicTextField(
-        value = value,
-        onValueChange = onValueChange,
-        modifier = modifier
-            .fillMaxWidth()
-            .heightIn(min = NextSetTheme.sizes.minTouchTarget),
-        textStyle = NextSetTheme.typography.body.copy(color = colors.text),
-        singleLine = true,
-        cursorBrush = SolidColor(colors.accent),
-        interactionSource = interaction,
-        keyboardOptions = KeyboardOptions(imeAction = imeAction),
-        keyboardActions = KeyboardActions(onAny = { focusManager.clearFocus() }),
-        decorationBox = { innerTextField ->
-            Row(
-                modifier = Modifier
-                    .background(colors.surface, shape)
-                    .then(if (focused) Modifier.border(2.dp, colors.accent, shape) else Modifier)
-                    .heightIn(min = NextSetTheme.sizes.minTouchTarget)
-                    .padding(start = spacing.md),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                if (leadingIcon != null) {
-                    Icon(
-                        painter = painterResource(leadingIcon),
-                        contentDescription = null,
-                        tint = colors.text2,
-                        modifier = Modifier.size(NextSetTheme.sizes.icon),
-                    )
-                    Box(Modifier.width(spacing.sm))
-                }
-                Box(
+    Box(
+        modifier = modifier.fillMaxWidth().background(colors.surface, shape)
+            .then(if (focused) Modifier.border(2.dp, colors.accentText, shape) else Modifier),
+    ) {
+        BasicTextField(
+            value = value,
+            onValueChange = onValueChange,
+            modifier = Modifier
+                .padding(horizontal = NextSetTheme.radius.rowSize)
+                .fillMaxWidth()
+                .heightIn(min = NextSetTheme.sizes.minTouchTarget),
+            textStyle = (if (leadingIcon == null) NextSetTheme.typography.heading else NextSetTheme.typography.body)
+                .copy(color = colors.text),
+            singleLine = true,
+            cursorBrush = SolidColor(colors.accentText),
+            interactionSource = interaction,
+            keyboardOptions = KeyboardOptions(imeAction = imeAction),
+            keyboardActions = KeyboardActions(onAny = { focusManager.clearFocus() }),
+            decorationBox = { innerTextField ->
+                Row(
                     modifier = Modifier
-                        .weight(1f)
-                        .padding(vertical = spacing.sm),
+                        .heightIn(min = NextSetTheme.sizes.minTouchTarget),
+                    verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    if (value.isEmpty()) {
-                        Text(text = placeholder, style = NextSetTheme.typography.body, color = colors.text2)
-                    }
-                    innerTextField()
-                }
-                if (value.isNotEmpty() && clearLabel != null) {
-                    IconButton(
-                        onClick = { onValueChange("") },
-                        modifier = Modifier.size(NextSetTheme.sizes.minTouchTarget),
-                    ) {
+                    if (leadingIcon != null) {
                         Icon(
-                            painter = painterResource(R.drawable.ic_close),
-                            contentDescription = clearLabel,
-                            tint = colors.text2,
+                            painter = painterResource(leadingIcon),
+                            contentDescription = null,
+                            tint = colors.text3,
+                            modifier = Modifier.size(NextSetTheme.sizes.icon),
                         )
+                        Box(Modifier.width(spacing.sm))
                     }
-                } else {
-                    Box(Modifier.width(spacing.md))
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(vertical = spacing.sm),
+                    ) {
+                        if (value.isEmpty()) {
+                            Text(text = placeholder, style = if (leadingIcon == null) NextSetTheme.typography.heading else NextSetTheme.typography.body, color = colors.text2)
+                        }
+                        innerTextField()
+                    }
+                    if (value.isNotEmpty() && clearLabel != null) {
+                        IconButton(
+                            onClick = { onValueChange("") },
+                            modifier = Modifier.size(NextSetTheme.sizes.minTouchTarget),
+                        ) {
+                            Icon(
+                                painter = painterResource(R.drawable.ic_close),
+                                contentDescription = clearLabel,
+                                tint = colors.text2,
+                            )
+                        }
+                    } else {
+                        Box(Modifier.width(spacing.md))
+                    }
                 }
-            }
-        },
-    )
+            },
+        )
+    }
 }
 
 /** 종목 고르기의 검색 칸. 글자를 칠 때마다 [onQueryChange]가 불린다(EX-02). */

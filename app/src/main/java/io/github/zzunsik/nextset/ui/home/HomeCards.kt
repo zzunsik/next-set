@@ -148,7 +148,7 @@ private fun HomeCard(
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .background(NextSetTheme.colors.surface, NextSetTheme.radius.md)
+            .background(NextSetTheme.colors.surface, NextSetTheme.radius.card)
             .clickable(onClickLabel = onClickLabel, onClick = onClick)
             .padding(spacing.lg),
         verticalArrangement = Arrangement.spacedBy(spacing.xs),
@@ -195,7 +195,7 @@ internal fun RoutineRow(
         Icon(
             painter = painterResource(R.drawable.ic_play_arrow),
             contentDescription = null,
-            tint = colors.accent,
+            tint = colors.accentText,
             modifier = Modifier.size(NextSetTheme.sizes.icon),
         )
         MoreMenu(description = stringResource(R.string.home_routine_more, routine.routine.name), actions = menu)

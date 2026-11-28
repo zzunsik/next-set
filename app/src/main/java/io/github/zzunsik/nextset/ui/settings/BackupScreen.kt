@@ -106,9 +106,9 @@ fun BackupScreen(
                         .fillMaxWidth()
                         .heightIn(min = NextSetTheme.sizes.buttonHeight),
                     enabled = !state.busy,
-                    shape = NextSetTheme.radius.md,
+                    shape = NextSetTheme.radius.full,
                     // 글자는 누르는 요소의 색(`accent`)이다. 테두리는 M3 기본(`line`)으로 장식이다.
-                    colors = ButtonDefaults.outlinedButtonColors(contentColor = colors.accent),
+                    colors = ButtonDefaults.outlinedButtonColors(contentColor = colors.accentText),
                 ) {
                     Text(
                         text = stringResource(R.string.backup_import),

@@ -31,23 +31,23 @@ class ThemeModeTest {
 
     @Test
     fun systemFollowsLightSystemSetting() {
-        assertEquals(LightColors to LightColors.accent, resolve(ThemeMode.System))
+        assertEquals(LightColors to LightColors.accentText, resolve(ThemeMode.System))
     }
 
     @Test
     @Config(qualifiers = "+night")
     fun systemFollowsDarkSystemSetting() {
-        assertEquals(DarkColors to DarkColors.accent, resolve(ThemeMode.System))
+        assertEquals(DarkColors to DarkColors.accentText, resolve(ThemeMode.System))
     }
 
     @Test
     @Config(qualifiers = "+night")
     fun lightOverridesDarkSystemSetting() {
-        assertEquals(LightColors to LightColors.accent, resolve(ThemeMode.Light))
+        assertEquals(LightColors to LightColors.accentText, resolve(ThemeMode.Light))
     }
 
     @Test
     fun darkOverridesLightSystemSetting() {
-        assertEquals(DarkColors to DarkColors.accent, resolve(ThemeMode.Dark))
+        assertEquals(DarkColors to DarkColors.accentText, resolve(ThemeMode.Dark))
     }
 }

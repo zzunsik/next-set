@@ -49,6 +49,7 @@ fun ComposeContentTestRule.assertAccessible() {
         ),
     )
     assertTouchTargets()
+    waitForIdle()
 }
 
 /**

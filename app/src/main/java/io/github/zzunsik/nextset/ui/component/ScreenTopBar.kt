@@ -1,6 +1,8 @@
 package io.github.zzunsik.nextset.ui.component
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.background
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -43,7 +45,7 @@ fun ScreenTopBar(
         horizontalArrangement = Arrangement.spacedBy(NextSetTheme.spacing.xs),
     ) {
         // IconButton의 누르는 요소는 40dp라 48dp 상자로 키운다(NF-10).
-        IconButton(onClick = onBack, modifier = Modifier.size(NextSetTheme.sizes.minTouchTarget)) {
+        IconButton(onClick = onBack, modifier = Modifier.size(NextSetTheme.sizes.minTouchTarget).background(colors.surface, CircleShape)) {
             Icon(
                 painter = painterResource(R.drawable.ic_arrow_back),
                 contentDescription = stringResource(R.string.navigate_back),

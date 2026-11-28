@@ -81,12 +81,12 @@ internal fun RestTimeButton(seconds: Int, exerciseName: String, onClick: () -> U
         modifier = Modifier
             .heightIn(min = NextSetTheme.sizes.minTouchTarget)
             .semantics { contentDescription = description },
-        shape = NextSetTheme.radius.md,
+        shape = NextSetTheme.radius.full,
     ) {
         Text(
             text = stringResource(R.string.rest_time_button, durationText(seconds)),
             style = NextSetTheme.typography.label,
-            color = NextSetTheme.colors.accent,
+            color = NextSetTheme.colors.accentText,
             maxLines = 1,
         )
     }
@@ -203,12 +203,12 @@ fun RestTimerBar(
                     TextButton(
                         onClick = onEnableNotifications,
                         modifier = Modifier.heightIn(min = NextSetTheme.sizes.minTouchTarget),
-                        shape = NextSetTheme.radius.md,
+                        shape = NextSetTheme.radius.full,
                     ) {
                         Text(
                             text = stringResource(R.string.notifications_enable),
                             style = NextSetTheme.typography.label,
-                            color = colors.accent,
+                            color = colors.accentText,
                             maxLines = 1,
                         )
                     }
@@ -253,7 +253,7 @@ private fun RemainingTime(remainingMillis: Long) {
     val description = stringResource(R.string.rest_remaining_description, text)
     Text(
         text = text,
-        style = NextSetTheme.typography.numeralMedium,
+        style = NextSetTheme.typography.headline,
         color = NextSetTheme.colors.text,
         maxLines = 1,
         modifier = Modifier.semantics { contentDescription = description },
@@ -298,7 +298,7 @@ private fun RowScope.AdjustButton(text: String, description: String, enabled: Bo
             .weight(1f)
             .heightIn(min = NextSetTheme.sizes.buttonHeight)
             .semantics { contentDescription = description },
-        shape = NextSetTheme.radius.md,
+        shape = NextSetTheme.radius.full,
         contentPadding = PaddingValues(horizontal = NextSetTheme.spacing.xs),
     ) {
         // 셋이 폭을 똑같이 나눠 쓴다. 글자를 키워 한 줄에 들어가지 않으면 `caption` 크기까지 줄이고, 그래도 넘치면 두 줄로 쓴다.

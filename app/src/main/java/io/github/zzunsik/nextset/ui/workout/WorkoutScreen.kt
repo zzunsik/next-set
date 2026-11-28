@@ -273,7 +273,7 @@ private fun WorkoutTopBar(state: WorkoutUiState, now: Instant, actions: WorkoutA
             onClick = actions.onFinish,
             enabled = !state.loading,
             modifier = Modifier.heightIn(min = NextSetTheme.sizes.buttonHeight),
-            shape = NextSetTheme.radius.md,
+            shape = NextSetTheme.radius.full,
         ) {
             Text(text = stringResource(R.string.workout_finish), style = NextSetTheme.typography.label)
         }
@@ -415,7 +415,7 @@ private fun ExpandedNextSet(next: NextSetUi, onShow: () -> Unit, onEnterValue: (
                 TextButton(
                     onClick = onEnterValue,
                     modifier = Modifier.heightIn(min = NextSetTheme.sizes.buttonHeight),
-                    shape = NextSetTheme.radius.md,
+                    shape = NextSetTheme.radius.full,
                 ) {
                     Text(text = stringResource(R.string.next_set_enter_value), style = typography.label)
                 }
@@ -434,7 +434,7 @@ private fun ExpandedNextSet(next: NextSetUi, onShow: () -> Unit, onEnterValue: (
 /** `numeralLarge`. 한 줄에 들어가지 않으면 28sp까지 줄인다(docs/DESIGN.md "타이포"). */
 @Composable
 private fun RowScope.BigNumber(text: String, modifier: Modifier = Modifier) {
-    val style = NextSetTheme.typography.numeralLarge
+    val style = NextSetTheme.typography.numeralHero
     Text(
         text = text,
         style = style,
@@ -515,7 +515,7 @@ private fun ExerciseList(
                         .padding(horizontal = spacing.sm)
                         .heightIn(min = NextSetTheme.sizes.buttonHeight)
                         .semantics { contentDescription = description },
-                    shape = NextSetTheme.radius.md,
+                    shape = NextSetTheme.radius.full,
                 ) {
                     Text(text = stringResource(R.string.set_add), style = NextSetTheme.typography.label)
                 }
@@ -529,7 +529,7 @@ private fun ExerciseList(
                     modifier = Modifier
                         .padding(horizontal = spacing.sm, vertical = spacing.sm)
                         .heightIn(min = NextSetTheme.sizes.buttonHeight),
-                    shape = NextSetTheme.radius.md,
+                    shape = NextSetTheme.radius.full,
                 ) {
                     Text(text = stringResource(R.string.workout_add_exercise), style = NextSetTheme.typography.label)
                 }
@@ -580,7 +580,7 @@ private fun ExerciseHeader(
                     Icon(
                         painter = painterResource(R.drawable.ic_check),
                         contentDescription = stringResource(R.string.exercise_header_all_done),
-                        tint = colors.done,
+                        tint = colors.go,
                         modifier = Modifier.size(NextSetTheme.sizes.icon),
                     )
                 }
@@ -704,7 +704,7 @@ private fun SetRow(
     var menu by remember { mutableStateOf(false) }
     // 세트 체크는 색만 바뀐다(docs/DESIGN.md "모션": effects 빠름).
     val background by animateColorAsState(
-        targetValue = if (row.completed) colors.doneSoft else colors.bg,
+        targetValue = if (row.completed) colors.surface else colors.bg,
         animationSpec = NextSetMotion.effectsFast.spec(),
         label = "setRowBackground",
     )
